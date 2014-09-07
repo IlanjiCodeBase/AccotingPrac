@@ -1,0 +1,164 @@
+<div id="popup">
+<span class="button b-close"><span>X</span></span>
+
+
+<div class="row">
+ <h4>Upload Database Backup</h4>
+<div class="widget-container col-md-12 col-md-offset-1">
+ <form class="form-horizontal" id="upload-file" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+      <label class="control-label col-lg-4">Upload Backup <span class="mandatory">*</span></label>
+        <div class="col-lg-5">
+            <input type="file" name="file" id="file" class="form-control" autocomplete="off"  />
+        </div>
+    </div>
+
+     <div class="form-group">
+        <div class="col-lg-8 col-lg-offset-3">
+            <div class="form-actions">
+               <input type="submit" name="upload" class="btn btn-primary " id="upload" value="Upload" />
+                <button type="reset" class="btn" onclick="return bPopup_close();">Cancel</button>
+            </div>
+        </div>
+     </div>
+
+</form>
+</div>
+</div>
+</div>
+
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/settings/"; ?>">Settings</a></li>
+   <li class="active">Backup and Restore</li>
+</ul>
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+   <?php
+    $logSession = new Zend_Session_Namespace('sess_login');
+   ?>
+
+   <div class="row">
+    <div class="col-md-1 grid-spacing">
+       <a href="javascript:void(0)" class="btn btn-primary btn-small" type="button" onclick="uploadBackup();">Upload Backup</a>
+       </div>
+      <div class="col-md-1 grid-spacing" style="margin-left:25px;">
+       <a href="javascript:void(0)" class="btn btn-primary btn-small" type="button" onclick="backupDatabase();">Backup Database</a>
+       </div>
+       <div class="col-md-1 grid-spacing" style="margin-left:40px;">
+       <a href="javascript:void(0)" class="btn btn-primary" type="button" onclick="deleteDatabase();">Delete Database</a>
+       </div>
+   </div>
+
+ <div class="row">
+                        <div class="col-md-12">
+                        <h4>Backups</h4>
+                            <div class="box-widget">
+                                <table class="table data-tbl-boxy responsive">
+                                    <thead>
+                                        <tr>
+                                            <th>S.No.</th>
+                                            <th>
+                                                Backup Name
+                                              </th>
+                                              <th>
+                                                Date
+                                            </th>
+                                            <th>
+                                                Action
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php
+                                      $i=1;
+                                      for ($j=2; $j<sizeof($this->backups); $j++) {
+                                    ?>
+
+                                    <tr>
+                                      <td><?php echo $i; ?></td>
+                                      <td><?php echo $this->backups[$j]; ?></td>
+                                      <td><?php echo date("F d Y H:i:s.", filemtime("../".$this->filepath.$this->backups[$j])); ?></td>
+                                      <td><a href="javascript:void(0)" title="Restore this backup" onclick="restoreDatabase('<?php echo base64_encode($this->backups[$j]); ?>');"><i class="icon-box-remove"></i> Restore</a>
+                                      <a href="<?php echo $this->sitePath."..".$this->filepath.$this->backups[$j]; ?>" title="Download this backup" style="margin-left:20px;" download="backup.sql"><i class="icon-box-add"></i> Download</a>
+                                      <a href="javascript:void(0)" title="Restore this backup" onclick="deleteBackup('<?php echo base64_encode($this->backups[$j]); ?>');" style="margin-left:20px;"><i class="icon-remove-2"></i> Delete</a>
+                                    <!--  <a href="<?php echo $this->sitePath."settings/download/id/".base64_encode("..".$this->sitePath.$this->filepath.$this->backups[$j]); ?>" title="Download this backup" download-original-title="Download this backup" style="margin-left:20px;" target="_blank" ><i class="icon-box-add"></i> Download</a> -->
+                                      </td>
+                                    </tr>
+
+
+                                    <?php
+                                        $i++;
+                                      }
+                                    ?>
+                                     
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+<script type="text/javascript">
+
+function restoreDatabase(value) {
+  var confirmMsg = confirm('Are you sure want to restore the complete database, it will take several minutes to complete?') 
+  if(confirmMsg) {
+    window.location = '<?php echo $this->sitePath."settings/backup/restoreDb/'+value+'"; ?>';
+  }
+}
+
+function deleteBackup(value) {
+  var confirmMsg = confirm('Are you sure want to delete this backup?') 
+  if(confirmMsg) {
+    window.location = '<?php echo $this->sitePath."settings/backup/deleteBackup/'+value+'"; ?>';
+  }
+}
+
+function backupDatabase() {
+  var confirmMsg = confirm('Are you sure want to backup the complete database, it will take several minutes to complete?') 
+  if(confirmMsg) {
+    window.location = '<?php echo $this->sitePath."settings/backup/backupdb/take"; ?>';
+  }
+}
+
+function deleteDatabase() {
+  var confirmMsg = confirm('Are you sure want to delete the complete database then you cannot able to access your details again?') 
+  if(confirmMsg) {
+    window.location = '<?php echo $this->sitePath."settings/backup/deleteDb/clear"; ?>';
+  }
+}
+
+function downloadme(x,name){
+window.location.href = x;
+}
+
+function uploadBackup() {
+      $('#popup').bPopup({
+            modalClose: false,
+            easing: 'easeOutBack', 
+            speed: 1000,
+            transition: 'slideDown',
+            follow: [false, false], 
+    });
+}
+
+ function bPopup_close() {
+    $("#popup").bPopup().close();
+ }
+</script>

@@ -1,0 +1,38 @@
+ <div class="main-container" style="background-color:#ccc;">
+
+            <div class="container">
+                    <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->error) && !empty($this->error)) {
+           ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php
+                }
+            ?>
+            </div>
+          </div>
+            <div class="login-wrap">
+                <div class="login-head">
+                    <h3>Login</h3>
+                </div>
+                <form method="post">
+                    <div class="login-form">
+                        <ul>
+                            <li><i class="icon-user"></i><input type="text" name="username" class="login-user-input" required placeholder="Username"></li>
+                            <li><i class="icon-key"></i><input type="password" name="password" required class="login-pass-input" placeholder="Password"></li>
+                        </ul>
+                    </div>
+                    <div class="login-action">
+                        <button type="submit" class="backend-login-btn btn btn-block btn-large btn-inverse">Login</button>
+                       <!-- <ul class="login-initial clearfix">
+                            <li class="pull-left"><a href="#">Forgot Password?</a></li>
+                            <li class="pull-right"><span class="rem-check"><input type="checkbox"></span>Remember Me</li>
+                        </ul>--> 
+                    </div>
+                </form>
+            </div>
+</div>
+</div>       

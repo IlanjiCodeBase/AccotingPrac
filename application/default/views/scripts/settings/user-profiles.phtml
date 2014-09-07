@@ -1,0 +1,132 @@
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/settings/"; ?>">Settings</a></li>
+   <li class="active">User Profiles</li>
+</ul>
+
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+   <?php
+    $logSession = new Zend_Session_Namespace('sess_login');
+   ?>
+   <div class="row">
+       <div class="col-md-12 grid-spacing">
+       <a href="<?php echo $this->sitePath."settings/add-user"; ?>" class="btn btn-primary" type="button">Create User</a>
+            <!-- Element to pop up -->    
+       </div>
+   </div>
+
+   <div class="row">
+
+
+                    
+                         <div class="col-md-12">
+                            
+                            <div class="box-widget">
+                                <div class="widget-head clearfix">
+                                    <span class="h-icon"><i class="icon-power-cord"></i></span>
+                                    <h4 class="pull-left">User Profile Access</h4>
+                                </div>
+                                <div class="widget-container">
+                                    <div class="widget-block">
+                                        <div class="widget-content">
+                                            <table class="table responsive">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                S.No.
+                                            </th>
+                                            <th>
+                                                User ID
+                                            </th>
+                                            <th>
+                                                Account Type
+                                            </th>
+                                            <th>
+                                                Access Controls
+                                            </th>
+                                            <th>
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php
+                                        $i = 1;
+                                        foreach ($this->result as $results) {
+                                            if($results['account_type']!=1) {
+                                    ?>
+                                    <tr>
+                                    <td><?php echo $i; ?></td>
+                                    <td><?php echo $results['username']; ?></td>
+                                    <td>
+                                    <?php 
+                                    foreach ($this->account_types as $key => $account) {
+                                        if($key==$results['account_type'] && $key!=1) {
+                                            echo $account;
+                                        }
+                                    }
+                                    ?>
+                                    </td>
+                                    <td>
+                                    <?php
+                                        if($results['account_type']==2) {
+                                            echo "Transaction Access (Read, Create/Edit, Approve) and Admin Settings";
+                                        } else if($results['account_type']==3) {
+                                            echo "Transaction Access (Read, Create/Edit, Approve)";
+                                        } else if($results['account_type']==4) {
+                                            echo "Transaction Access (Read, Create/Edit)";
+                                        }  else if($results['account_type']==5) {
+                                            echo "Transaction Access (Read)";
+                                        } 
+                                    ?>
+                                    </td>
+                                    <td>
+                                    <a href="<?php echo $this->sitePath."settings/edit-user/id/".base64_encode($results['id']); ?>" data-original-title="Edit User" title="Edit User"><i class="icon-pencil-3"></i></a>
+
+                                    <a href="<?php echo $this->sitePath."settings/reset-password/id/".base64_encode($results['id']); ?>" data-original-title="Reset Password" title="Reset Password"><i class=" icon-key"></i></a>
+
+                                    <a href="javascript:void(0)" onclick="getConfirm('<?php echo base64_encode($results['id']); ?>')" data-original-title="Delete User" title="Delete User"><i class="icon-user-minus"></i></a>
+
+                                    </td>
+                                    </tr>
+                                    <?php
+                                        $i++;
+                                            }
+                                        }
+                                    ?>
+                                    
+                                      </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+ <script type="text/javascript">
+    function getConfirm(Idvalue) {
+       // alert(Idvalue); return false; 
+        var confirmMsg = confirm("Are you sure want to delete this user?");
+        if(confirmMsg) {
+            window.location.href='<?php echo $this->sitePath; ?>settings/user-profiles/delid/'+Idvalue;
+        }
+    }
+ </script>

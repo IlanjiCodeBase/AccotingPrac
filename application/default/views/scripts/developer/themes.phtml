@@ -1,0 +1,91 @@
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/developer/"; ?>">Developer</a></li>
+   <li class="active">Themes</li>
+</ul>
+
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+   <?php
+    $logSession = new Zend_Session_Namespace('sess_login');
+   ?>
+
+ <div class="row">
+                        <div class="col-md-12">
+                        <h4>Available Themes</h4>
+                            <div class="box-widget">
+                                <table class="table data-tbl-boxy responsive">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                Theme Name
+                                              </th>
+                                              <th>
+                                                Default
+                                            </th>
+                                            <th>
+                                                Description
+                                            </th>
+                                            <th>
+                                                Updated
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                      <?php 
+                                        foreach ($this->themes as $theme) {
+                                          if($theme['default_theme']==1) {
+                                            $checked = 'checked';
+                                          } else {
+                                            $checked = '';
+                                          }
+                                      ?>
+                                          <tr>
+                                            <td><?php echo ucfirst($theme['theme_name']); ?></td>
+                                            <td><input type="radio" name="default_theme" id="<?php echo "default_theme".$theme['id']; ?>" value='<?php echo $theme['id']; ?>' <?php echo $checked; ?> onclick="changeTheme(<?php echo $this->defaultTheme; ?>,<?php echo $theme['id']; ?>);"></td>
+                                            <td><?php echo ucfirst($theme['description']); ?></td>
+                                            <td><?php echo date('d-m-Y',strtotime($theme['date_modified'])); ?></td>
+                                          </tr>
+                                      <?php
+                                        }
+                                      ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+<script type="text/javascript">
+function changeTheme(active,current) {
+  $.ajax({
+        type: "POST",
+        url: "<?php echo $this->sitePath.'default/developer/ajax-refresh'; ?>",
+        data: 'action=changeTheme&id='+current+'&activeid='+active,
+        success: function (html) {
+            if(html==1) {
+              alert("Theme Updated Successfully");
+              location.reload();
+            } else if(html==2) {
+              alert("Theme Cannot be Updated now. Kindly try again later");
+            }
+        }
+  }); 
+}
+
+</script>

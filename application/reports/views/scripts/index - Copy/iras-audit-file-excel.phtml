@@ -1,0 +1,78 @@
+<?php
+  if(isset($this->excel) && !empty($this->excel)) {
+        die();
+    } else {
+       // echo "2";
+        echo '<script type="text/javascript">';
+        echo 'window.close()';
+        echo '</script>';
+        die();
+    }
+?>
+<div class="main-container">
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+
+      <form class="form-horizontal" id="report-period" method="post">
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">From Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="from_date" id="from_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->from) && !empty($this->from)) { echo $this->from; } else { echo date('01-01-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">To Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="to_date" id="to_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->to) && !empty($this->to)) { echo $this->to; } else { echo date('d-m-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+         <label class="col-lg-5 control-label">&nbsp;</label>
+           <div class="col-lg-3">
+              <div class="form-actions">
+                <button type="submit" id="update" class="btn btn-primary">Update</button>
+              </div>
+           </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+  
+
+
+
+</div>
+</div>
+<script type="text/javascript">
+/* var nowTemp = new Date();
+var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+ 
+var checkin = $('#from_date').datepicker({
+  onRender: function(date) {
+    return date.valueOf() < now.valueOf() ? 'disabled' : '';
+  }
+}).on('changeDate', function(ev) {
+  if (ev.date.valueOf() > checkout.date.valueOf()) {
+    var newDate = new Date(ev.date)
+    newDate.setDate(newDate.getDate() + 1);
+    checkout.setValue(newDate);
+  }
+  checkin.hide();
+  $('#to_date')[0].focus();
+}).data('datepicker');
+var checkout = $('#to_date').datepicker({
+  onRender: function(date) {
+    return date.valueOf() <= checkin.date.valueOf() ? 'disabled' : '';
+  }
+}).on('changeDate', function(ev) {
+  checkout.hide();
+}).data('datepicker'); */
+</script>

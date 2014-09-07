@@ -1,0 +1,135 @@
+<?php 
+  $logSession = new Zend_Session_Namespace('sess_login');
+?>
+
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li class="active">Search Results</li>
+</ul>
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+
+ <div class="row">
+                        <div class="col-md-12">
+
+                            <h3>Search Results for "<?php echo $this->search; ?>"</h3>
+
+                            <div class="box-widget">
+                                <table class="table data-tbl-boxy responsive">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                S.No.
+                                            </th>
+                                            <th>
+                                                Type
+                                            </th>
+                                            <th>
+                                                Date
+                                            </th>
+                                            <th>
+                                                No
+                                            </th>
+                                            <th>
+                                                Customer / Vendor / Product
+                                            </th>
+                                            <th>
+                                                Action
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php
+                                      $i = 1;
+                                      foreach ($this->result as $key => $result) {
+                                        if($result['act']==1) {
+                                          $type   = 'transaction';
+                                          $action = 'income';
+                                          $id = base64_encode($result['id']);
+                                        } else if($result['act']==2) {
+                                          $type   = 'transaction';
+                                          $action = 'expense';
+                                          $id = base64_encode($result['id']);
+                                        } else if($result['act']==3) {
+                                          $type   = 'transaction';
+                                          $action = 'invoice';
+                                          $id = base64_encode($result['id']);
+                                        } else if($result['act']==4) {
+                                          $type   = 'transaction';
+                                          $action = 'credit';
+                                          $id = base64_encode($result['id']);
+                                        } else if($result['act']==5) {
+                                          $type   = 'transaction';
+                                          $action = 'journal';
+                                          $id = base64_encode($result['id']);
+                                        } else if($result['act']==6) {
+                                          $type   = 'business';
+                                          $action = 'customer';
+                                          $id = base64_encode($result['id']);
+                                        } else if($result['act']==7) {
+                                          $type   = 'business';
+                                          $action = 'vendor';
+                                          $id = base64_encode($result['id']);
+                                        } else if($result['act']==8) {
+                                          $type   = 'settings';
+                                          $action = 'product';
+                                          $id = base64_encode($result['id']);
+                                        } 
+                                    ?>
+                                    <tr>
+                                      <td><?php echo $i; ?></td>
+                                      <td><?php echo $result['type']; ?></td>
+                                      <td><?php echo date('m-d-Y',strtotime($result['date'])); ?></td>
+                                      <td><?php echo $key; ?></td>
+                                      <td><?php echo ucfirst($result['name']); ?></td>
+                                      <td><span class="label label-success">
+                                      <?php 
+                                        if($result['act']==8) {
+                                      ?>
+                                        <a href="<?php echo $this->sitePath.$type."/edit-product/id/".$id; ?>"? style="color:#fff;" target="_blank">View Details</a>
+                                      <?php 
+                                        } else {
+                                      ?>
+                                       <a href="<?php echo $this->sitePath.$type."/".$action."/view/id/".$id; ?>"? style="color:#fff;" target="_blank">View Details</a>
+                                      <?php
+                                        }
+                                      ?>
+                                      </span></td>
+                                    </tr>
+                                    <?php
+                                        $i++;
+                                      }
+                                    ?>
+                                    
+                                    </tbody>
+                                </table>
+                               
+                            </div>
+                            
+
+                        </div>
+                    </div>
+
+
+</div>
+</div>
+

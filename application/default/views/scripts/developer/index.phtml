@@ -1,0 +1,56 @@
+<?php
+$logSession = new Zend_Session_Namespace('sess_login');
+?>
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li class="active">Developer</li>
+</ul>
+<div class="board-widget">
+                        <div class="row">
+                            <div class="col-sm-6 col-md-3">
+                                <div class="board-widget-wrap">
+                                    <a href="<?php echo $this->sitePath."developer/proxy-settings"; ?>"><i class="icon-cog"></i><span class="board-widget-label">Proxy Settings</span></a>
+                                </div>
+                            </div>
+                            <?php 
+                                if($logSession->type==0) {
+                            ?>
+                            <div class=" col-sm-6 col-md-3">
+                                <div class="board-widget-wrap">
+                                    <a href="<?php echo $this->sitePath."index/registration"; ?>"><i class="icon-file-8"></i><span class="board-widget-label">Account Registration and Creation </span></a>
+                                </div>
+                            </div>
+                            <?php 
+                                }
+                            ?>
+                            <div class="col-sm-6 col-md-3">
+                                <div class="board-widget-wrap">
+                                    <a href="<?php echo $this->sitePath."developer/companies"; ?>"><i class="icon-database"></i><span class="board-widget-label">Company and Database Settings</span></a>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-3">
+                                <div class="board-widget-wrap">
+                                    <a href="<?php echo $this->sitePath."developer/users"; ?>"><i class="icon-user"></i><span class="board-widget-label">User Settings</span></a>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-3">
+                                <div class="board-widget-wrap">
+                                    <a href="<?php echo $this->sitePath."developer/themes"; ?>"><i class="icon-stack-list"></i><span class="board-widget-label">Themes</span></a>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-3">
+                                <div class="board-widget-wrap">
+                                    <a href="<?php echo $this->sitePath."developer/announcements"; ?>"><i class=" icon-podcast"></i><span class="board-widget-label">Announcements</span></a>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-3">
+                                <div class="board-widget-wrap">
+                                    <a href="<?php echo $this->sitePath."developer/irastax"; ?>"><i class="icon-clipboard-4"></i><span class="board-widget-label">IRAS Tax Codes</span></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+</div>
+</div>

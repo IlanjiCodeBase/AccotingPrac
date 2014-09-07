@@ -1,0 +1,396 @@
+<div class="main-container">
+<div class="container">
+
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/settings/"; ?>">Settings</a></li>
+   <li class="active">Invoice and Credit Note Customization</li>
+</ul>
+
+
+                                <div class="row">
+                                       <div class="col-md-6 col-md-offset-3">
+                                       <?php 
+                                            if(isset($this->success) && !empty($this->success)) {
+                                       ?>
+                                            <div class="alert alert-success">
+                                               <strong><?php echo $this->success; ?></strong>
+                                            </div>
+                                        <?php
+                                            } else if(isset($this->error) && !empty($this->error)) {
+                                        ?>
+                                            <div class="alert alert-danger">
+                                               <strong><?php echo $this->error; ?></strong>
+                                            </div>
+                                        <?php 
+                                            }
+                                        ?>
+                                        </div>
+                                 </div>
+
+
+<div class="row">
+                        <div class="col-md-12 widget-module">
+                            <div class="square-widget widget-collapsible">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i> Invoice and Credit Note Customization</h4>
+                                    
+                                </div>
+
+                                <div class="widget-container col-md-12 col-md-offset-3">
+                                    <form class="form-horizontal" id="invoice-customization" method="post" enctype="multipart/form-data">
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Template <span class="mandatory">*</span></label>
+                                            <div class="col-lg-4">
+                                            <input type="hidden" name="custom_id" id="custom_id" value="<?php echo $this->result[0]['id']; ?>">
+                                            <?php
+                                                if($this->result[0]['template'] && $this->result[0]['template']==1) {
+                                            ?>
+                                               <div style="float:left;">
+                                               <a href="<?php echo $this->sitePath."..".$this->path."contemporary.jpg"?>" target="_blank">
+                                                <img src="<?php echo $this->sitePath."..".$this->path."contemporary.jpg"?>" width="85px" height="60px" style="width:85px; height:60px;" title="Contemporary">
+                                                </a><br/>
+                                                <input type="radio" name="template" checked id="template" class="" value="1"> Contemporary
+                                                </div>
+                                                <div style="float:left; margin-left:10px;">
+                                                <a href="<?php echo $this->sitePath."..".$this->path."original.jpg"?>" target="_blank">
+                                                <img src="<?php echo $this->sitePath."..".$this->path."original.jpg"?>" width="85px" height="60px" style="width:85px; height:60px;" title="Original"></a>
+                                                <br/>
+                                                <input type="radio" name="template" id="template" class="" value="2"> Original
+                                                </div>
+                                                <div style="float:left; margin-left:10px;">
+                                                
+                                                <a href="<?php echo $this->sitePath."..".$this->path."standard.jpg"?>" target="_blank"><img src="<?php echo $this->sitePath."..".$this->path."standard.jpg"?>" width="85px" height="60px" style="width:85px; height:60px;" title="Standard"></a>
+                                                <br/>
+                                                <input type="radio" name="template" id="template" class="" value="3"> Standard
+                                                </div>
+                                            <?php
+                                                } else if($this->result[0]['template'] && $this->result[0]['template']==2) {
+                                            ?>
+                                                <div style="float:left;">
+                                               <a href="<?php echo $this->sitePath."..".$this->path."contemporary.jpg"?>" target="_blank">
+                                                <img src="<?php echo $this->sitePath."..".$this->path."contemporary.jpg"?>" width="85px" height="60px" style="width:85px; height:60px;" title="Contemporary">
+                                                </a><br/>
+                                                <input type="radio" name="template" id="template" class="" value="1"> Contemporary
+                                                </div>
+                                                <div style="float:left; margin-left:10px;">
+                                                <a href="<?php echo $this->sitePath."..".$this->path."original.jpg"?>" target="_blank">
+                                                <img src="<?php echo $this->sitePath."..".$this->path."original.jpg"?>" width="85px" height="60px" style="width:85px; height:60px;" title="Original"></a>
+                                                <br/>
+                                                <input type="radio" name="template" checked id="template" class="" value="2"> Original
+                                                </div>
+                                                <div style="float:left; margin-left:10px;">
+                                                
+                                                <a href="<?php echo $this->sitePath."..".$this->path."standard.jpg"?>" target="_blank"><img src="<?php echo $this->sitePath."..".$this->path."standard.jpg"?>" width="85px" height="60px" style="width:85px; height:60px;" title="Standard"></a>
+                                                <br/>
+                                                <input type="radio" name="template" id="template" class="" value="3"> Standard
+                                                </div>
+                                            <?php
+                                                } else if($this->result[0]['template'] && $this->result[0]['template']==3) {
+                                            ?>
+                                                <div style="float:left;">
+                                               <a href="<?php echo $this->sitePath."..".$this->path."contemporary.jpg"?>" target="_blank">
+                                                <img src="<?php echo $this->sitePath."..".$this->path."contemporary.jpg"?>" width="85px" height="60px" style="width:85px; height:60px;" title="Contemporary">
+                                                </a><br/>
+                                                <input type="radio" name="template" id="template" class="" value="1"> Contemporary
+                                                </div>
+                                                <div style="float:left; margin-left:10px;">
+                                                <a href="<?php echo $this->sitePath."..".$this->path."original.jpg"?>" target="_blank">
+                                                <img src="<?php echo $this->sitePath."..".$this->path."original.jpg"?>" width="85px" height="60px" style="width:85px; height:60px;" title="Original"></a>
+                                                <br/>
+                                                <input type="radio" name="template" id="template" class="" value="2"> Original
+                                                </div>
+                                                <div style="float:left; margin-left:10px;">
+                                                
+                                                <a href="<?php echo $this->sitePath."..".$this->path."standard.jpg"?>" target="_blank"><img src="<?php echo $this->sitePath."..".$this->path."standard.jpg"?>" width="85px" height="60px" style="width:85px; height:60px;" title="Standard"></a>
+                                                <br/>
+                                                <input type="radio" name="template" checked id="template" class="" value="3"> Standard
+                                                </div>
+                                            <?php 
+                                                } else {
+                                            ?>
+                                                <div style="float:left;">
+                                               <a href="<?php echo $this->sitePath."..".$this->path."contemporary.jpg"?>" target="_blank">
+                                                <img src="<?php echo $this->sitePath."..".$this->path."contemporary.jpg"?>" width="85px" height="60px" style="width:85px; height:60px;" title="Contemporary">
+                                                </a><br/>
+                                                <input type="radio" name="template" id="template" class="" value="1"> Contemporary
+                                                </div>
+                                                <div style="float:left; margin-left:10px;">
+                                                <a href="<?php echo $this->sitePath."..".$this->path."original.jpg"?>" target="_blank">
+                                                <img src="<?php echo $this->sitePath."..".$this->path."original.jpg"?>" width="85px" height="60px" style="width:85px; height:60px;" title="Original"></a>
+                                                <br/>
+                                                <input type="radio" name="template" id="template" class="" value="2"> Original
+                                                </div>
+                                                <div style="float:left; margin-left:10px;">
+                                                
+                                                <a href="<?php echo $this->sitePath."..".$this->path."standard.jpg"?>" target="_blank"><img src="<?php echo $this->sitePath."..".$this->path."standard.jpg"?>" width="85px" height="60px" style="width:85px; height:60px;" title="Standard"></a>
+                                                <br/>
+                                                <input type="radio" name="template" id="template" class="" value="3"> Standard
+                                                </div>
+                                            <?php
+                                                }
+                                            ?>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Company Logo </label>
+                                           
+                                            <div class="col-lg-3">
+                                                <input type="file" name="file" id="file" class="form-control" />
+                                                <input type="hidden" name="logo" id="logo" value="<?php echo $this->result[0]['company_logo']; ?>">
+                                            </div>
+                                             <?php
+                                                $display_status = 'disabled';
+                                                if(isset($this->result[0]['company_logo']) && !empty($this->result[0]['company_logo'])) {
+                                                    $display_status = '';
+                                            ?>
+                                                 <div class="col-lg-2">
+                                                    <img src="<?php echo $this->sitePath."..".$this->filepath.$this->result[0]['company_logo']; ?>" alt="Logo" title="Logo" />
+                                                 </div>
+                                            <?php
+                                                }
+                                            ?>
+                                        </div>
+
+                                    <!--     <div class="form-group">
+                                            <label class="col-lg-2 control-label">Display Logo </label>
+                                            <div class="col-lg-3">
+                                            <?php
+                                                if($this->result[0]['display_logo'] && !empty($this->result[0]['display_logo']) && $this->result[0]['display_logo']==1) {
+                                                    $logo_check = 'checked';
+                                                } else {
+                                                    $logo_check = '';
+                                                }
+                                            ?>
+                                                <input type="checkbox" name="display_logo" id="display_logo" class="" autocomplete="off" <?php echo $display_status; ?> value="<?php echo $this->result[0]['display_logo']; ?>" <?php echo $logo_check; ?>>
+                                            </div>
+                                        </div> -->
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Default Product Title <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                             <select class="form-control" name="product_title" id="product_title">
+                                             <?php
+                                                if($this->result[0]['default_product_title'] && $this->result[0]['default_product_title']==1) {
+                                            ?>
+                                                <option value="1" selected>Product</option>
+                                                <option value="2">Service</option>
+                                                <option value="3">Product/Service</option>
+                                            <?php
+                                                } else if($this->result[0]['default_product_title'] && $this->result[0]['default_product_title']==2) {
+                                            ?>
+                                                <option value="1">Product</option>
+                                                <option value="2" selected>Service</option>
+                                                <option value="3">Product/Service</option>
+                                            <?php
+                                                } else if($this->result[0]['default_product_title'] && $this->result[0]['default_product_title']==3) {
+                                            ?>
+                                                <option value="1">Product</option>
+                                                <option value="2">Service</option>
+                                                <option value="3" selected>Product/Service</option>
+                                            <?php
+                                                } else {
+                                            ?>
+                                                <option value="1">Product</option>
+                                                <option value="2">Service</option>
+                                                <option value="3">Product/Service</option>
+                                            <?php
+                                                }
+                                            ?>
+                                             </select>
+                                            </div>
+                                        </div>
+                                        <?php
+                                            if(isset($this->invoiceNext) && !empty($this->invoiceNext)) {
+                                                $invoiceNumber = explode("-", $this->invoiceNext);
+                                                $invoice_Prefix = $invoiceNumber[0];
+                                                $running_Number = ++$this->invoiceNext;
+                                            } else {
+                                                $running_Number = $this->result[0]['invoice_prefix']."-".'0000000001';
+                                            }
+
+
+                                              $invoice_prefix = $this->result[0]['invoice_prefix'];
+                                              $invoiceSplit  = explode("-", $running_Number);
+                                              if($invoice_prefix!=$invoiceSplit[0]) {
+                                                $invoicePre = $invoice_prefix;
+                                              } else {
+                                                $invoicePre = $invoice_prefix;
+                                              }
+                                              $runningNumber = $invoicePre."-".$invoiceSplit[1];
+                                        ?>
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Invoice Prefix </label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="invoice_prefix" id="invoice_prefix" class="form-control" autocomplete="off" value="<?php echo $invoicePre; ?>" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Invoice Next Running Sequence </label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="invoice_number" id="invoice_number" class="form-control" autocomplete="off" readonly  value="<?php echo $runningNumber; ?>" />
+                                            </div>
+                                        </div>
+                                        
+                                        <?php
+                                            if(isset($this->creditNext) && !empty($this->creditNext)) {
+                                                $creditNumber   = explode("-", $this->creditNext);
+                                                $credit_Prefix  = $creditNumber[0];
+                                                $running_creditNumber = ++$this->creditNext;
+                                            } else {
+                                                $running_creditNumber = $this->result[0]['credit_prefix']."-".'0000000001';
+                                            }
+
+
+                                              $credit_prefix = $this->result[0]['credit_prefix'];
+                                              $creditSplit  = explode("-", $running_creditNumber);
+                                              if($credit_prefix!=$creditSplit[0]) {
+                                                $creditPre = $credit_prefix;
+                                              } else {
+                                                $creditPre = $credit_prefix;
+                                              }
+                                              $runningcreditNumber = $creditPre."-".$creditSplit[1];
+                                        ?>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Credit Note Prefix </label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="credit_prefix" id="credit_prefix" class="form-control" autocomplete="off" value="<?php echo $creditPre; ?>" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Credit Note Next Running Sequence </label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="credit_number" id="credit_number" class="form-control" autocomplete="off" readonly  value="<?php echo $runningcreditNumber; ?>" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Default Credit Term <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                            <select class="form-control" name="credit_term" id="credit_term">
+                                                   <?php
+                                                        $days = '';
+                                                        $creditSelect = '';
+                                                        if(isset($this->creditTerm) && !empty($this->creditTerm)) {
+                                                            foreach ($this->creditTerm as $key => $credit) {
+                                                                if($key!=1) {
+                                                                    $credits = $credit." Days";
+                                                                } else {
+                                                                    $credits = $credit;
+                                                                }
+                                                                if(isset($this->result[0]['default_credit_term']) && !empty($this->result[0]['default_credit_term'])) {
+                                                                  if($this->result[0]['default_credit_term']==$key) {
+                                                                    if($key!=1) {
+                                                                        $days = $credit;
+                                                                    } 
+                                                                    $creditSelect = 'selected';
+                                                                  }
+                                                                  else {
+                                                                    $creditSelect = '';
+                                                                  }
+                                                                } 
+                                                    ?>
+                                                        <option value="<?php echo $key; ?>" <?php echo $creditSelect; ?>><?php echo $credits; ?></option>
+                                                    <?php
+                                                            }
+                                                        }
+                                                    ?>                                                        
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                         <div class="form-group">
+                                            <label class="col-lg-2 control-label">Default Tax Code <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                            <select class="form-control" name="tax_code" id="tax_code">
+                                                    <?php
+                                                        if(isset($this->result[0]['default_tax_code']) && $this->result[0]['default_tax_code']==0) {
+                                                            $selected = 'selected';
+                                                        } else {
+                                                            $selected = '';
+                                                        }
+                                                    ?>
+                                                    <option value="0" title="Not Applicable" <?php echo $selected; ?>>NA</option>  
+                                                    <?php
+                                                        $taxSelect = '';
+                                                        if(isset($this->taxCode) && !empty($this->taxCode)) {
+                                                            foreach ($this->taxCode as $tax) {
+                                                                 if(isset($this->result[0]['default_tax_code']) && !empty($this->result[0]['default_tax_code'])) {
+                                                                  if($this->result[0]['default_tax_code']==$tax['id']) {
+                                                                    $taxSelect = 'selected';
+                                                                  }
+                                                                  else {
+                                                                    $taxSelect = '';
+                                                                  }
+                                                                } 
+                                                                /*if($tax['tax_type']==1) {
+                                                                    foreach ($this->purchase as $key => $purchase) {
+                                                                      if($tax['tax_code']==$key) {
+                                                                        $code = $purchase['name'];
+                                                                      }
+                                                                    }
+                                                                  } else if($tax['tax_type']==2) {*/
+                                                                    foreach ($this->supply as $key => $supply) {
+                                                                      if($tax['tax_code']==$key) {
+                                                                        $code = $supply['name'];
+                                                                      }
+                                                                    }
+                                                                //  }
+                                                    ?>
+                                                        <option value="<?php echo $tax['id']; ?>" <?php echo $taxSelect;  ?> title="<?php echo ucfirst(str_replace("\r\n", " ", $tax['description'])); ?>"><?php echo $code." - ".$tax['tax_percentage']." %"; ?></option>
+                                                    <?php
+                                                            }
+                                                        }
+                                                    ?>                                                  
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Default Currency </label>
+                                            <div class="col-lg-3">
+                                                <select name="currency" id="currency" class="form-control">
+                                                        <?php 
+                                                            $currencySelect = '';
+                                                            if(isset($this->currencies) && !empty($this->currencies)) {
+                                                                foreach ($this->currencies as $key => $currencies) {
+                                                                if(isset($this->result[0]['default_currency']) && !empty($this->result[0]['default_currency'])) {
+                                                                  if($this->result[0]['default_currency']==$key) {
+                                                                    $currencySelect = 'selected';
+                                                                  }
+                                                                  else {
+                                                                    $currencySelect = '';
+                                                                  }
+                                                                } 
+                                                        ?>
+                                                                 <option value="<?php echo $key; ?>" <? echo $currencySelect; ?>><?php echo $currencies; ?></option>
+                                                        <?php
+                                                                }
+                                                            } 
+                                                        ?>
+                                                    </select>  
+                                            </div>
+                                        </div>
+
+                                       
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">&nbsp;</label>
+                                            <div class="col-lg-3">
+                                                <div class="form-actions">
+                                                    <button type="submit" id="send" class="btn btn-primary">Save</button>
+                                                    <a href="<?php echo $this->sitePath."default/settings"; ?>"><button type="button" class="btn">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    </div>
+</div>

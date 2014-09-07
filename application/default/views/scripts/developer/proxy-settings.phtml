@@ -1,0 +1,243 @@
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/developer/"; ?>">Developer</a></li>
+   <li class="active">Proxy Settings</li>
+</ul>
+
+                                <div class="row">
+                                       <div class="col-md-6 col-md-offset-3">
+                                       <?php 
+                                            if(isset($this->success) && !empty($this->success)) {
+                                       ?>
+                                            <div class="alert alert-success">
+                                               <strong><?php echo $this->success; ?></strong>
+                                            </div>
+                                        <?php
+                                            } else if(isset($this->error) && !empty($this->error)) {
+                                        ?>
+                                            <div class="alert alert-danger">
+                                               <strong><?php echo $this->error; ?></strong>
+                                            </div>
+                                        <?php 
+                                            }
+                                        ?>
+                                        </div>
+                                 </div>
+
+<?php
+    $companyDisable = '';
+    $userDisable = '';
+    $setProxy = 2;
+    $logSession = new Zend_Session_Namespace('sess_login');
+    if(isset($logSession->proxy_cid) && !empty($logSession->proxy_cid) && isset($logSession->proxy_id) && !empty($logSession->proxy_id)) {
+        $companyDisable = 'disabled';
+        $userDisable = 'disabled';
+        $setProxy = 1;
+    }
+?>
+<div class="row">
+                        <div class="col-md-12 widget-module">
+                            <div class="square-widget widget-collapsible">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i> Proxy Settings</h4>
+                                    
+                                </div>
+
+                                <div class="widget-container col-md-12 col-md-offset-3">
+                                    <form class="form-horizontal" id="proxy-setting" method="post">
+                                   
+                                    <?php
+                                      if(isset($logSession->type) && $logSession->type==0) {
+                                    ?>
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Company <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <select class="form-control" name="company" id="company" onchange="return companyUsers(this.value);" <?php echo $companyDisable; ?>>
+                                                    <option value="">Select</option>
+                                                    <?php
+                                                      $companySelect = '';
+                                                        if(isset($this->companies) && !empty($this->companies)) {
+                                                            foreach ($this->companies as $company) {
+                                                              if(isset($logSession->proxy_cid) && !empty($logSession->proxy_cid)) {
+                                                                if($logSession->proxy_cid==$company['cid'])
+                                                                  $companySelect = 'selected';
+                                                                else
+                                                                  $companySelect = '';
+                                                            }
+                                                    ?>
+                                                        <option value="<?php echo $company['cid']."_".$company['company_name']; ?>" <?php echo $companySelect; ?>><?php echo ucfirst($company['company_name']); ?></option>
+                                                    <?php
+                                                            }
+                                                        }
+                                                    ?>                                                    
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                  <div class="form-group">
+                                            <label class="col-lg-2 control-label">User <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                              <div id="company_users">
+                                                <select class="form-control" name="users" id="users" <?php echo $userDisable; ?>>
+                                                    <option value="">Select</option>
+                                                    <?php
+                                                      $userSelect = '';
+                                                      if(isset($logSession->proxy_id) && !empty($logSession->proxy_id)) {
+                                                        if(isset($this->userList) && !empty($this->userList)) {
+                                                            foreach ($this->userList as $user) {
+                                                                 if($user['account_type']==1) {
+                                                                   $account_type = 'Developer';
+                                                                } else if($user['account_type']==2) {
+                                                                   $account_type = 'Super User';
+                                                                } else if($user['account_type']==3) {
+                                                                   $account_type = 'Manager';
+                                                                } else if($user['account_type']==4) {
+                                                                   $account_type = 'User';
+                                                                } else if($user['account_type']==5) {
+                                                                   $account_type = 'Viewer';
+                                                                }                                                                
+                                                                if($logSession->proxy_id==$user['id'])
+                                                                  $userSelect = 'selected';
+                                                                else
+                                                                  $userSelect = '';
+                                                    ?>
+                                                        <option value="<?php echo $user['id']; ?>" <?php echo $userSelect; ?>><?php echo $user['username']." (".$account_type.")"; ?></option>
+                                                    <?php
+                                                               }
+                                                            }
+                                                        }
+                                                    ?>  
+                                                </select>
+                                              </div>
+                                            </div>
+                                        </div>
+
+                                      <?php
+                                          } else if(isset($logSession->type) && $logSession->type==1) {
+                                      ?>
+                                        <input type="hidden" name="company" id="company" value="<?php echo $logSession->cid."_".$logSession->name; ?>" />
+                                         <div class="form-group">
+                                            <label class="col-lg-2 control-label">Company <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <select class="form-control" name="companys" id="companys" disabled>
+                                                    <?php
+                                                      $companySelect = '';
+                                                        if(isset($this->companies) && !empty($this->companies)) {
+                                                            foreach ($this->companies as $company) {
+                                                              if(isset($logSession->cid) && !empty($logSession->cid) && $logSession->cid==$company['cid']) {
+                                                    ?>
+                                                        <option value="<?php echo $company['cid']; ?>" <?php echo "selected"; ?>><?php echo ucfirst($company['company_name']); ?></option>
+                                                    <?php
+                                                              }
+                                                            }
+                                                        }
+                                                    ?>                                                    
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                  <div class="form-group">
+                                            <label class="col-lg-2 control-label">User <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                              <div id="company_users">
+                                                <select class="form-control" name="users" id="users" <?php echo $userDisable; ?>>
+                                                    <option value="">Select</option>
+                                                    <?php
+                                                      $userSelect = '';
+                                                        if(isset($this->userList) && !empty($this->userList)) {
+                                                            foreach ($this->userList as $user) {
+                                                                if($user['account_type']==1) {
+                                                                   $account_type = 'Developer';
+                                                                } else if($user['account_type']==2) {
+                                                                   $account_type = 'Super User';
+                                                                } else if($user['account_type']==3) {
+                                                                   $account_type = 'Manager';
+                                                                } else if($user['account_type']==4) {
+                                                                   $account_type = 'User';
+                                                                } else if($user['account_type']==5) {
+                                                                   $account_type = 'Viewer';
+                                                                }                                                                
+                                                                if($logSession->proxy_id==$user['id'])
+                                                                  $userSelect = 'selected';
+                                                                else
+                                                                  $userSelect = '';
+                                                    ?>
+                                                        <option value="<?php echo $user['id']."_".$user['account_type']; ?>" <?php echo $userSelect; ?>><?php echo $user['username']." (".$account_type.")"; ?></option>
+                                                    <?php
+                                                               }
+                                                            }
+                                                    ?>  
+                                                </select>
+                                              </div>
+                                            </div>
+                                        </div>
+                                      
+                                      <?php
+                                          }
+                                      ?>
+
+                                       
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">&nbsp;</label>
+                                            <div class="col-lg-3">
+                                                <div class="form-actions">
+                                                <?php 
+                                                    if(isset($setProxy) && $setProxy!=1) {
+                                                ?>
+                                                    <input type="hidden" name="set_proxy" id="set_proxy" value="2">
+                                                    <button type="submit" class="btn btn-primary">Set Proxy</button>
+                                                <?php 
+                                                    } else {
+                                                ?>
+                                                    <input type="hidden" name="set_proxy" id="set_proxy" value="1">
+                                                    <button type="submit" class="btn btn-primary">Unset Proxy</button>
+                                                <?php 
+                                                    }
+                                                ?>
+                                                    <a href="<?php echo $this->sitePath."developer"; ?>"><button type="button" class="btn">Cancel</button></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+function companyUsers(value) {
+    var account_type = '';
+      $.ajax({
+        type: "POST",
+        url: "<?php echo $this->sitePath.'default/developer/ajax-refresh'; ?>",
+        data: 'action=companyUsers&id='+value,
+        success: function (html) {
+ 
+            var userJson = $.parseJSON(html);
+            var users = '<select name="users" id="users"  class="form-control" required><option value="">Select</option>';
+              $.each(userJson, function(){
+                  if(this.account_type==1) {
+                     account_type = 'Developer';
+                  } else if(this.account_type==2) {
+                     account_type = 'Super User';
+                  } else if(this.account_type==3) {
+                     account_type = 'Manager';
+                  } else if(this.account_type==4) {
+                     account_type = 'User';
+                  } else if(this.account_type==5) {
+                     account_type = 'Viewer';
+                  }
+                  users += '<option value='+this.id+'_'+this.account_type+'>'+this.username+'&nbsp;('+account_type+')</option>';
+             
+              });
+            users += '</select>';
+            $("#company_users").html(users);
+        }
+      }); 
+}
+
+</script>

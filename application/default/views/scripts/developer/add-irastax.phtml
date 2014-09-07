@@ -1,0 +1,107 @@
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/developer/"; ?>">Developer</a></li>
+   <li><a href="<?php echo $this->sitePath."default/developer/irastax"; ?>">IRAS Tax Codes</a></li>
+   <li class="active">Add</li>
+</ul>
+
+
+                                <div class="row">
+                                       <div class="col-md-6 col-md-offset-3">
+                                       <?php 
+                                            if(isset($this->success) && !empty($this->success)) {
+                                       ?>
+                                            <div class="alert alert-success">
+                                               <strong><?php echo $this->success; ?></strong>
+                                            </div>
+                                        <?php
+                                            } else if(isset($this->error) && !empty($this->error)) {
+                                        ?>
+                                            <div class="alert alert-danger">
+                                               <strong><?php echo $this->error; ?></strong>
+                                            </div>
+                                        <?php 
+                                            }
+                                        ?>
+                                        </div>
+                                 </div>
+
+
+<div class="row">
+                        <div class="col-md-12 widget-module">
+                            <div class="square-widget widget-collapsible">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i> Add IRAS Tax Code</h4>
+                                    
+                                </div>
+
+                                <div class="widget-container col-md-12 col-md-offset-3">
+                                    <form class="form-horizontal" id="add-tax" method="post">
+
+<!--                                         <div class="form-group">
+                                            <label class="col-lg-2 control-label">Tax Code <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="tax_code" id="tax_code" class="form-control" placeholder="Enter Tax Code" autocomplete="off">
+                                            </div>
+                                        </div> -->
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Tax Type <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                            <select class="form-control" id="tax_type" name="tax_type">
+                                                <option value="">Select Tax Type</option>
+                                                <option value="1">Purchase</option>
+                                                <option value="2">Supply</option>
+                                            </select>
+                                            <!-- <input type="text" name="tax_type" id="tax_type" class="form-control" placeholder="Enter Tax Type" autocomplete="off"> -->
+                                            </div>
+                                        </div>
+
+                                         <div class="form-group">
+                                            <label class="col-lg-2 control-label">Tax Code <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                            <input type="text" name="category_code" id="category_code" class="form-control" placeholder="Enter Tax Code" autocomplete="off">
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Tax Percentage <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="percentage" id="percentage" class="form-control" placeholder="Enter Percentage" autocomplete="off">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Description <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <textarea class="form-control" name="description" id="description" placeholder="Description About Tax" autocomplete="off" style="height:200px;"></textarea>
+                                            </div>
+                                        </div>
+                                       
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">&nbsp;</label>
+                                            <div class="col-lg-3">
+                                                <div class="form-actions">
+                                                    <button type="submit" id="send" class="btn btn-primary">Submit</button>
+                                                    <button type="button" class="btn" onclick="return back();">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function back() {
+        window.location.href='<?php echo $this->sitePath; ?>developer/irastax';
+    }
+
+
+
+</script>

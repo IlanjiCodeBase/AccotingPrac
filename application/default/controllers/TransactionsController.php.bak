@@ -1,0 +1,891 @@
+<?php 
+class TransactionsController extends Zend_Controller_Action {
+	/**
+     * @var result
+    */
+	protected $result;
+	
+	/**
+    * @var $postArray
+    */
+	protected $postArray;
+	
+	public function init() {
+		$this->root 	   = Zend_Registry::get('path');
+		$this->transaction = new Transaction();
+		$this->account     = new Account();
+		$this->accountData = new Account_Data();	
+ 	}
+	/**
+    * @param $method action
+    */
+	
+	public function __call($method, $args) {
+			// If an unmatched 'Action' method was requested, pass on to the
+			// default action method:
+			if ('Action' == substr($method, -6)) {
+				return $this->_redirect('index/error/');
+			}
+			throw new Zend_Controller_Exception('Invalid method called');
+	}
+	
+	
+
+
+	public function indexAction() {
+		if(!Zend_Session::namespaceIsset('sess_login')) {
+			$this->_redirect('index');
+		} else {
+			$logSession = new Zend_Session_Namespace('sess_login');
+			$delid     = base64_decode($this->_getParam('delid'));
+			$transType = base64_decode($this->_getParam('type'));
+			if(isset($delid) && !empty($delid)) {
+				$deleteStatus = $this->transaction->deleteTransaction($delid,$transType);
+				if($deleteStatus) {
+					$sessSuccess = new Zend_Session_Namespace('delete_success');
+					$sessSuccess->status = 1;
+				}
+					$this->_redirect('transactions');
+			}
+			if(Zend_Session::namespaceIsset('unverify_success')) {
+				$this->view->success = 'Transaction unverified successfully';
+				Zend_Session::namespaceUnset('unverify_success');
+			}
+			if(Zend_Session::namespaceIsset('verify_success')) {
+				$this->view->success = 'Transaction verified successfully';
+				Zend_Session::namespaceUnset('verify_success');
+			}
+			if(Zend_Session::namespaceIsset('delete_success')) {
+				$this->view->success = 'Transaction deleted successfully';
+				Zend_Session::namespaceUnset('delete_success');
+			}
+			$unverifyid = base64_decode($this->_getParam('unverifyid'));
+			if(isset($unverifyid) && !empty($unverifyid)) {
+				$unverifyStatus = $this->transaction->unverifyTransaction($unverifyid);
+				if($unverifyStatus) {
+					$sessSuccess = new Zend_Session_Namespace('unverify_success');
+					$sessSuccess->status = 1;
+				}
+					$this->_redirect('transactions');
+			}
+			$verifyid = base64_decode($this->_getParam('verifyid'));
+			if(isset($verifyid) && !empty($verifyid)) {
+				$verifyStatus = $this->transaction->verifyTransaction($verifyid);
+				if($verifyStatus) {
+					$sessSuccess = new Zend_Session_Namespace('verify_success');
+					$sessSuccess->status = 1;
+				}
+					$this->_redirect('transactions');
+			}
+			$this->view->getUncategory       = $this->accountData->getData(array('unCategorized'));
+			$this->view->transactions   	 = $this->transaction->getTransactions($logSession->id);
+			$this->view->payAccounts    	 = $this->transaction->getPaymentAccount($logSession->id);
+			$this->view->nonPayAccounts 	 = $this->transaction->getNonPaymentAccount($logSession->id);
+			$this->view->uncategoryAccounts  = $this->transaction->getDefaultAccount();
+			$this->view->systemAccount  	 = $this->account->getSystemAccount();
+			$this->view->customersList     	 = $this->transaction->getCustomers($logSession->id);
+			$this->view->vendorsList     	 = $this->transaction->getVendors($logSession->id);
+
+			/*echo '<pre>'; print_r($this->view->payAccounts); echo '</pre>';
+			echo '<pre>'; print_r($this->view->nonPayAccounts); echo '</pre>';
+			echo '<pre>'; print_r($this->view->systemAccount); echo '</pre>';
+			echo '<pre>'; print_r($this->view->getUncategory); echo '</pre>';
+			echo '<pre>'; print_r($this->view->uncategoryAccounts); echo '</pre>';*/
+		}
+	}
+
+    public function popUpAction() {
+    	if(!Zend_Session::namespaceIsset('sess_login')) {
+			$this->_redirect('index');
+		} 
+    }
+
+	public function ajaxDisplayAction() {
+		$this->_helper->getHelper('layout')->disableLayout();
+		$this->_helper->viewRenderer->setNoRender(true);
+		$logSession = new Zend_Session_Namespace('sess_login');
+		$action = $this->_getParam('ajaxAction');
+		if($action=='edit-transaction') {
+			$id     = base64_decode($this->_getParam('id'));
+			$type   = base64_decode($this->_getParam('type'));
+			$payAccounts    	 = $this->transaction->getPaymentAccount($logSession->id);
+			$nonPayAccounts 	 = $this->transaction->getNonPaymentAccount($logSession->id);
+			$uncategoryAccounts  = $this->transaction->getDefaultAccount();
+			$systemAccount  	 = $this->account->getSystemAccount();
+			$getTransaction      = $this->transaction->getTransactionDetails($id,$logSession->id);
+			$customersList     	 = $this->transaction->getCustomers($logSession->id);
+			$vendorsList     	 = $this->transaction->getVendors($logSession->id);
+			//echo '<pre>'; print_r($getTransaction); echo '</pre>';
+			if($type==1) {
+				//echo '<script type="text/javascript" src="'.$this->view->scriptpath.'jquery.js"></script>';
+				//echo '<script type="text/javascript" src="'.$this->view->scriptpath.'jquery-ui-1.10.3.custom.min.js"></script>';
+				//echo '<script type="text/javascript" src="'.$this->view->scriptpath.'bootstrap.min.js"></script>';
+			   // echo '<script type="text/javascript" src="'.$this->view->scriptpath.'jquery-select.js"></script>';
+			    //echo '<script type="text/javascript" src="'.$this->view->scriptpath.'popup_common_script.js"></script>';
+				echo '<div class="col-md-10 widget-module">';
+				echo '<div class="square-widget widget-collapsible">';
+				echo '<div class="widget-head clearfix">';
+				echo ' <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i>Edit Transaction Details</h4>';
+				echo '</div>';
+				echo '<div class="widget-container">';
+				echo '<form class="form-horizontal" id="edit-income" method="post">';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Date</label>';
+				echo '<div class="col-lg-5">';
+				$date = date("d-m-Y",strtotime($getTransaction[0]['date']));
+				echo '<input type="text" value="'.$date.'" class="form-control date-pick" name="date" placeholder="Date" id="date" autocomplete="off">';
+				echo '<input type="hidden" name="action" value="edit_income">';
+				echo '<input type="hidden" name="tid" value="'.$getTransaction[0]['id'].'">';
+				echo '<input type="hidden" name="transaction_type" value="1">';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Description</label>';
+				echo '<div class="col-lg-7">';
+				echo ' <input type="text" class="form-control" value="'.$getTransaction[0]['description'].'" name="description" id="description" placeholder="Enter Description" autocomplete="off">';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Amount</label>';
+				echo '<div class="col-lg-5">';
+				echo '<input type="text" class="form-control" value="'.$getTransaction[0]['amount'].'" name="amount" id="amount" placeholder="Amount" autocomplete="off">';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Category</label>';
+				echo '<div class="col-lg-5">';
+				echo '<select class="select2 form-control" name="category" name="category" style="width:200px !important;">';
+                  $inc = 0;
+                  $exp = 0;
+                  $categorySelect = '';
+                  foreach ($systemAccount as  $system) {
+                     echo '<optgroup label='.ucfirst($system['account']).'>';
+                  foreach ($nonPayAccounts as  $nonPay) {
+                     if($system['id']==4 &&$inc==0) {
+                        foreach ($uncategoryAccounts as  $uncategory) { 
+                        	if($uncategory['did']=='i1') {
+                        		if($getTransaction[0]['category'] == 'i1') 
+                        			$categorySelect = 'selected';
+                        		else  $categorySelect = '';
+                            $inc++;
+                      echo '<option value="'.$uncategory['did'].'" '.$categorySelect.'>'.$uncategory['name'].'</option>';
+                           }
+                   		 }
+                      } else if($system['id']==5 &&$exp==0) {
+                    foreach ($uncategoryAccounts as  $uncategory) { 
+                    	if($uncategory['did']=='e1') {
+                    		if($getTransaction[0]['category'] == 'e1') 
+                        			$categorySelect = 'selected';
+                        		else  $categorySelect = '';
+                          $exp++;
+                       echo '<option value="'.$uncategory['did'].'" '.$categorySelect.'>'.$uncategory['name'].'</option>';
+                               } 
+                       }
+                     } else if($system['id']==$nonPay['fksys_id']) {
+                     	if($nonPay['id'] == $getTransaction[0]['category']) 
+                        			$categorySelect = 'selected';
+                        		else  $categorySelect = '';
+                        echo '<option value="'.$nonPay['id'].'" '.$categorySelect.'>'.ucfirst($nonPay['name']).'</option>';
+                                                          }
+                                                       }
+                        echo '</optgroup>';
+                                                     }
+
+				echo '</select>';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Account</label>';
+				echo '<div class="col-lg-5">';
+				echo '<select class="select2 form-control" name="account" id="account">';
+				 $accountSelect = '';
+                  foreach ($systemAccount as  $system) {
+                   echo '<optgroup label='.ucfirst($system['account']).'>';
+                      foreach ($payAccounts as  $pay) {
+                         if($system['id']==$pay['fksys_id']) {
+                         	if($pay['id'] == $getTransaction[0]['account']) 
+                        			$accountSelect = 'selected';
+                        		else  $accountSelect = '';
+                             echo '<option value="'.$pay['id'].'"  '.$accountSelect.'>'.ucfirst($pay['name']).'</option>';
+                           }
+                       }
+                     echo '</optgroup>';
+                    }
+				echo '</select>';
+				echo '<input type="hidden" name="esplit_count" id="esplit_count" value="0"  />';
+				echo '</div>';
+				echo '</div>';
+
+
+				echo '<div class="form-group">';
+                echo '<label class="col-lg-2 control-label">&nbsp;</label>';
+                echo '<div class="col-lg-10">';
+                echo '<div class="form-actions">';
+                echo '<button type="submit" class="btn btn-primary" id="edit_transaction">Save changes</button>';
+                echo '<button type="reset" class="btn">Cancel</button>';
+                echo '</div></div></div>';
+                                            
+				echo '</form';
+				echo '</div>';
+				echo '</div>';
+				echo '</div>';
+				echo '</div>';
+
+			} else if($type==2) {
+
+				$getSplit = $this->transaction->getSplitTransactionDetail($getTransaction[0]['id']);
+				//echo '<pre>'; print_r($getSplit); echo '</pre>';
+				echo '<div class="col-md-10 widget-module">';
+				echo '<div class="square-widget widget-collapsible">';
+				echo '<div class="widget-head clearfix">';
+				echo ' <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i>Edit Transaction Details</h4>';
+				echo '</div>';
+				echo '<div class="widget-container">';
+				echo '<form class="form-horizontal" id="edit-income" method="post">';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Date</label>';
+				echo '<div class="col-lg-5">';
+				$date = date("d-m-Y",strtotime($getTransaction[0]['date']));
+				echo '<input type="text" value="'.$date.'" class="form-control date-pick" name="date" placeholder="Date" id="date" autocomplete="off">';
+				echo '<input type="hidden" name="action" value="edit_income">';
+				echo '<input type="hidden" name="tid" value="'.$getTransaction[0]['id'].'">';
+				echo '<input type="hidden" name="transaction_type" value="2">';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Description</label>';
+				echo '<div class="col-lg-7">';
+				echo ' <input type="text" class="form-control" value="'.$getTransaction[0]['description'].'" name="description" id="description" placeholder="Enter Description" autocomplete="off">';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Amount</label>';
+				echo '<div class="col-lg-5">';
+				echo '<input type="text" class="form-control eamount" value="'.$getTransaction[0]['amount'].'" name="amount" id="amount" placeholder="Amount" autocomplete="off">';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Category</label>';
+				echo '<div class="col-lg-5">';
+				echo '<select class="select2 form-control" name="category" name="category" style="width:200px !important;">';
+                  $inc = 0;
+                  $exp = 0;
+                  $categorySelect = '';
+                  foreach ($systemAccount as  $system) {
+                     echo '<optgroup label='.ucfirst($system['account']).'>';
+                  foreach ($nonPayAccounts as  $nonPay) {
+                     if($system['id']==4 &&$inc==0) {
+                        foreach ($uncategoryAccounts as  $uncategory) { 
+                        	if($uncategory['did']=='i1') {
+                        		if($getTransaction[0]['category'] == 'i1') 
+                        			$categorySelect = 'selected';
+                        		else  $categorySelect = '';
+                            $inc++;
+                      echo '<option value="'.$uncategory['did'].'" '.$categorySelect.'>'.$uncategory['name'].'</option>';
+                           }
+                   		 }
+                      } else if($system['id']==5 &&$exp==0) {
+                    foreach ($uncategoryAccounts as  $uncategory) { 
+                    	if($uncategory['did']=='e1') {
+                    		if($getTransaction[0]['category'] == 'e1') 
+                        			$categorySelect = 'selected';
+                        		else  $categorySelect = '';
+                          $exp++;
+                       echo '<option value="'.$uncategory['did'].'" '.$categorySelect.'>'.$uncategory['name'].'</option>';
+                               } 
+                       }
+                     } else if($system['id']==$nonPay['fksys_id']) {
+                     	if($nonPay['id'] == $getTransaction[0]['category']) 
+                        			$categorySelect = 'selected';
+                        		else  $categorySelect = '';
+                        echo '<option value="'.$nonPay['id'].'" '.$categorySelect.'>'.ucfirst($nonPay['name']).'</option>';
+                                                          }
+                                                       }
+                        echo '</optgroup>';
+                                                     }
+
+				echo '</select>';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Account</label>';
+				echo '<div class="col-lg-5">';
+				echo '<select class="select2 form-control" name="account" id="account">';
+				 $accountSelect = '';
+                  foreach ($systemAccount as  $system) {
+                   echo '<optgroup label='.ucfirst($system['account']).'>';
+                      foreach ($payAccounts as  $pay) {
+                         if($system['id']==$pay['fksys_id']) {
+                         	if($pay['id'] == $getTransaction[0]['account']) 
+                        			$accountSelect = 'selected';
+                        		else  $accountSelect = '';
+                             echo '<option value="'.$pay['id'].'"  '.$accountSelect.'>'.ucfirst($pay['name']).'</option>';
+                           }
+                       }
+                     echo '</optgroup>';
+                    }
+				echo '</select>';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<h5>Splitted Transactions</h5>';
+				$j=1;
+				echo '<table id="myTable" class="order-list">';
+                echo '<thead>';
+                echo '<tr>';
+                echo '<td>Name</td>';
+                echo '<td>Amount</td>';
+                echo '</tr>';
+                echo '</thead>';
+                echo '<tbody>';
+                                           
+				foreach($getSplit as $split) {
+					echo '<tr>';
+                    echo '<td>';
+                    echo '<input type="text" name="name'.$j.'" id="name'.$j.'" class="form-control" value="'.$split['description'].'" />';
+                    echo '</td>';
+                    echo '<td>';
+                    echo '<input type="text" name="amount'.$j.'" id="amount'.$j.'" class="form-control" value="'.$split['amount'].'"/>';
+                    echo '</td>';
+                    echo '</tr>';
+                    echo '<input type="hidden" name="split_id'.$j.'" id="split_id'.$j.'" value="'.$split['id'].'" />';
+                    $j++;
+				}
+
+				echo '</tbody>';
+				echo '</table>';
+
+				echo '<input type="hidden" name="esplit" id="esplit" value="split" />';
+				echo '<input type="hidden" name="esplit_count" id="esplit_count" value='.--$j.'  />';
+				echo '<input type="hidden" name="eamount" id="eamount" value="'.$getTransaction[0]['amount'].'"  />';
+				echo '<div class="form-group">';
+                echo '<label class="col-lg-2 control-label">&nbsp;</label>';
+                echo '<div class="col-lg-10">';
+                echo '<div class="form-actions">';
+                echo '<button type="submit" class="btn btn-primary" id="edit_transaction">Save changes</button>';
+                echo '<button type="reset" class="btn">Cancel</button>';
+                echo '</div></div></div>';
+                                            
+				echo '</form';
+				echo '</div>';
+				echo '</div>';
+				echo '</div>';
+				echo '</div>';
+
+
+			} else if($type==3) {
+				$getCustomer = $this->transaction->getCustomerTransactionDetail($getTransaction[0]['id']);
+				echo '<div class="col-md-10 widget-module">';
+				echo '<div class="square-widget widget-collapsible">';
+				echo '<div class="widget-head clearfix">';
+				echo ' <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i>Edit Transaction Details</h4>';
+				echo '</div>';
+				echo '<div class="widget-container">';
+				echo '<form class="form-horizontal" id="edit-income" method="post">';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Date</label>';
+				echo '<div class="col-lg-5">';
+				$date = date("d-m-Y",strtotime($getTransaction[0]['date']));
+				echo '<input type="text" value="'.$date.'" class="form-control date-pick" name="date" placeholder="Date" id="date" autocomplete="off">';
+				echo '<input type="hidden" name="action" value="edit_income">';
+				echo '<input type="hidden" name="tid" value="'.$getTransaction[0]['id'].'">';
+				echo '<input type="hidden" name="transaction_type" value="3">';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Description</label>';
+				echo '<div class="col-lg-7">';
+				echo ' <input type="text" class="form-control" value="'.$getTransaction[0]['description'].'" name="description" id="description" placeholder="Enter Description" autocomplete="off">';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Amount</label>';
+				echo '<div class="col-lg-5">';
+				echo '<input type="text" class="form-control" value="'.$getTransaction[0]['amount'].'" name="amount" id="amount" placeholder="Amount" autocomplete="off">';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Category</label>';
+				echo '<div class="col-lg-5">';
+				echo '<select class="select2 form-control" name="category" name="category" style="width:200px !important;">';
+                  $inc = 0;
+                  $exp = 0;
+                  $categorySelect = '';
+                  foreach ($systemAccount as  $system) {
+                     echo '<optgroup label='.ucfirst($system['account']).'>';
+                  foreach ($nonPayAccounts as  $nonPay) {
+                     if($system['id']==4 &&$inc==0) {
+                        foreach ($uncategoryAccounts as  $uncategory) { 
+                        	if($uncategory['did']=='i1') {
+                        		if($getTransaction[0]['category'] == 'i1') 
+                        			$categorySelect = 'selected';
+                        		else  $categorySelect = '';
+                            $inc++;
+                      echo '<option value="'.$uncategory['did'].'" '.$categorySelect.'>'.$uncategory['name'].'</option>';
+                           }
+                   		 }
+                      } else if($system['id']==5 &&$exp==0) {
+                    foreach ($uncategoryAccounts as  $uncategory) { 
+                    	if($uncategory['did']=='e1') {
+                    		if($getTransaction[0]['category'] == 'e1') 
+                        			$categorySelect = 'selected';
+                        		else  $categorySelect = '';
+                          $exp++;
+                       echo '<option value="'.$uncategory['did'].'" '.$categorySelect.'>'.$uncategory['name'].'</option>';
+                               } 
+                       }
+                     } else if($system['id']==$nonPay['fksys_id']) {
+                     	if($nonPay['id'] == $getTransaction[0]['category']) 
+                        			$categorySelect = 'selected';
+                        		else  $categorySelect = '';
+                        echo '<option value="'.$nonPay['id'].'" '.$categorySelect.'>'.ucfirst($nonPay['name']).'</option>';
+                                                          }
+                                                       }
+                        echo '</optgroup>';
+                                                     }
+
+				echo '</select>';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Account</label>';
+				echo '<div class="col-lg-5">';
+				echo '<select class="select2 form-control" name="account" id="account">';
+				 $accountSelect = '';
+                  foreach ($systemAccount as  $system) {
+                   echo '<optgroup label='.ucfirst($system['account']).'>';
+                      foreach ($payAccounts as  $pay) {
+                         if($system['id']==$pay['fksys_id']) {
+                         	if($pay['id'] == $getTransaction[0]['account']) 
+                        			$accountSelect = 'selected';
+                        		else  $accountSelect = '';
+                             echo '<option value="'.$pay['id'].'"  '.$accountSelect.'>'.ucfirst($pay['name']).'</option>';
+                           }
+                       }
+                     echo '</optgroup>';
+                    }
+				echo '</select>';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Customer</label>';
+				echo '<div class="col-lg-5">';
+				echo '<select class="select2 form-control" name="customer" id="customer">';
+				$customerSelect = '';
+                   foreach ($customersList as  $customer) {
+                   	   if($customer['id'] == $getCustomer) 
+                   	   	 $customerSelect = 'selected';
+                   	   	else $customerSelect = '';
+                        echo '<option value="'.$customer['id'].'" '.$customerSelect.'>'.ucfirst($customer['name']).'</option>';
+                    }
+				echo '</select>';
+				echo '<input type="hidden" name="esplit_count" id="esplit_count" value="0"  />';
+				echo '</div>';
+				echo '</div>';
+
+
+
+				echo '<div class="form-group">';
+                echo '<label class="col-lg-2 control-label">&nbsp;</label>';
+                echo '<div class="col-lg-10">';
+                echo '<div class="form-actions">';
+                echo '<button type="submit" class="btn btn-primary" id="edit_transaction">Save changes</button>';
+                echo '<button type="reset" class="btn">Cancel</button>';
+                echo '</div></div></div>';
+                                            
+				echo '</form';
+				echo '</div>';
+				echo '</div>';
+				echo '</div>';
+				echo '</div>';
+
+			} else if($type==4) {
+
+				$getVendor = $this->transaction->getVendorTransactionDetail($getTransaction[0]['id']);
+				echo '<div class="col-md-10 widget-module">';
+				echo '<div class="square-widget widget-collapsible">';
+				echo '<div class="widget-head clearfix">';
+				echo ' <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i>Edit Transaction Details</h4>';
+				echo '</div>';
+				echo '<div class="widget-container">';
+				echo '<form class="form-horizontal" id="edit-income" method="post">';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Date</label>';
+				echo '<div class="col-lg-5">';
+				$date = date("d-m-Y",strtotime($getTransaction[0]['date']));
+				echo '<input type="text" value="'.$date.'" class="form-control date-pick" name="date" placeholder="Date" id="date" autocomplete="off">';
+				echo '<input type="hidden" name="action" value="edit_income">';
+				echo '<input type="hidden" name="tid" value="'.$getTransaction[0]['id'].'">';
+				echo '<input type="hidden" name="transaction_type" value="4">';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Description</label>';
+				echo '<div class="col-lg-7">';
+				echo ' <input type="text" class="form-control" value="'.$getTransaction[0]['description'].'" name="description" id="description" placeholder="Enter Description" autocomplete="off">';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Amount</label>';
+				echo '<div class="col-lg-5">';
+				echo '<input type="text" class="form-control" value="'.$getTransaction[0]['amount'].'" name="amount" id="amount" placeholder="Amount" autocomplete="off">';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Category</label>';
+				echo '<div class="col-lg-5">';
+				echo '<select class="select2 form-control" name="category" name="category" style="width:200px !important;">';
+                  $inc = 0;
+                  $exp = 0;
+                  $categorySelect = '';
+                  foreach ($systemAccount as  $system) {
+                     echo '<optgroup label='.ucfirst($system['account']).'>';
+                  foreach ($nonPayAccounts as  $nonPay) {
+                     if($system['id']==4 &&$inc==0) {
+                        foreach ($uncategoryAccounts as  $uncategory) { 
+                        	if($uncategory['did']=='i1') {
+                        		if($getTransaction[0]['category'] == 'i1') 
+                        			$categorySelect = 'selected';
+                        		else  $categorySelect = '';
+                            $inc++;
+                      echo '<option value="'.$uncategory['did'].'" '.$categorySelect.'>'.$uncategory['name'].'</option>';
+                           }
+                   		 }
+                      } else if($system['id']==5 &&$exp==0) {
+                    foreach ($uncategoryAccounts as  $uncategory) { 
+                    	if($uncategory['did']=='e1') {
+                    		if($getTransaction[0]['category'] == 'e1') 
+                        			$categorySelect = 'selected';
+                        		else  $categorySelect = '';
+                          $exp++;
+                       echo '<option value="'.$uncategory['did'].'" '.$categorySelect.'>'.$uncategory['name'].'</option>';
+                               } 
+                       }
+                     } else if($system['id']==$nonPay['fksys_id']) {
+                     	if($nonPay['id'] == $getTransaction[0]['category']) 
+                        			$categorySelect = 'selected';
+                        		else  $categorySelect = '';
+                        echo '<option value="'.$nonPay['id'].'" '.$categorySelect.'>'.ucfirst($nonPay['name']).'</option>';
+                                                          }
+                                                       }
+                        echo '</optgroup>';
+                                                     }
+
+				echo '</select>';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Account</label>';
+				echo '<div class="col-lg-5">';
+				echo '<select class="select2 form-control" name="account" id="account">';
+				 $accountSelect = '';
+                  foreach ($systemAccount as  $system) {
+                   echo '<optgroup label='.ucfirst($system['account']).'>';
+                      foreach ($payAccounts as  $pay) {
+                         if($system['id']==$pay['fksys_id']) {
+                         	if($pay['id'] == $getTransaction[0]['account']) 
+                        			$accountSelect = 'selected';
+                        		else  $accountSelect = '';
+                             echo '<option value="'.$pay['id'].'"  '.$accountSelect.'>'.ucfirst($pay['name']).'</option>';
+                           }
+                       }
+                     echo '</optgroup>';
+                    }
+				echo '</select>';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Vendor</label>';
+				echo '<div class="col-lg-5">';
+				echo '<select class="select2 form-control" name="vendor" id="vendor">';
+				$vendorSelect = '';
+                   foreach ($vendorsList as  $vendor) {
+                   	   if($vendor['id'] == $getVendor) 
+                   	   	 $vendorSelect = 'selected';
+                   	   	else $vendorSelect = '';
+                        echo '<option value="'.$vendor['id'].'" '.$vendorSelect.'>'.ucfirst($vendor['name']).'</option>';
+                    }
+				echo '</select>';
+				echo '<input type="hidden" name="esplit_count" id="esplit_count" value="0"  />';
+				echo '</div>';
+				echo '</div>';
+
+
+
+				echo '<div class="form-group">';
+                echo '<label class="col-lg-2 control-label">&nbsp;</label>';
+                echo '<div class="col-lg-10">';
+                echo '<div class="form-actions">';
+                echo '<button type="submit" class="btn btn-primary" id="edit_transaction">Save changes</button>';
+                echo '<button type="reset" class="btn">Cancel</button>';
+                echo '</div></div></div>';
+                                            
+				echo '</form';
+				echo '</div>';
+				echo '</div>';
+				echo '</div>';
+				echo '</div>';
+
+			} else if($type==5) {
+
+			} else if($type==6) {
+
+			} 
+		}
+		else if($action=='create-payment') {
+			$id       = base64_decode($this->_getParam('id'));
+			$type     = base64_decode($this->_getParam('type'));
+			$trans    = base64_decode($this->_getParam('trans'));
+			$amount   = base64_decode($this->_getParam('amount'));
+			if($type=='5') {
+				$getInvoices = $this->transaction->getAllInvoices($logSession->id);	
+				//echo '<pre>'; print_r($getInvoices); echo '</pre>';
+				echo '<div class="col-md-10 widget-module">';
+				echo '<div class="square-widget widget-collapsible">';
+				echo '<div class="widget-head clearfix">';
+				echo ' <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i>Make Invoice Payment</h4>';
+				echo '</div>';
+				echo '<div class="widget-container">';
+				echo '<form class="form-horizontal" id="make-payment" method="post">';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Invoices</label>';
+				echo '<div class="col-lg-6">';
+				echo '<input type="hidden" name="tid" id="tid" value="'.$id.'" />';
+				echo '<input type="hidden" name="tamount" id="tamount" value="'.$amount.'" />';
+				echo '<input type="hidden" name="ttype" id="ttype" value="'.$trans.'" />';
+				echo '<input type="hidden" name="action" id="action" value="invoice" />';
+				echo '<select class="form-control" name="payment_option" name="payment_option">';
+				echo '<option value="">Select Invoices</option>';
+				foreach ($getInvoices as $invoice) {
+					$invoice_amount = $invoice['inv_amount'];
+					$paid_amount	= $invoice['trans_amount'];
+					$pending_amount = $invoice_amount - $paid_amount;
+					if($paid_amount<$invoice_amount || $paid_amount==0) {
+					echo '<option value="'.$invoice['inv_id'].'">';
+					echo  $invoice['invoice_id']."-".$invoice['description']."(Amount Due ".$pending_amount.
+						  " out of ".$invoice_amount.")";
+					echo '</option>';
+					}
+				}
+				echo '</select>';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+                echo '<label class="col-lg-2 control-label">&nbsp;</label>';
+                echo '<div class="col-lg-10">';
+                echo '<div class="form-actions">';
+                echo '<button type="submit" class="btn btn-primary" id="make_payment">Make invoice payment</button>';
+                echo '<button type="reset" class="btn">Cancel</button>';
+                echo '</div></div></div>';
+
+				echo '</form>';
+				echo '</div></div></div>';
+
+			} else if($type=='6') {
+				$getBills = $this->transaction->getAllBills($logSession->id);	
+				//echo '<pre>'; print_r($getBills); echo '</pre>'; die();
+				echo '<div class="col-md-10 widget-module">';
+				echo '<div class="square-widget widget-collapsible">';
+				echo '<div class="widget-head clearfix">';
+				echo ' <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i>Make Bill Payment</h4>';
+				echo '</div>';
+				echo '<div class="widget-container">';
+				echo '<form class="form-horizontal" id="make-payment" method="post">';
+
+				echo '<div class="form-group">';
+				echo '<label class="col-lg-3 control-label">Bills</label>';
+				echo '<div class="col-lg-6">';
+				echo '<input type="hidden" name="tid" id="tid" value="'.$id.'" />';
+				echo '<input type="hidden" name="tamount" id="tamount" value="'.$amount.'" />';
+				echo '<input type="hidden" name="ttype" id="ttype" value="'.$trans.'" />';
+				echo '<input type="hidden" name="action" id="action" value="bill" />';
+				echo '<select class="form-control" name="payment_option" name="payment_option">';
+				echo '<option value="">Select Invoices</option>';
+				foreach ($getBills as $bill) {
+					$bill_amount    = $bill['bill_amount'];
+					$paid_amount	= $bill['trans_amount'];
+					$pending_amount = $bill_amount - $paid_amount;
+					if($paid_amount<$bill_amount || $paid_amount==0) {
+					echo '<option value="'.$bill['billid'].'">';
+					echo  $bill['bill_id']."-".$bill['description']."(Amount Due ".$pending_amount.
+						  " out of ".$bill_amount.")";
+					echo '</option>';
+					}
+				}
+				echo '</select>';
+				echo '</div>';
+				echo '</div>';
+
+				echo '<div class="form-group">';
+                echo '<label class="col-lg-2 control-label">&nbsp;</label>';
+                echo '<div class="col-lg-10">';
+                echo '<div class="form-actions">';
+                echo '<button type="submit" class="btn btn-primary" id="make_payment">Make invoice payment</button>';
+                echo '<button type="reset" class="btn">Cancel</button>';
+                echo '</div></div></div>';
+
+				echo '</form>';
+				echo '</div></div></div>';
+
+			}
+		}
+	}
+
+	public function ajaxGetTransaction() {
+		$this->_helper->getHelper('layout')->disableLayout();
+		$this->_helper->viewRenderer->setNoRender(true);
+		$logSession = new Zend_Session_Namespace('sess_login');
+			$this->getUncategory       = $this->accountData->getData(array('unCategorized'));
+			$this->transactions   	   = $this->transaction->getTransactions($logSession->id);
+			$this->payAccounts    	   = $this->transaction->getPaymentAccount($logSession->id);
+			$this->nonPayAccounts 	   = $this->transaction->getNonPaymentAccount($logSession->id);
+			$this->uncategoryAccounts  = $this->transaction->getDefaultAccount();
+			$this->systemAccount  	   = $this->account->getSystemAccount();
+			$this->customersList       = $this->transaction->getCustomers($logSession->id);
+			$this->vendorsList     	   = $this->transaction->getVendors($logSession->id);
+
+			$i=1;
+            foreach ($this->transactions as $transaction) {
+            	echo "<tr>";
+            	echo "<td>".$i++."</td>";
+                echo "<td>".date("d-m-Y",strtotime($transaction['date']))."</td>";
+                echo "<td>".$transaction['description']."</td>";
+                echo "<td>".$transaction['amount']."</td>";
+                echo "<td>"; 
+                if($transaction['transaction_category']==1)  {
+                    echo "Income";
+                } else if($transaction['transaction_category']==2)  {
+                    echo "Expense";
+                }
+                echo "</td>";
+                echo "<td>";
+ 				foreach ($this->nonPayAccounts as  $nonPay) { 
+                  if($nonPay['id'] == $transaction['category']) {
+                        echo ucfirst($nonPay['name']); 
+                         break;
+                  } else {
+                   if($transaction['category']=='i1') {
+                        echo "Uncategorized Income";
+                        break;
+                    } else if($transaction['category']=='e1') {
+                        echo "Uncategorized Expense";
+                        break;
+                    } else if($transaction['category']=='inv1') {
+                        echo "Invoice Payment";
+                        break;
+                    } else if($transaction['category']=='bill1') {
+                        echo "Bill payment";
+                        break;
+                     }
+                  }
+               }
+                echo "</td>";
+                echo "<td>";
+                foreach ($this->payAccounts as  $pay) { 
+                    if($pay['id'] == $transaction['account'])
+                        echo ucfirst($pay['name']); 
+                 }
+                echo "</td>";
+                echo "<td>";
+                echo '<div class="col-md-2">';
+                  if($transaction['verify_status']==1) {
+                     echo '<a class="btn btn-mini btn-success" href="javascript:void(0)" data-original-title="Unverify"  onclick="unverify('.'\''.base64_encode($transaction["id"]).'\''.')"><i class="icon-ok"></i></a>';
+                  } else if($transaction['verify_status']==0) {
+                     echo '<a class="btn btn-mini btn-default" href="javascript:void(0)" data-original-title="Verify"  onclick="verify('.'\''.base64_encode($transaction["id"]).'\''.')"><i class="icon-ok"></i></a>';
+                  }
+                echo "</div>";
+				echo '<div class="btn-group col-md-1">';
+                echo '<button data-toggle="dropdown" class="btn btn-small dropdown-toggle"> <span class="caret"></span></button>';
+                echo '<ul class="dropdown-menu">';
+                  if($transaction['transaction_category']==1 && $transaction['transaction_type']!=5)
+                   {
+                      echo '<li><a class="create-payment" href="javascript:void(0)"  data-index="'.base64_encode($transaction['id']).'" data-type="'.base64_encode(5).'" data-trans="'.base64_encode($transaction['transaction_type']).'" data-amount="'.base64_encode($transaction['amount']).'">Make Invoice Payment</a></li>';
+                    } else if($transaction['transaction_category']==2 && $transaction['transaction_type']!=6) {
+                      echo '<li><a class="create-payment" href="javascript:void(0)"  data-index="'.base64_encode($transaction['id']).'" data-type="'.base64_encode(6).'" data-trans="'.base64_encode($transaction['transaction_type']).'" data-amount="'.base64_encode($transaction['amount']).'">Make Bill Payment</a></li>';
+                    }
+                    if(($transaction['transaction_type']!=5 && $transaction['transaction_type']!=6) && ($transaction['verify_status']==0) ) {
+                      echo '<li><a class="edit-transaction" href="javascript:void(0)" data-index="'.base64_encode($transaction['id']).'" data-type="'.base64_encode($transaction['transaction_type']).'">Edit</a></li>';
+                    }
+                    echo '<li><a href="javascript:void(0)" onclick="return deleteTransaction("'.base64_encode($transaction['id']).'","'.base64_encode($transaction['transaction_type']).'");">Delete</a></li>';
+                    echo '</ul>';
+                echo '</div>';
+
+
+                echo "</td>";
+            	echo "</tr>";
+             }
+
+
+	}
+
+	public function ajaxCallAction() {
+		$this->_helper->getHelper('layout')->disableLayout();
+		$this->_helper->viewRenderer->setNoRender(true);
+		$logSession = new Zend_Session_Namespace('sess_login');
+		if($this->_request->isXmlHttpRequest()) {
+			if ($this->_request->isPost()) {
+				$ajaxVal = $this->getRequest()->getPost();
+				if($ajaxVal['action']=='income') {
+					$ajaxVal['date'] = date("Y-m-d",strtotime($ajaxVal['date']));
+					$result = $this->transaction->insertIncomeTransaction($ajaxVal,$logSession->id);
+					if($result) {
+						//$this->ajaxGetTransaction();
+						echo "success";
+					}
+				} else if($ajaxVal['action']=='expense') {
+					$ajaxVal['date'] = date("Y-m-d",strtotime($ajaxVal['date']));
+					$result = $this->transaction->insertExpenseTransaction($ajaxVal,$logSession->id);
+					if($result) {
+						echo "success";
+					}
+				} else if($ajaxVal['action']=='edit_income') {
+					$ajaxVal['date'] = date("Y-m-d",strtotime($ajaxVal['date']));
+					$result = $this->transaction->editTransaction($ajaxVal,$logSession->id);
+					if($result) {
+						echo "success";
+					}
+				} else if($ajaxVal['action']=='invoice') {
+					$result = $this->transaction->invoiceTransaction($ajaxVal);
+					if($result) {
+						echo "success";
+					}
+				}  else if($ajaxVal['action']=='bill') {
+					$result = $this->transaction->billTransaction($ajaxVal);
+					if($result) {
+						echo "success";
+					}
+				}
+
+			}
+		}
+
+	}
+
+	
+}
+
+?>

@@ -1,0 +1,167 @@
+<?php 
+class AccountsController extends Zend_Controller_Action {
+	/**
+     * @var result
+    */
+	protected $result;
+	
+	/**
+    * @var $postArray
+    */
+	protected $postArray;
+	
+	public function init() {
+		$this->root 	   = Zend_Registry::get('path');
+		$this->account 	   = new Account();
+		$this->accountData = new Account_Data();	
+ 	}
+	/**
+    * @param $method action
+    */
+	
+	public function __call($method, $args) {
+			// If an unmatched 'Action' method was requested, pass on to the
+			// default action method:
+			if ('Action' == substr($method, -6)) {
+				return $this->_redirect('index/error/');
+			}
+			throw new Zend_Controller_Exception('Invalid method called');
+	}
+	
+	public function indexAction() {
+		if(!Zend_Session::namespaceIsset('sess_login')) {
+			$this->_redirect('index');
+		} else {
+			$logSession = new Zend_Session_Namespace('sess_login');
+			if(Zend_Session::namespaceIsset('insert_subaccount_success')) {
+				$this->view->success = 'Account Created successfully';
+				Zend_Session::namespaceUnset('insert_subaccount_success');
+			}
+			if(Zend_Session::namespaceIsset('edit_subaccount_success')) {
+				$this->view->success = 'Account Updated successfully';
+				Zend_Session::namespaceUnset('edit_subaccount_success');
+			}
+			if(Zend_Session::namespaceIsset('delete_success')) {
+				$this->view->success = 'Account disabled successfully';
+				Zend_Session::namespaceUnset('delete_success');
+			}
+			if(Zend_Session::namespaceIsset('active_success')) {
+				$this->view->success = 'Account enabled successfully';
+				Zend_Session::namespaceUnset('active_success');
+			}
+			$delid = base64_decode($this->_getParam('delid'));
+			if(isset($delid) && !empty($delid)) {
+				$deleteStatus = $this->account->disableAccount($delid);
+				if($deleteStatus) {
+					$sessSuccess = new Zend_Session_Namespace('delete_success');
+					$sessSuccess->status = 1;
+				}
+					$this->_redirect('accounts');
+			}
+			$actid = base64_decode($this->_getParam('actid'));
+			if(isset($actid) && !empty($actid)) {
+				$activeStatus = $this->account->enableAccount($actid);
+				if($activeStatus) {
+					$sessSuccess = new Zend_Session_Namespace('active_success');
+					$sessSuccess->status = 1;
+				}
+					$this->_redirect('accounts');
+			}
+			if($this->_request->isPost()) {
+				$postArray  = $this->getRequest()->getPost();
+				if($postArray['action']=='add') {
+					if(!isset($postArray['payment_account'])) {
+						$postArray['payment_account'] = 0;
+					}
+					$result     = $this->account->insertAccount($logSession->id,$postArray);
+					if($result) {
+							$sessSuccess = new Zend_Session_Namespace('insert_subaccount_success');
+							$sessSuccess->status = 1;
+							$this->_redirect('accounts');
+					} else {
+							$this->view->error = 'Account cannot be created. Kindly try again later';
+					}
+				} else if($postArray['action']=='edit') {
+					if(trim($postArray['name'])!='') {
+						$result     = $this->account->editAccount($postArray);
+						if($result) {
+								$sessSuccess = new Zend_Session_Namespace('edit_subaccount_success');
+								$sessSuccess->status = 1;
+								$this->_redirect('accounts');
+						} else {
+								$this->view->error = 'Account cannot be updated now. Kindly try again later';
+						}
+					}  else {
+						$this->_redirect('accounts');
+					}
+				}
+			}
+			$this->view->systemAccount = $this->account->getSystemAccount();
+			$this->view->subAccount    = $this->account->getSubAccount($logSession->id);
+			/*foreach ($this->view->systemAccount as  $sys) {
+				$totalAccounts[$sys['id']]['name'] =  $sys['account'];
+				foreach ($this->view->subAccount as $sub) {
+					if($sys['id'] == $sub['fksys_id']) {
+						$totalAccounts[$sys['id']][$sub['id']] = $sub['name'];
+					} 
+				}
+			}*/
+
+			//echo '<pre>'; print_r($totalAccounts); echo '</pre>';
+		}
+
+	}
+
+
+	public function addAction() {
+		if(!Zend_Session::namespaceIsset('sess_login')) {
+			$this->_redirect('index');
+		} 
+	}
+
+	public function ajaxCallAction() {
+		$this->_helper->getHelper('layout')->disableLayout();
+		$this->_helper->viewRenderer->setNoRender(true);
+		if($this->_request->isXmlHttpRequest()) {
+			if ($this->_request->isPost()) {
+				$ajaxVal = $this->getRequest()->getPost();
+			} else {
+				$action = $this->_getParam('ajaxAction');
+				if($action=='subAccount') {
+					$id     = base64_decode($this->_getParam('id'));
+					$name   = base64_decode($this->_getParam('name'));
+					$status = $this->_getParam('status');
+					$type   = $this->_getParam('type');
+					echo '<div class="form-group">';
+                    echo '<label class="col-lg-3 control-label">Account Name</label>';
+                    echo '<div class="col-lg-5">';
+					echo '<input type="text" name="name" id="name" value="'.$name.'" class="form-control" placeholder="Enter account name">';
+					echo '</div>';
+                    echo '</div>';
+					echo '<input type="hidden" name="id" value="'.$id.'" />';
+					if($status!=0) {
+						$checkStatus = "checked";
+					} else {
+						$checkStatus = '';
+					}
+					if($type!=4 && $type!=5) {
+						echo '<div class="form-group">';
+	                    echo '<label class="col-lg-3 control-label">Payment Account</label>';
+	                    echo '<div class="col-lg-7">';
+	                    echo '<div class="styled-chekbox">';
+						echo '<input type="checkbox" class="icheck-box" '.$checkStatus.' name="payment_account" value="1">';
+						echo '</div>';
+	                    echo '<span class="checkbox-label">I use this account to deposit or spend money (e.g., bank account, credit card, line of credit)</span>';
+	                    echo '</div>';
+	                    echo '</div>';
+                	}
+				}
+				//var_dump($this->getRequest()->getParam('ajaxaction'));
+			}
+		}
+	}
+
+	
+}
+
+?>

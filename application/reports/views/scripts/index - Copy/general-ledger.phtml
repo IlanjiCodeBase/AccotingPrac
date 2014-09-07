@@ -1,0 +1,303 @@
+<?php
+$logSession = new Zend_Session_Namespace('sess_login');
+if(isset($logSession->proxy_name) && !empty($logSession->proxy_name)) {
+  $company_name = ucfirst($logSession->proxy_name);
+} else {
+  $company_name = ucfirst($logSession->name);
+}
+?>
+<div class="main-container">
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+
+      <form class="form-horizontal" id="report-period" method="post">
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">From Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="from_date" id="from_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->from) && !empty($this->from)) { echo $this->from; } else { echo date('01-01-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">To Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="to_date" id="to_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->to) && !empty($this->to)) { echo $this->to; } else { echo date('d-m-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+         <label class="col-lg-5 control-label">&nbsp;</label>
+           <div class="col-lg-3">
+              <div class="form-actions">
+                <button type="submit" id="update" class="btn btn-primary">Update</button>
+              </div>
+           </div>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+    <div class="row">
+      <div class="col-md-2 pull-right">
+          <button class="print btn btn-inverse" type="button" rel="content"><i class="icon-print"></i> Print</button>
+          <button class="btn btn-inverse" type="button"  onclick="tableToExcel('content', 'General Ledger')"><i class="icon-file-excel"></i> Excel</button>
+          <!-- <button class="btn btn-inverse" type="button"  onclick="generatePdf()"><i class="icon-file-pdf"></i> PDF</button> -->
+      </div>
+    </div>
+
+  <div class="row">
+    <div class="col-md-12">
+
+     <h4 align="center"><?php echo $company_name; ?> Company</h4> 
+     <h4 align="center">General Ledger</h4> 
+     <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4> 
+
+     <div class="box-widget">
+        <div class="widget-head clearfix">
+            <span class="h-icon"><i class="icon-power-cord"></i></span>
+            <h4 class="pull-left"><a href="javascript:void(0)" style="color:#fff;">General Ledger</a></h4>
+        </div>
+        <div class="widget-container">
+        <div class="widget-block">
+        <div class="widget-content">
+        <table class="table responsive">
+            <thead>
+              <tr>
+                 <th>
+                    Account
+                 </th>
+                  <th>
+                    Debit
+                 </th>
+                  <th>
+                    Credit
+                 </th>
+                 <th>
+                    Balance
+                 </th>
+              </tr>
+            </thead>
+            <tbody>
+                <?php
+                  $debit_amount = 0.00;
+                  $credit_amount = 0.00;
+                  foreach ($this->generalAccount as $key => $general) {
+                    $i = 0;
+                    $debit_amount += $general['debit_amount'];
+                    $credit_amount += $general['credit_amount'];
+                ?>
+                <tr>
+                  <td>
+                    <?php 
+                       foreach ($this->getAccount as $account) {
+                          if($key==$account['id']) {
+                            $acc_type = $account['account_type'];
+                            echo $account['account_name'];
+                            $i=1;
+                          }
+                       }
+
+                       if($i==0) {
+                          if($key=='accountReceivables') {
+                            $acc_type = 1;
+                            echo "Account Receivables";
+                          } else if($key=='accountPayables') {
+                            $acc_type = 2;
+                            echo "Account Payables";
+                          } else if($key=='gstPayables') {
+                            $acc_type = 3;
+                            echo "GST Payables";
+                          }
+                       }
+                    ?>
+
+                  </td>
+                  <td><?php echo number_format($general['debit_amount'],2,'.',','); ?></td>
+                  <td><?php echo number_format($general['credit_amount'],2,'.',','); ?></td>
+                  <td>
+                    <?php 
+                    if($acc_type == 4) {
+                       $net_movement = $general['debit_amount']-$general['credit_amount']; 
+                    } else {
+                       $net_movement = $general['credit_amount']-$general['debit_amount']; 
+                    }
+                       if($net_movement<0) {
+                          $negative_format = "(".number_format(abs($net_movement),2,'.',',').")";
+                          echo $negative_format;
+                       } else {
+                          echo number_format($net_movement,2,'.',',');
+                       }
+                    ?>
+                  </td>
+                </tr>
+                <?php
+                  }
+                ?>
+                <tr>
+                  <td><strong>Total</strong></td>
+                  <td><strong><?php echo number_format($debit_amount,2,'.',','); ?></strong></td>
+                  <td><strong><?php echo number_format($credit_amount,2,'.',','); ?></strong></td>
+                  <td><strong><?php echo number_format($debit_amount-$credit_amount,2,'.',','); ?></strong></td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        </div>
+        </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<div id="content" style="display:none;">
+     <h4 align="center"><?php echo $company_name; ?> Company</h4> 
+     <h4 align="center">General Ledger</h4> 
+     <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4> 
+
+   <table border="0" align="center" cellpadding="7" cellspacing="7">
+            <thead>
+              <tr>
+                 <th>
+                    Account
+                 </th>
+                  <th>
+                    Debit
+                 </th>
+                  <th>
+                    Credit
+                 </th>
+                 <th>
+                    Balance
+                 </th>
+              </tr>
+            </thead>
+            <tbody>
+                <?php
+                  $debit_amount = 0.00;
+                  $credit_amount = 0.00;
+                  foreach ($this->generalAccount as $key => $general) {
+                    $i = 0;
+                    $debit_amount += $general['debit_amount'];
+                    $credit_amount += $general['credit_amount'];
+                ?>
+                <tr>
+                  <td>
+                    <?php 
+                       foreach ($this->getAccount as $account) {
+                          if($key==$account['id']) {
+                            $acc_type = $account['account_type'];
+                            echo $account['account_name'];
+                            $i=1;
+                          }
+                       }
+
+                       if($i==0) {
+                          if($key=='accountReceivables') {
+                            $acc_type = 1;
+                            echo "Account Receivables";
+                          } else if($key=='accountPayables') {
+                            $acc_type = 2;
+                            echo "Account Payables";
+                          } else if($key=='gstPayables') {
+                            $acc_type = 3;
+                            echo "GST Payables";
+                          }
+                       }
+                    ?>
+
+                  </td>
+                  <td><?php echo number_format($general['debit_amount'],2,'.',','); ?></td>
+                  <td><?php echo number_format($general['credit_amount'],2,'.',','); ?></td>
+                  <td>
+                    <?php 
+                    if($acc_type == 4) {
+                       $net_movement = $general['debit_amount']-$general['credit_amount']; 
+                    } else {
+                       $net_movement = $general['credit_amount']-$general['debit_amount']; 
+                    }
+                       if($net_movement<0) {
+                          $negative_format = "(".number_format(abs($net_movement),2,'.',',').")";
+                          echo $negative_format;
+                       } else {
+                          echo number_format($net_movement,2,'.',',');
+                       }
+                    ?>
+                  </td>
+                </tr>
+                <?php
+                  }
+                ?>
+                <tr>
+                  <td><strong>Total</strong></td>
+                  <td><strong><?php echo number_format($debit_amount,2,'.',','); ?></strong></td>
+                  <td><strong><?php echo number_format($credit_amount,2,'.',','); ?></strong></td>
+                  <td><strong><?php echo number_format($debit_amount-$credit_amount,2,'.',','); ?></strong></td>
+                </tr>
+            </tbody>
+        </table>
+</div>
+
+<script type="text/javascript">
+  (function ($) {
+  var rules = document.styleSheets[document.styleSheets.length-1].cssRules;
+  for (var idx = 0, len = rules.length; idx < len; idx++) {
+    $(rules[idx].selectorText).each(function (i, elem) {
+      elem.style.cssText += rules[idx].style.cssText;
+    });
+  }
+  $('style').remove();
+})(jQuery);
+
+var tableToExcel = (function() {
+  var uri = 'data:application/vnd.ms-excel;base64,'
+    , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+    , base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) }
+    , format = function(s, c) { return s.replace(/{(\w+)}/g, function(m, p) { return c[p]; }) }
+  return function(table, name) {
+    if (!table.nodeType) table = document.getElementById(table)
+    var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML}
+    window.location.href = uri + base64(format(template, ctx))
+  }
+})()
+
+/*function generatePdf() {
+  var doc = new jsPDF();
+  doc.setFont("helvetica");
+  doc.setFontType("bold");
+  doc.setFontSize(12);
+  doc.text(10, 10, '<?php echo $company_name; ?> Company');
+  doc.text(10, 18, 'General Ledger');
+
+  doc.text(10, 26, 'Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?>');
+
+  doc.setFontType("bold");
+  doc.setFontSize(10);
+
+  doc.text(10, 35, 'Account');
+  doc.text(80, 35, 'Debit');
+  doc.text(120, 35, 'Credit');
+  doc.text(160, 35, 'Balance');
+
+  doc.setFontType("normal");
+  doc.setFontSize(10);
+  doc.line(10, 38, 200, 38);
+  var j = 40;
+  for(var i=0;i<=200;i++) {
+    j = j+5;
+    doc.text(10, j, 'Account Receivables');
+    doc.text(80, j, '32,02322');
+    doc.text(120, j, '23,0123');
+    doc.text(160, j, 'sssd'+j+'df');
+  }
+
+  doc.save('Report.pdf');
+}*/
+</script>

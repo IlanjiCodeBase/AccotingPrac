@@ -1,0 +1,193 @@
+
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."business/vendor/"; ?>">Vendor</a></li>
+   <li class="active">View</li>
+</ul>
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+<div class="row">
+<div class="col-md-12">
+                            <div class="square-widget">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-user-4"></i> Vendor Details</h4>
+                                </div>
+                                <div class="widget-container" style="margin-left:50px;">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <strong>Vendor ID</strong> <br/>
+                                        <span><?php echo $this->customer[0]['vendor_id']; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Vendor Name  </strong> <br/>
+                                        <span><?php echo $this->vendor[0]['vendor_name']; ?></span> 
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Company Registration Number </strong> <br/>
+                                        <span><?php echo $this->vendor[0]['company_registration_no']; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Company GST Number </strong> <br/>
+                                        <span><?php echo $this->vendor[0]['company_gst_no']; ?></span>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <strong>Company GST Verified Date </strong><br>
+                                        <span><?php echo date("d-m-Y",strtotime($this->vendor[0]['gst_verified_date'])); ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Address Line 1 </strong><br>
+                                        <span><?php echo $this->vendor[0]['address1']; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Address Line 2 </strong><br>
+                                        <span><?php echo $this->vendor[0]['address2']; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>City </strong><br>
+                                        <span><?php echo $this->vendor[0]['city']; ?></span>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <strong>State </strong><br>
+                                        <span><?php echo $this->vendor[0]['state']; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Country </strong><br>
+                                        <span>
+                                        <?php 
+                                          foreach($this->countries as $key => $countries) { 
+                                              if($key==$this->vendor[0]['country']) {
+                                                  echo $countries;
+                                              }
+                                           } 
+                                        ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <abbr title="Phone"><strong>Phone</strong></abbr><br> <span><?php echo $this->vendor[0]['office_number']; ?> </span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <abbr title="Fax"><strong>Fax</strong></abbr> <br><span><?php echo $this->vendor[0]['fax_number']; ?></span>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <abbr title="Email"><strong>Email</strong></abbr><br/> <span><?php echo $this->vendor[0]['email']; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <abbr title="Website"><strong>Website</strong></abbr><br/> <span><?php echo $this->vendor[0]['website']; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>COA </strong><br/>
+                                        <span><?php if($this->vendor[0]['coa_link']==5) { echo "Trade Creditors"; } else if($this->vendor[0]['coa_link']==6) { echo "Account Payables - Others"; } else {
+                                                  foreach($this->otherPayable as $payable) { 
+                                                      if($payable['id']==$this->vendor[0]['coa_link']) {
+                                                          echo ucfirst($payable['account_name']);
+                                                      }
+                                                   } 
+                                            } ?></span>
+                                    </div>
+                                    <!-- <div class="col-md-3">
+                                        <strong>Other COA </strong><br/>
+                                        <span>
+                                        <?php 
+                                          $payable_link = explode(",", $this->vendor[0]['other_coa_link']);
+                                          foreach($this->otherPayable as $payable) { 
+                                              if(in_array($payable['id'], $payable_link)) {
+                                                  echo ucfirst($payable['account_name']).'<br/>';
+                                              }
+                                           } 
+                                        ?></span>
+                                      </div> -->
+                                </div>
+
+                                      
+                                </div>
+                            </div>
+                        </div>
+
+
+<div class="col-md-12">
+<div class="square-widget">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-phone"></i> Key Contact Persons</h4>
+                                </div>
+                                <div class="widget-container">
+                                    <div class="widget-block">
+                                        <div class="widget-content box-padding">
+                                            <!--box-spacing define 20px padding for all content here-->
+                                            <div class="panel-group" id="accordion">
+                                               
+
+                                                  <?php 
+                                                      $j = 1;
+                                                      foreach ($this->contacts as $contact) {
+                                                  ?>
+                                                  <div class="col-md-6">
+                                                   <div class="panel panel-default">
+                                                    <div class="panel-heading">
+                                                        <h4 class="panel-title">
+                                                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#contact<?php echo $j; ?>">
+                                                                Contact Person <?php echo $j; ?> </a>
+                                                        </h4>
+                                                    </div>
+
+                                                    <div id="contact<?php echo $j; ?>" class="panel-collapse collapse in">
+                                                        <div class="panel-body">
+                                                            <strong>Contact Name : </strong> <span><?php echo $contact['contact_name']; ?></span> <br/>
+                                                            <strong>Designation : </strong> <span><?php echo $contact['designation']; ?></span> <br/>
+                                                            <strong>Office Number : </strong> <span><?php echo $contact['contact_office_number']; ?></span> <br/>
+                                                            <strong>Mobile Number : </strong> <span><?php echo $contact['contact_mobile_number']; ?></span> <br/>
+                                                            <strong>Email : </strong> <span><a href="mailto:<?php echo $contact['contact_email']; ?>"><?php echo $contact['contact_email']; ?></a></span> <br/>
+                                                            <strong>Default Contact : </strong> <span><?php if($contact['default_key_contact']==1) { echo "Yes"; } else if($contact['default_key_contact']==2) { echo "No"; } ?></span> <br/>
+                                                        </div>
+                                                    </div>
+
+                                                    </div>
+
+                                                    </div>
+
+                                                  <?php
+                                                        $j++;
+                                                      }
+                                                  ?>
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+</div>
+
+</div>
+</div>
+

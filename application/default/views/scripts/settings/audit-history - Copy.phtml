@@ -1,0 +1,285 @@
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/settings/"; ?>">Settings</a></li>
+   <li class="active">Audit History</li>
+</ul>
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+   <?php
+    $logSession = new Zend_Session_Namespace('sess_login');
+   ?>
+
+ <div class="row">
+                        <div class="col-md-12">
+                            <div class="box-widget">
+                                <table class="table responsive">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                Updated On
+                                            </th>
+                                            <th>
+                                                User
+                                            </th>
+                                            <th>
+                                                Event
+                                            </th>
+                                            <th>
+                                                Name
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php
+                                      foreach($this->audit as $result) {
+                                        if($result['source']==$this->type && $result['reference']==$this->id && $this->type!=12 && $this->type!=13) { 
+                                    ?>
+                                      <tr>
+                                          <td><?php echo date('d-m-Y H:i:s',strtotime($result['timestamp'])); ?></td>
+                                          <td>
+                                          <?php
+                                            foreach ($this->users as $user) {
+                                              if($user['id']==$result['fkuser_id']) {
+                                                if($user['account_type']==0 || $user['account_type']==1) {
+                                                  $account_type = 'Developer';
+                                                } else if($user['account_type']==2) {
+                                                  $account_type = 'Super User';
+                                                } else if($user['account_type']==3) {
+                                                  $account_type = 'Manager';
+                                                } else if($user['account_type']==4) {
+                                                  $account_type = 'User';
+                                                } else if($user['account_type']==5) {
+                                                  $account_type = 'Viewer';
+                                                }
+                                                echo $user['username']." (".$account_type.")";
+                                              }
+                                            }
+                                          ?>
+                                          </td>
+                                          <?php 
+                                            if($result['source']==1) {
+                                              if($result['event']==1) {
+                                                echo '<td>Added : <a href="'.$this->sitePath."transaction/income/view/id/".base64_encode($result['reference']).'" target="_blank">Income</a></td>';
+                                              } else if($result['event']==2) {
+                                                echo '<td>Edited : <a href="'.$this->sitePath."transaction/income/view/id/".base64_encode($result['reference']).'" target="_blank">Income</a></td>';
+                                              } else if($result['event']==3) {
+                                                echo '<td>Deleted : Income</td>';
+                                              } else if($result['event']==6) {
+                                                echo '<td>Verified : <a href="'.$this->sitePath."transaction/income/view/id/".base64_encode($result['reference']).'" target="_blank">Income Transaction</a></td>';
+                                              } else if($result['event']==7) {
+                                                echo '<td>Unverified : <a href="'.$this->sitePath."transaction/income/view/id/".base64_encode($result['reference']).'" target="_blank">Income Transaction</a></td>';
+                                              }  else if($result['event']==8) {
+                                                echo '<td>Draft : <a href="'.$this->sitePath."transaction/income/view/id/".base64_encode($result['reference']).'" target="_blank">Income Transaction</a></td>';
+                                              } 
+                                              echo '<td>'.ucfirst($result['name_number']).'</td>';
+                                            } else if($result['source']==2) {
+                                              if($result['event']==1) {
+                                                echo '<td>Added : <a href="'.$this->sitePath."transaction/expense/view/id/".base64_encode($result['reference']).'" target="_blank">Expense</a></td>';
+                                              } else if($result['event']==2) {
+                                                echo '<td>Edited : <a href="'.$this->sitePath."transaction/expense/view/id/".base64_encode($result['reference']).'" target="_blank">Expense</a></td>';
+                                              } else if($result['event']==3) {
+                                                echo '<td>Deleted : Expense</td>';
+                                              } else if($result['event']==6) {
+                                                echo '<td>Verified : <a href="'.$this->sitePath."transaction/expense/view/id/".base64_encode($result['reference']).'" target="_blank">Expense Transaction</a></td>';
+                                              } else if($result['event']==7) {
+                                                echo '<td>Unverified : <a href="'.$this->sitePath."transaction/expense/view/id/".base64_encode($result['reference']).'" target="_blank">Expense Transaction</a></td>';
+                                              }  else if($result['event']==8) {
+                                                echo '<td>Draft : <a href="'.$this->sitePath."transaction/expense/view/id/".base64_encode($result['reference']).'" target="_blank">Expense Transaction</a></td>';
+                                              } 
+                                              echo '<td>'.ucfirst($result['name_number']).'</td>';
+                                            } else if($result['source']==3) {
+                                              if($result['event']==1) {
+                                                echo '<td>Added : <a href="'.$this->sitePath."transaction/invoice/view/id/".base64_encode($result['reference']).'" target="_blank">Invoice</a></td>';
+                                              } else if($result['event']==2) {
+                                                echo '<td>Edited : <a href="'.$this->sitePath."transaction/invoice/view/id/".base64_encode($result['reference']).'" target="_blank">Invoice</a></td>';
+                                              } else if($result['event']==3) {
+                                                echo '<td>Deleted : Invoice</td>';
+                                              } else if($result['event']==6) {
+                                                echo '<td>Verified : <a href="'.$this->sitePath."transaction/invoice/view/id/".base64_encode($result['reference']).'" target="_blank">Invoice Transaction</a></td>';
+                                              } else if($result['event']==7) {
+                                                echo '<td>Unverified : <a href="'.$this->sitePath."transaction/invoice/view/id/".base64_encode($result['reference']).'" target="_blank">Invoice Transaction</a></td>';
+                                              }  else if($result['event']==8) {
+                                                echo '<td>Draft : <a href="'.$this->sitePath."transaction/invoice/view/id/".base64_encode($result['reference']).'" target="_blank">Invoice Transaction</a></td>';
+                                              } 
+                                              echo '<td>'.ucfirst($result['name_number']).'</td>';
+                                            } else if($result['source']==4) {
+                                              if($result['event']==1) {
+                                                echo '<td>Added : <a href="'.$this->sitePath."transaction/credit/view/id/".base64_encode($result['reference']).'" target="_blank">Credit Note</a></td>';
+                                              } else if($result['event']==2) {
+                                                echo '<td>Edited : <a href="'.$this->sitePath."transaction/credit/view/id/".base64_encode($result['reference']).'" target="_blank">Credit Note</a></td>';
+                                              } else if($result['event']==3) {
+                                                echo '<td>Deleted : Credit Note</td>';
+                                              } else if($result['event']==6) {
+                                                echo '<td>Verified : <a href="'.$this->sitePath."transaction/credit/view/id/".base64_encode($result['reference']).'" target="_blank">Credit Note Transaction</a></td>';
+                                              } else if($result['event']==7) {
+                                                echo '<td>Unverified : <a href="'.$this->sitePath."transaction/credit/view/id/".base64_encode($result['reference']).'" target="_blank">Credit Note Transaction</a></td>';
+                                              }  else if($result['event']==8) {
+                                                echo '<td>Draft : <a href="'.$this->sitePath."transaction/credit/view/id/".base64_encode($result['reference']).'" target="_blank">Credit Note Transaction</a></td>';
+                                              } 
+                                              echo '<td>'.ucfirst($result['name_number']).'</td>';
+                                            } else if($result['source']==5) {
+                                              if($result['event']==1) {
+                                                echo '<td>Added : <a href="'.$this->sitePath."transaction/journal/view/id/".base64_encode($result['reference']).'" target="_blank">Journal Entry</a></td>';
+                                              } else if($result['event']==2) {
+                                                echo '<td>Edited : <a href="'.$this->sitePath."transaction/journal/view/id/".base64_encode($result['reference']).'" target="_blank">Journal Entry</a></td>';
+                                              } else if($result['event']==3) {
+                                                echo '<td>Deleted : Journal Entry</td>';
+                                              } else if($result['event']==6) {
+                                                echo '<td>Verified : <a href="'.$this->sitePath."transaction/journal/view/id/".base64_encode($result['reference']).'" target="_blank">Journal Entry Transaction</a></td>';
+                                              } else if($result['event']==7) {
+                                                echo '<td>Unverified : <a href="'.$this->sitePath."transaction/journal/view/id/".base64_encode($result['reference']).'" target="_blank">Journal Entry Transaction</a></td>';
+                                              }  else if($result['event']==8) {
+                                                echo '<td>Draft : <a href="'.$this->sitePath."transaction/journal/view/id/".base64_encode($result['reference']).'" target="_blank">Journal Entry Transaction</a></td>';
+                                              } 
+                                              echo '<td></td>';
+                                            } else if($result['source']==6) {
+                                              if($result['event']==1) {
+                                                echo '<td>Added : <a href="'.$this->sitePath."business/customer/view/id/".base64_encode($result['reference']).'" target="_blank">Customer</a></td>';
+                                              } else if($result['event']==2) {
+                                                echo '<td>Edited : <a href="'.$this->sitePath."business/customer/view/id/".base64_encode($result['reference']).'" target="_blank">Customer</a></td>';
+                                              } else if($result['event']==3) {
+                                                echo '<td>Deleted : Customer</td>';
+                                              }
+                                              echo '<td>'.ucfirst($result['name_number']).'</td>';
+                                            } else if($result['source']==7) {
+                                              if($result['event']==1) {
+                                                echo '<td>Added : <a href="'.$this->sitePath."business/vendor/view/id/".base64_encode($result['reference']).'" target="_blank">Vendor</a></td>';
+                                              } else if($result['event']==2) {
+                                                echo '<td>Edited : <a href="'.$this->sitePath."business/vendor/view/id/".base64_encode($result['reference']).'" target="_blank">Vendor</a></td>';
+                                              } else if($result['event']==3) {
+                                                echo '<td>Deleted : Vendor</td>';
+                                              }
+                                              echo '<td>'.ucfirst($result['name_number']).'</td>';
+                                            } else if($result['source']==8) {
+                                              if($result['event']==1) {
+                                                echo '<td>Added : <a href="'.$this->sitePath."settings/account".'" target="_blank">Account</a></td>';
+                                              } else if($result['event']==2) {
+                                                echo '<td>Edited : <a href="'.$this->sitePath."settings/account".'" target="_blank">Account</a></td>';
+                                              } else if($result['event']==3) {
+                                                echo '<td>Deleted : Account</td>';
+                                              }
+                                              echo '<td>'.ucfirst($result['name_number']).'</td>';
+                                            } else if($result['source']==9) {
+                                              if($result['event']==1) {
+                                                echo '<td>Added : <a href="'.$this->sitePath."settings/edit-tax/id/".base64_encode($result['reference']).'" target="_blank">Tax</a></td>';
+                                              } else if($result['event']==2) {
+                                                echo '<td>Edited : <a href="'.$this->sitePath."settings/edit-tax/id/".base64_encode($result['reference']).'" target="_blank">Tax</a></td>';
+                                              } else if($result['event']==3) {
+                                                echo '<td>Deleted : Tax</td>';
+                                              }
+                                               else if($result['event']==4) {
+                                                echo '<td><a href="'.$this->sitePath."settings/edit-tax/id/".base64_encode($result['reference']).'" target="_blank">Tax set as active</a></td>';
+                                              }
+                                               else if($result['event']==5) {
+                                                echo '<td><a href="'.$this->sitePath."settings/edit-tax/id/".base64_encode($result['reference']).'" target="_blank">Tax set as inactive</a></td>';
+                                              }
+                                              echo '<td>'.ucfirst($result['name_number']).'</td>';
+                                            } else if($result['source']==10) {
+                                              if($result['event']==1) {
+                                                echo '<td>Added : <a href="'.$this->sitePath."settings/edit-product/id/".base64_encode($result['reference']).'" target="_blank">Product</a></td>';
+                                              } else if($result['event']==2) {
+                                                echo '<td>Edited : <a href="'.$this->sitePath."settings/edit-product/id/".base64_encode($result['reference']).'" target="_blank">Product</a></td>';
+                                              } else if($result['event']==3) {
+                                                echo '<td>Deleted : Product</td>';
+                                              }
+                                              echo '<td>'.ucfirst($result['name_number']).'</td>';
+                                            } else if($result['source']==11) {
+                                              if($result['event']==1) {
+                                                if($result['name_number']=='Income') {
+                                                   echo '<td>Added Payment : <a href="'.$this->sitePath."transaction/income/view/id/".base64_encode($result['reference']).'" target="_blank">Income</a></td>';
+                                                } else if($result['name_number']=='Expense') {
+                                                   echo '<td>Added Payment : <a href="'.$this->sitePath."transaction/expense/view/id/".base64_encode($result['reference']).'" target="_blank">Expense</a></td>';
+                                                } else if($result['name_number']=='Invoice') {
+                                                   echo '<td>Added Payment : <a href="'.$this->sitePath."transaction/invoice/view/id/".base64_encode($result['reference']).'" target="_blank">Invoice</a></td>';
+                                                }
+
+                                                echo '<td></td>';
+                                              } else if($result['event']==2) {
+                                                if($result['name_number']=='Income') {
+                                                   echo '<td>Updated Payment : <a href="'.$this->sitePath."transaction/income/view/id/".base64_encode($result['reference']).'" target="_blank">Income</a></td>';
+                                                } else if($result['name_number']=='Expense') {
+                                                   echo '<td>Updated Payment : <a href="'.$this->sitePath."transaction/expense/view/id/".base64_encode($result['reference']).'" target="_blank">Expense</a></td>';
+                                                } else if($result['name_number']=='Invoice') {
+                                                   echo '<td>Updated Payment : <a href="'.$this->sitePath."transaction/invoice/view/id/".base64_encode($result['reference']).'" target="_blank">Invoice</a></td>';
+                                                }
+                                                echo '<td></td>';
+                                              } else if($result['event']==3) {
+                                                if($result['name_number']=='Income') {
+                                                   echo '<td>Deleted Payment : Income</td>';
+                                                } else if($result['name_number']=='Expense') {
+                                                   echo '<td>Deleted Payment : Expense</td>';
+                                                } else if($result['name_number']=='Invoice') {
+                                                   echo '<td>Deleted Payment : Invoice</td>';
+                                                }
+                                                echo '<td></td>';
+                                              }
+                                            }  else if($result['source']==12) {
+                                              echo '<td>Logged In</td>';
+                                              echo '<td></td>';
+                                            }   else if($result['source']==13) {
+                                              echo '<td>Logged Out</td>';
+                                              echo '<td></td>';
+                                            } 
+                                          ?>
+                                      </tr>
+                                    <?php
+                                        } else if(($result['source']==12 || $result['source']==13) && ($this->type==12 || $this->type==13) && $result['fkuser_id']==$this->id) {
+                                    ?>
+                                    <tr>
+                                     <td><?php echo date('d-m-Y H:i:s',strtotime($result['timestamp'])); ?></td>
+                                          <td>
+                                          <?php
+                                            foreach ($this->users as $user) {
+                                              if($user['id']==$result['fkuser_id']) {
+                                                if($user['account_type']==0 || $user['account_type']==1) {
+                                                  $account_type = 'Developer';
+                                                } else if($user['account_type']==2) {
+                                                  $account_type = 'Super User';
+                                                } else if($user['account_type']==3) {
+                                                  $account_type = 'Manager';
+                                                } else if($user['account_type']==4) {
+                                                  $account_type = 'User';
+                                                } else if($user['account_type']==5) {
+                                                  $account_type = 'Viewer';
+                                                }
+                                                echo $user['username']." (".$account_type.")";
+                                              }
+                                            }
+                                          ?>
+                                          </td>
+                                          <?php 
+                                            if($result['source']==12) {
+                                              echo '<td>Logged In</td>';
+                                              echo '<td></td>';
+                                            }   else if($result['source']==13) {
+                                              echo '<td>Logged Out</td>';
+                                              echo '<td></td>';
+                                            } 
+                                          }
+                                       ?>
+                                       </tr>
+                                    <?php
+                                      }
+                                    ?>                                  
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>

@@ -1,0 +1,1541 @@
+<?php
+$logSession = new Zend_Session_Namespace('sess_login');
+if(isset($logSession->proxy_name) && !empty($logSession->proxy_name)) {
+  $company_name = ucfirst($logSession->proxy_name);
+} else {
+  $company_name = ucfirst($logSession->name);
+}
+?>
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."reports"; ?>">Reports</a></li>
+   <li class="active">Income Statement</li>
+</ul>
+  <div class="row">
+    <div class="col-md-12">
+
+      <form class="form-horizontal" id="report-period" method="post">
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">From Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="from_date" id="from_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->from) && !empty($this->from)) { echo $this->from; } else { echo date('01-01-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">To Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="to_date" id="to_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->to) && !empty($this->to)) { echo $this->to; } else { echo date('d-m-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+         <label class="col-lg-5 control-label">&nbsp;</label>
+           <div class="col-lg-3">
+              <div class="form-actions">
+                <button type="submit" id="update" class="btn btn-primary">Update</button>
+              </div>
+           </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+    <div class="row">
+      <div class="col-md-3 col-md-offset-2 pull-right">
+          <button class="print btn btn-inverse" type="button" rel="content"><i class="icon-print"></i> Print</button>
+          <button class="btn btn-inverse" type="button"  onclick="tableToExcel('content', 'Income Statement')"><i class="icon-file-excel"></i> Excel</button>
+      </div>
+    </div>
+
+
+  <div class="row">
+    <div class="col-md-12">
+           <h4 align="center"><?php echo $company_name; ?> </h4> 
+           <h4 align="center">Income Statement</h4> 
+           <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4> 
+    </div>
+    <div class="col-md-10 col-md-offset-1">
+     <div class="box-widget" style="margin-bottom:0px;">
+        <div class="widget-head clearfix">
+            <span class="h-icon"><i class="icon-power-cord"></i></span>
+            <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(1);" style="color:#fff;">Income Statement</a></h4>
+        </div>
+        <div class="widget-container">
+        <div class="widget-block">
+        <div class="widget-content">
+        <table class="table responsive"> 
+            <thead>
+              <tr>
+                 <th>
+                    Particulars
+                 </th>
+                 <th style="text-align:right;">
+                    Amount
+                 </th>
+              </tr>
+            </thead>
+            <tbody>
+             
+                                            <?php 
+                                                $total_revenue   = 0.00;
+                                                $discamountgiven = 0.00;
+                                                $exchange        = 0.00;
+                                                $grossProfit     = 0.00;
+                                                $revenueTotal    = 0.00;
+                                                $goodsTotal      = 0.00;
+                                                $otherIncome     = 0.00;
+                                                $otherExpense    = 0.00;
+                                                $completedCoa    = array();
+                                                $l = 3;
+                                             ?>
+                                             
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->income as $levelOne => $listOne) {
+                                                        if($levelOne=='Revenue') {
+                                                        $total_l1 = 0.00;
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account income_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        $total_l2 = 0.00;
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account income_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(5,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                         <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->incomeCoa as $incomeCoa) {
+                                                        if($incomeCoa['account_type'] == 3 && $incomeCoa['level1']==$l2 && $incomeCoa['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        
+                                                         if(isset($this->incomeStatement[$incomeCoa['id']]) && !empty($this->incomeStatement[$incomeCoa['id']]) && !in_array($incomeCoa['id'], $completedCoa)) {
+                                                                $completedCoa[] = $incomeCoa['id'];
+                                                                $active[] = "income_".$l2."_".$l3;
+                                                                $debit_amount = $this->incomeStatement[$incomeCoa['id']]['debit'];
+                                                                $credit_amount = $this->incomeStatement[$incomeCoa['id']]['credit'];
+                                                                $amount = ($credit_amount - $debit_amount);
+                                                                $total_l2      += $amount;
+                                                                $total_l1      += $amount;
+                                                                $total_revenue += $amount;
+                                                                $pay_accounts = "pay_accounts";
+                                                       
+                                            ?>
+                                                 <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $incomeCoa['account_name']; ?></span></td>
+                                                        <td style="text-align:right;">
+                                                            <?php 
+
+                                                          if($amount<0) {
+                                                            $negative_format = "(".number_format(abs($amount),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($amount,2,'.',',');
+                                                           }
+
+                                                            ?>
+                                                        </td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                      }
+                                                        }
+                                                    }
+                                                }
+                                            ?>
+
+
+                                             <?php 
+                                              if($total_l2!=0) {
+                                            ?>
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:20px;"><?php echo "Total ".$levelTwo; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                       if($total_l2<0) {
+                                                            $negative_format = "(".number_format(abs($total_l2),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($total_l2,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            <?php
+                                              }
+                                            ?>
+
+
+                                            <?php
+                                                    $l3++;
+                                                }
+                                            ?>
+
+                                            <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo "Discounts Given"; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                      $debit_amount = $this->incomeStatement[7]['debit'];
+                                                      $credit_amount = $this->incomeStatement[7]['credit'];
+                                                      $discamountgiven = ($credit_amount - $debit_amount);
+                                                      $revenueTotal += $discamountgiven;
+                                                       if($discamountgiven<0) {
+                                                            $negative_format = "(".number_format(abs($discamountgiven),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($discamountgiven,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+
+                                            <?php 
+                                              if($total_l1!=0) {
+                                            ?>
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:10px;"><?php echo "Total ".$levelOne; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+                                                       $revenueTotal += $total_l1;
+                                                       if($revenueTotal<0) {
+                                                            $negative_format = "(".number_format(abs($revenueTotal),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($revenueTotal,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            <?php
+                                              }
+                                            ?>
+
+                                            <?php
+                                                    $l2++;
+                                                  }
+                                                }
+                                             ?>
+
+
+                              <?php 
+                                                $total_goods   = 0.00;
+                                                $discamountreceived = 0.00;
+                                                $exchange = 0.00;
+                                                $l = 4;
+                                             ?>
+                                             
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->expense as $levelOne => $listOne) {
+                                                        if($levelOne=='Cost of Goods') {
+                                                        $total_l1 = 0.00;
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account expense_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        $total_l2 = 0.00;
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account expense_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(5,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                         <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->expenseCoa as $expenseCoa) {
+                                                        if($expenseCoa['account_type'] == 4 && $expenseCoa['level1']==$l2 && $expenseCoa['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        
+                                                         if(isset($this->incomeStatement[$expenseCoa['id']]) && !empty($this->incomeStatement[$expenseCoa['id']]) && !in_array($expenseCoa['id'], $completedCoa)) {
+                                                                $completedCoa[] = $expenseCoa['id'];
+                                                                $active[] = "expense_".$l2."_".$l3;
+                                                                $debit_amount = $this->incomeStatement[$expenseCoa['id']]['debit'];
+                                                                $credit_amount = $this->incomeStatement[$expenseCoa['id']]['credit'];
+                                                                $amount = ($debit_amount - $credit_amount);
+                                                                $total_l2      += $amount;
+                                                                $total_l1      += $amount;
+                                                                $total_goods   += $amount;
+                                                                $pay_accounts = "pay_accounts";
+                                                       
+                                            ?>
+                                                 <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $expenseCoa['account_name']; ?></span></td>
+                                                        <td style="text-align:right;">
+                                                            <?php 
+
+                                                          if($amount<0) {
+                                                            $negative_format = "(".number_format(abs($amount),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($amount,2,'.',',');
+                                                           }
+
+                                                            ?>
+                                                        </td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                      }
+                                                        }
+                                                    }
+                                                }
+                                            ?>
+
+
+                                             <?php 
+                                              if($total_l2!=0) {
+                                            ?>
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:20px;"><?php echo "Total ".$levelTwo; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                       if($total_l2<0) {
+                                                            $negative_format = "(".number_format(abs($total_l2),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($total_l2,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            <?php
+                                              }
+                                            ?>
+
+
+                                            <?php
+                                                    $l3++;
+                                                }
+                                            ?>
+
+                                            <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo "Discounts Received"; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                      $debit_amount = $this->incomeStatement[8]['debit'];
+                                                      $credit_amount = $this->incomeStatement[8]['credit'];
+                                                      $discamountreceived = ($debit_amount - $credit_amount);
+                                                       $goodsTotal += $discamountreceived;
+                                                       if($discamountreceived<0) {
+                                                            $negative_format = "(".number_format(abs($discamountreceived),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($discamountreceived,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+
+
+
+
+                                            <?php 
+                                              if($total_l1!=0) {
+                                            ?>
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:10px;"><?php echo "Total ".$levelOne; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+                                                       $goodsTotal += $total_l1+$exchange;
+                                                       if($goodsTotal<0) {
+                                                            $negative_format = "(".number_format(abs($goodsTotal),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($goodsTotal,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            <?php
+                                              }
+                                            ?>
+
+                                            <?php
+                                                    $l2++;
+                                                  }
+                                                }
+                                             ?>
+
+                                       <tr>
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:10px;"><?php echo "Gross Profit "; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+                                                       $grossProfit = $revenueTotal-$goodsTotal;
+                                                       if($grossProfit<0) {
+                                                            $negative_format = "(".number_format(abs($grossProfit),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($grossProfit,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+
+
+
+
+
+                                 <?php
+                                                      $l2 = "2";
+                                                      foreach ($this->income as $levelOne => $listOne) {
+                                                        if($levelOne!='Revenue') {
+                                                        $total_l1 = 0.00;
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account income_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        $total_l2 = 0.00;
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account income_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(5,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                         <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->incomeCoa as $incomeCoa) {
+                                                        if($incomeCoa['account_type'] == 3 && $incomeCoa['level1']==$l2 && $incomeCoa['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        
+                                                         if(isset($this->incomeStatement[$incomeCoa['id']]) && !empty($this->incomeStatement[$incomeCoa['id']]) && !in_array($incomeCoa['id'], $completedCoa)) {
+                                                                $completedCoa[] = $incomeCoa['id'];
+                                                                $active[] = "income_".$l2."_".$l3;
+                                                                $debit_amount = $this->incomeStatement[$incomeCoa['id']]['debit'];
+                                                                $credit_amount = $this->incomeStatement[$incomeCoa['id']]['credit'];
+                                                                $amount = ($credit_amount - $debit_amount);
+                                                                $total_l2      += $amount;
+                                                                $total_l1      += $amount;
+                                                                $otherIncome   += $amount;
+                                                                $pay_accounts = "pay_accounts";
+                                                       
+                                            ?>
+                                                 <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $incomeCoa['account_name']; ?></span></td>
+                                                        <td style="text-align:right;">
+                                                            <?php 
+
+                                                          if($amount<0) {
+                                                            $negative_format = "(".number_format(abs($amount),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($amount,2,'.',',');
+                                                           }
+
+                                                            ?>
+                                                        </td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                      }
+                                                        }
+                                                    }
+                                                }
+                                            ?>
+
+
+                                             <?php 
+                                              if($total_l2!=0) {
+                                            ?>
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:20px;"><?php echo "Total ".$levelTwo; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                       if($total_l2<0) {
+                                                            $negative_format = "(".number_format(abs($total_l2),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($total_l2,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            <?php
+                                              }
+                                            ?>
+
+
+                                            <?php
+                                                    $l3++;
+                                                }
+                                            ?>
+
+                                            
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:10px;"><?php echo "Total ".$levelOne; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+                                                       $total = $total_l1;
+                                                       if($total<0) {
+                                                            $negative_format = "(".number_format(abs($total),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($total,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            
+
+                                            <?php
+                                                    $l2++;
+                                                  }
+                                                }
+                                             ?>
+
+
+
+
+                              <?php 
+                                                $l = 4;
+                                             ?>
+                                             
+                                                   <?php
+                                                      $l2 = "2";
+                                                      foreach ($this->expense as $levelOne => $listOne) {
+                                                        if($levelOne!='Cost of Goods') {
+                                                        $total_l1 = 0.00;
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account expense_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        $total_l2 = 0.00;
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account expense_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(5,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                         <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->expenseCoa as $expenseCoa) {
+                                                        if($expenseCoa['account_type'] == 4 && $expenseCoa['level1']==$l2 && $expenseCoa['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        
+                                                         if(isset($this->incomeStatement[$expenseCoa['id']]) && !empty($this->incomeStatement[$expenseCoa['id']]) && !in_array($expenseCoa['id'], $completedCoa)) {
+                                                                $completedCoa[] = $expenseCoa['id'];
+                                                                $active[] = "expense_".$l2."_".$l3;
+                                                                $debit_amount = $this->incomeStatement[$expenseCoa['id']]['debit'];
+                                                                $credit_amount = $this->incomeStatement[$expenseCoa['id']]['credit'];
+                                                                $amount = ($debit_amount - $credit_amount);
+                                                                $total_l2      += $amount;
+                                                                $total_l1      += $amount;
+                                                                $otherExpense  += $amount;
+                                                                $pay_accounts = "pay_accounts";
+                                                       
+                                            ?>
+                                                 <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $expenseCoa['account_name']; ?></span></td>
+                                                        <td style="text-align:right;">
+                                                            <?php 
+
+                                                          if($amount<0) {
+                                                            $negative_format = "(".number_format(abs($amount),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($amount,2,'.',',');
+                                                           }
+
+                                                            ?>
+                                                        </td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                      }
+                                                        }
+                                                    }
+                                                }
+                                            ?>
+
+
+                                             <?php 
+                                              if($total_l2!=0) {
+                                            ?>
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:20px;"><?php echo "Total ".$levelTwo; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                       if($total_l2<0) {
+                                                            $negative_format = "(".number_format(abs($total_l2),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($total_l2,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            <?php
+                                              }
+                                            ?>
+
+
+                                            <?php
+                                                    $l3++;
+                                                }
+                                            ?>
+
+                                            <?php
+
+                                            if($levelOne=='Non-Operating Expenses') {
+
+                                            ?>
+
+                                               <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo "Foreign Exchange Gain/(Loss)"; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                      /*$debit_amount = $this->incomeStatement[2]['debit'];
+                                                      $credit_amount = $this->incomeStatement[2]['credit'];
+                                                      $exchange = ($debit_amount - $credit_amount);*/
+                                                      $exchange = $this->foreignCurrency;
+                                                      $otherExpense  += $exchange;
+                                                      $active[] = "expense_".$l2."_".$l3;
+                                                       if($exchange<0) {
+                                                            $negative_format = "(".number_format(abs($exchange),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($exchange,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+
+
+                                              <?php
+
+                                                  }
+
+                                              ?>
+
+                                          
+
+                                            
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:10px;"><?php echo "Total ".$levelOne; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+                                                       $total = $total_l1+$exchange;
+                                                       if($total<0) {
+                                                            $negative_format = "(".number_format(abs($total),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($total,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            
+                                            <?php
+                                                    $l2++;
+                                                  }
+                                                }
+                                             ?>
+
+                                       <tr>
+
+                                            <tr>
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:10px;"><?php echo "Total Profit "; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+                                                       $otherProfit = ($grossProfit+$otherIncome-$otherExpense);
+                                                       if($otherProfit<0) {
+                                                            $negative_format = "(".number_format(abs($otherProfit),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($otherProfit,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+
+            </tbody>
+        </table>
+        </div>
+        </div>
+        </div>
+        </div>
+    </div>
+
+    
+
+
+  </div>
+
+</div>
+</div>
+
+
+ <div class="row" id="content" style="display:none;">
+    <div class="col-md-12">
+           <h4 align="center"><?php echo $company_name; ?> </h4> 
+           <h4 align="center">Income Statement</h4> 
+           <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4> 
+    </div>
+    <div class="col-md-10 col-md-offset-1">
+     <div class="box-widget" style="margin-bottom:0px;">
+        <div class="widget-head clearfix">
+            <span class="h-icon"><i class="icon-power-cord"></i></span>
+           <!--  <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(1);" style="color:#fff;">Income Statement</a></h4> -->
+        </div>
+        <div class="widget-container">
+        <div class="widget-block">
+        <div class="widget-content">
+        <table class="table responsive" align="center" width="70%" cellpadding="5" cellspacing="5" style="width:70%;"> 
+            <thead>
+              <tr>
+                 <th>
+                    Particulars
+                 </th>
+                 <th style="text-align:right;">
+                    Amount
+                 </th>
+              </tr>
+            </thead>
+           <tbody>
+             
+                                            <?php 
+                                                $total_revenue   = 0.00;
+                                                $discamountgiven = 0.00;
+                                                $exchange        = 0.00;
+                                                $grossProfit     = 0.00;
+                                                $revenueTotal    = 0.00;
+                                                $goodsTotal      = 0.00;
+                                                $otherIncome     = 0.00;
+                                                $otherExpense    = 0.00;
+                                                $completedCoa    = array();
+                                                $l = 3;
+                                             ?>
+                                             
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->income as $levelOne => $listOne) {
+                                                        if($levelOne=='Revenue') {
+                                                        $total_l1 = 0.00;
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account income_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        $total_l2 = 0.00;
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account income_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(5,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                         <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->incomeCoa as $incomeCoa) {
+                                                        if($incomeCoa['account_type'] == 3 && $incomeCoa['level1']==$l2 && $incomeCoa['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        
+                                                         if(isset($this->incomeStatement[$incomeCoa['id']]) && !empty($this->incomeStatement[$incomeCoa['id']]) && !in_array($incomeCoa['id'], $completedCoa)) {
+                                                                $completedCoa[] = $incomeCoa['id'];
+                                                                $active[] = "income_".$l2."_".$l3;
+                                                                $debit_amount = $this->incomeStatement[$incomeCoa['id']]['debit'];
+                                                                $credit_amount = $this->incomeStatement[$incomeCoa['id']]['credit'];
+                                                                $amount = ($credit_amount - $debit_amount);
+                                                                $total_l2      += $amount;
+                                                                $total_l1      += $amount;
+                                                                $total_revenue += $amount;
+                                                                $pay_accounts = "pay_accounts";
+                                                       
+                                            ?>
+                                                 <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $incomeCoa['account_name']; ?></span></td>
+                                                        <td style="text-align:right;">
+                                                            <?php 
+
+                                                          if($amount<0) {
+                                                            $negative_format = "(".number_format(abs($amount),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($amount,2,'.',',');
+                                                           }
+
+                                                            ?>
+                                                        </td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                      }
+                                                        }
+                                                    }
+                                                }
+                                            ?>
+
+
+                                             <?php 
+                                              if($total_l2!=0) {
+                                            ?>
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:20px;"><?php echo "Total ".$levelTwo; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                       if($total_l2<0) {
+                                                            $negative_format = "(".number_format(abs($total_l2),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($total_l2,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            <?php
+                                              }
+                                            ?>
+
+
+                                            <?php
+                                                    $l3++;
+                                                }
+                                            ?>
+
+                                            <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo "Discounts Given"; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                      $debit_amount = $this->incomeStatement[7]['debit'];
+                                                      $credit_amount = $this->incomeStatement[7]['credit'];
+                                                      $discamountgiven = ($credit_amount - $debit_amount);
+                                                      $revenueTotal += $discamountgiven;
+                                                       if($discamountgiven<0) {
+                                                            $negative_format = "(".number_format(abs($discamountgiven),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($discamountgiven,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+
+                                            <?php 
+                                              if($total_l1!=0) {
+                                            ?>
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:10px;"><?php echo "Total ".$levelOne; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+                                                       $revenueTotal += $total_l1;
+                                                       if($revenueTotal<0) {
+                                                            $negative_format = "(".number_format(abs($revenueTotal),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($revenueTotal,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            <?php
+                                              }
+                                            ?>
+
+                                            <?php
+                                                    $l2++;
+                                                  }
+                                                }
+                                             ?>
+
+
+                              <?php 
+                                                $total_goods   = 0.00;
+                                                $discamountreceived = 0.00;
+                                                $exchange = 0.00;
+                                                $l = 4;
+                                             ?>
+                                             
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->expense as $levelOne => $listOne) {
+                                                        if($levelOne=='Cost of Goods') {
+                                                        $total_l1 = 0.00;
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account expense_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        $total_l2 = 0.00;
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account expense_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(5,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                         <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->expenseCoa as $expenseCoa) {
+                                                        if($expenseCoa['account_type'] == 4 && $expenseCoa['level1']==$l2 && $expenseCoa['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        
+                                                         if(isset($this->incomeStatement[$expenseCoa['id']]) && !empty($this->incomeStatement[$expenseCoa['id']]) && !in_array($expenseCoa['id'], $completedCoa)) {
+                                                                $completedCoa[] = $expenseCoa['id'];
+                                                                $active[] = "expense_".$l2."_".$l3;
+                                                                $debit_amount = $this->incomeStatement[$expenseCoa['id']]['debit'];
+                                                                $credit_amount = $this->incomeStatement[$expenseCoa['id']]['credit'];
+                                                                $amount = ($debit_amount - $credit_amount);
+                                                                $total_l2      += $amount;
+                                                                $total_l1      += $amount;
+                                                                $total_goods   += $amount;
+                                                                $pay_accounts = "pay_accounts";
+                                                       
+                                            ?>
+                                                 <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $expenseCoa['account_name']; ?></span></td>
+                                                        <td style="text-align:right;">
+                                                            <?php 
+
+                                                          if($amount<0) {
+                                                            $negative_format = "(".number_format(abs($amount),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($amount,2,'.',',');
+                                                           }
+
+                                                            ?>
+                                                        </td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                      }
+                                                        }
+                                                    }
+                                                }
+                                            ?>
+
+
+                                             <?php 
+                                              if($total_l2!=0) {
+                                            ?>
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:20px;"><?php echo "Total ".$levelTwo; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                       if($total_l2<0) {
+                                                            $negative_format = "(".number_format(abs($total_l2),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($total_l2,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            <?php
+                                              }
+                                            ?>
+
+
+                                            <?php
+                                                    $l3++;
+                                                }
+                                            ?>
+
+                                            <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo "Discounts Received"; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                      $debit_amount = $this->incomeStatement[8]['debit'];
+                                                      $credit_amount = $this->incomeStatement[8]['credit'];
+                                                      $discamountreceived = ($debit_amount - $credit_amount);
+                                                       $goodsTotal += $discamountreceived;
+                                                       if($discamountreceived<0) {
+                                                            $negative_format = "(".number_format(abs($discamountreceived),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($discamountreceived,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+
+
+
+
+                                            <?php 
+                                              if($total_l1!=0) {
+                                            ?>
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:10px;"><?php echo "Total ".$levelOne; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+                                                       $goodsTotal += $total_l1+$exchange;
+                                                       if($goodsTotal<0) {
+                                                            $negative_format = "(".number_format(abs($goodsTotal),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($goodsTotal,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            <?php
+                                              }
+                                            ?>
+
+                                            <?php
+                                                    $l2++;
+                                                  }
+                                                }
+                                             ?>
+
+                                       <tr>
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:10px;"><?php echo "Gross Profit "; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+                                                       $grossProfit = $revenueTotal-$goodsTotal;
+                                                       if($grossProfit<0) {
+                                                            $negative_format = "(".number_format(abs($grossProfit),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($grossProfit,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+
+
+
+
+
+                                 <?php
+                                                      $l2 = "2";
+                                                      foreach ($this->income as $levelOne => $listOne) {
+                                                        if($levelOne!='Revenue') {
+                                                        $total_l1 = 0.00;
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account income_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        $total_l2 = 0.00;
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account income_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(5,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                         <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->incomeCoa as $incomeCoa) {
+                                                        if($incomeCoa['account_type'] == 3 && $incomeCoa['level1']==$l2 && $incomeCoa['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        
+                                                         if(isset($this->incomeStatement[$incomeCoa['id']]) && !empty($this->incomeStatement[$incomeCoa['id']]) && !in_array($incomeCoa['id'], $completedCoa)) {
+                                                                $completedCoa[] = $incomeCoa['id'];
+                                                                $active[] = "income_".$l2."_".$l3;
+                                                                $debit_amount = $this->incomeStatement[$incomeCoa['id']]['debit'];
+                                                                $credit_amount = $this->incomeStatement[$incomeCoa['id']]['credit'];
+                                                                $amount = ($credit_amount - $debit_amount);
+                                                                $total_l2      += $amount;
+                                                                $total_l1      += $amount;
+                                                                $otherIncome   += $amount;
+                                                                $pay_accounts = "pay_accounts";
+                                                       
+                                            ?>
+                                                 <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $incomeCoa['account_name']; ?></span></td>
+                                                        <td style="text-align:right;">
+                                                            <?php 
+
+                                                          if($amount<0) {
+                                                            $negative_format = "(".number_format(abs($amount),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($amount,2,'.',',');
+                                                           }
+
+                                                            ?>
+                                                        </td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                      }
+                                                        }
+                                                    }
+                                                }
+                                            ?>
+
+
+                                             <?php 
+                                              if($total_l2!=0) {
+                                            ?>
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:20px;"><?php echo "Total ".$levelTwo; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                       if($total_l2<0) {
+                                                            $negative_format = "(".number_format(abs($total_l2),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($total_l2,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            <?php
+                                              }
+                                            ?>
+
+
+                                            <?php
+                                                    $l3++;
+                                                }
+                                            ?>
+
+                                            
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:10px;"><?php echo "Total ".$levelOne; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+                                                       $total = $total_l1;
+                                                       if($total<0) {
+                                                            $negative_format = "(".number_format(abs($total),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($total,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            
+
+                                            <?php
+                                                    $l2++;
+                                                  }
+                                                }
+                                             ?>
+
+
+
+
+                              <?php 
+                                                $l = 4;
+                                             ?>
+                                             
+                                                   <?php
+                                                      $l2 = "2";
+                                                      foreach ($this->expense as $levelOne => $listOne) {
+                                                        if($levelOne!='Cost of Goods') {
+                                                        $total_l1 = 0.00;
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account expense_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        $total_l2 = 0.00;
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account expense_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(5,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                         <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->expenseCoa as $expenseCoa) {
+                                                        if($expenseCoa['account_type'] == 4 && $expenseCoa['level1']==$l2 && $expenseCoa['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        
+                                                         if(isset($this->incomeStatement[$expenseCoa['id']]) && !empty($this->incomeStatement[$expenseCoa['id']]) && !in_array($expenseCoa['id'], $completedCoa)) {
+                                                                $completedCoa[] = $expenseCoa['id'];
+                                                                $active[] = "expense_".$l2."_".$l3;
+                                                                $debit_amount = $this->incomeStatement[$expenseCoa['id']]['debit'];
+                                                                $credit_amount = $this->incomeStatement[$expenseCoa['id']]['credit'];
+                                                                $amount = ($debit_amount - $credit_amount);
+                                                                $total_l2      += $amount;
+                                                                $total_l1      += $amount;
+                                                                $otherExpense  += $amount;
+                                                                $pay_accounts = "pay_accounts";
+                                                       
+                                            ?>
+                                                 <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $expenseCoa['account_name']; ?></span></td>
+                                                        <td style="text-align:right;">
+                                                            <?php 
+
+                                                          if($amount<0) {
+                                                            $negative_format = "(".number_format(abs($amount),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($amount,2,'.',',');
+                                                           }
+
+                                                            ?>
+                                                        </td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                      }
+                                                        }
+                                                    }
+                                                }
+                                            ?>
+
+
+                                             <?php 
+                                              if($total_l2!=0) {
+                                            ?>
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:20px;"><?php echo "Total ".$levelTwo; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                       if($total_l2<0) {
+                                                            $negative_format = "(".number_format(abs($total_l2),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($total_l2,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            <?php
+                                              }
+                                            ?>
+
+
+                                            <?php
+                                                    $l3++;
+                                                }
+                                            ?>
+
+                                            <?php
+
+                                            if($levelOne=='Non-Operating Expenses') {
+
+                                            ?>
+
+                                               <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo "Foreign Exchange Gain/(Loss)"; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+
+                                                      /*$debit_amount = $this->incomeStatement[2]['debit'];
+                                                      $credit_amount = $this->incomeStatement[2]['credit'];
+                                                      $exchange = ($debit_amount - $credit_amount);*/
+                                                      $exchange = $this->foreignCurrency;
+                                                      $otherExpense  += $exchange;
+                                                      $active[] = "expense_".$l2."_".$l3;
+                                                       if($exchange<0) {
+                                                            $negative_format = "(".number_format(abs($exchange),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($exchange,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+
+
+                                              <?php
+
+                                                  }
+
+                                              ?>
+
+                                          
+
+                                            
+                                              <tr class="balance_account <?php echo $pay_accounts; ?> success expense_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:10px;"><?php echo "Total ".$levelOne; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+                                                       $total = $total_l1+$exchange;
+                                                       if($total<0) {
+                                                            $negative_format = "(".number_format(abs($total),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($total,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+                                            
+                                            <?php
+                                                    $l2++;
+                                                  }
+                                                }
+                                             ?>
+
+                                       <tr>
+
+                                            <tr>
+                                                    <td><span style="font-weight:bold; font-size:12px; cursor: pointer; margin-left:10px;"><?php echo "Total Profit "; ?></span></td>
+                                                    <td style="text-align:right;"><strong>
+                                                    <?php 
+                                                       $otherProfit = ($grossProfit+$otherIncome-$otherExpense);
+                                                       if($otherProfit<0) {
+                                                            $negative_format = "(".number_format(abs($otherProfit),2,'.',',').")";
+                                                              echo $negative_format;
+                                                           } else {
+                                                              echo number_format($otherProfit,2,'.',',');
+                                                           }
+
+                                                    ?>
+                                                    </strong></td>
+                                              </tr>
+
+            </tbody>
+        </table>
+        </div>
+        </div>
+        </div>
+        </div>
+    </div>
+
+    
+
+
+  </div>
+
+<!--   <div class="row">
+        <div class="col-md-12">
+        <?php 
+          $net_profit = $total_income - $total_expense;
+        ?>
+        <h4>Net Profit : 
+        <?php
+         if($net_profit<0) {
+            $negative_format = "(".number_format(abs($net_profit),2,'.',',').")";
+            echo $negative_format;
+         } else {
+            echo number_format($net_profit,2,'.',',');
+         }
+        ?></h4>
+        </div>
+  </div>
+ -->
+</div>
+</div>
+
+
+<script type="text/javascript">
+/* var nowTemp = new Date();
+var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+ 
+var checkin = $('#from_date').datepicker({
+  onRender: function(date) {
+    return date.valueOf() < now.valueOf() ? 'disabled' : '';
+  }
+}).on('changeDate', function(ev) {
+  if (ev.date.valueOf() > checkout.date.valueOf()) {
+    var newDate = new Date(ev.date)
+    newDate.setDate(newDate.getDate() + 1);
+    checkout.setValue(newDate);
+  }
+  checkin.hide();
+  $('#to_date')[0].focus();
+}).data('datepicker');
+var checkout = $('#to_date').datepicker({
+  onRender: function(date) {
+    return date.valueOf() <= checkin.date.valueOf() ? 'disabled' : '';
+  }
+}).on('changeDate', function(ev) {
+  checkout.hide();
+}).data('datepicker'); */
+</script>
+<script type="text/javascript">
+$(document).ready(function() {
+    <?php 
+        foreach ($active as $act) {
+           $levels = explode("_", $act);
+    ?>
+        $(".pay_accounts").show();
+        $(".non_pay_accounts").hide();
+        $("<?php echo ".".$levels[0]."_".$levels[1]; ?>").show();
+      //  $("<?php echo ".".$levels[0]."_".$levels[1].$levels[2]; ?>").show();
+        $("<?php echo ".".$act; ?>").show();
+        $("<?php echo ".".$levels[0]."_".$levels[1]; ?>").addClass("<?php echo $levels[0]."_active"; ?>");
+        $("<?php echo ".".$levels[0]."_".$levels[1].$levels[2]; ?>").addClass("<?php echo $levels[0]."_active"; ?>");
+        $("<?php echo ".".$act; ?>").addClass("<?php echo $levels[0]."_active"; ?>");
+    <?php
+        }
+    ?>
+     $(".assets_active").show();
+        $(".liability_active").show();
+        $(".income_active").show();
+        $(".expense_active").show();
+        $(".equity_active").show();
+});
+  (function ($) {
+  var rules = document.styleSheets[document.styleSheets.length-1].cssRules;
+  for (var idx = 0, len = rules.length; idx < len; idx++) {
+    $(rules[idx].selectorText).each(function (i, elem) {
+      elem.style.cssText += rules[idx].style.cssText;
+    });
+  }
+  $('style').remove();
+})(jQuery);
+
+var tableToExcel = (function() {
+  var uri = 'data:application/vnd.ms-excel;base64,'
+    , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+    , base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) }
+    , format = function(s, c) { return s.replace(/{(\w+)}/g, function(m, p) { return c[p]; }) }
+  return function(table, name) {
+    if (!table.nodeType) table = document.getElementById(table)
+    var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML}
+    window.location.href = uri + base64(format(template, ctx))
+  }
+})()
+</script>

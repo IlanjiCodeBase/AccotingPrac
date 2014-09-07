@@ -1,0 +1,144 @@
+<?php 
+  $logSession = new Zend_Session_Namespace('sess_login');
+?>
+
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li class="active">Transaction Notification</li>
+</ul>
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+
+ <div class="row">
+                        <div class="col-md-12">
+
+                            <h3>Pending for Approval</h3>
+
+                            <div class="box-widget">
+                            <form id="approve_pending_transaction" name="approve_pending_transaction" method="post">
+                                <table class="table responsive" id="pending_transaction">
+                                    <thead>
+                                        <tr>
+                                        	<th class="nosort">
+                                        		<input type="checkbox" name="checkall" id="checkall"  value="1" onclick="return clickable(this.value);"/>
+                                        	</th> 
+                                            <th>
+                                                Date
+                                            </th>
+                                            <th>
+                                                Label
+                                            </th>
+                                            <th>
+                                                Transaction Type
+                                            </th>
+                                            <th>
+                                                Ref No.
+                                            </th>
+                                            <th>
+                                                Customer/Vendor Name
+                                            </th>
+                                            <th>
+                                                Amount
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php 
+                                        $i=1;
+                                        foreach($this->result as $key => $results) {
+                                           if($results['label']=='Income') {
+                                           		$hyperlink = 'income';
+                                           } else if($results['label']=='Expense') {
+                                           		$hyperlink = 'expense';
+                                           } else if($results['label']=='Invoice') {
+                                           		$hyperlink = 'invoice';
+                                           } else if($results['label']=='Credit Note') {
+                                           		$hyperlink = 'credit';
+                                           } else if($results['label']=='Journal Entry') {
+                                           		$hyperlink = 'journal';
+                                           }
+                                           $id = base64_encode($results['id']);
+                                    ?>
+                                        <tr>
+                                        	<th><input type="checkbox" name="approve_id[]" id="<?php echo $hyperlink."_".$results['id']; ?>" class="approve_id" value="<?php echo $hyperlink."_".$results['id']; ?>"    onclick="return transactionCount();" /></th>
+                                			<td><?php echo date('m-d-Y',strtotime($results['date'])); ?></td>
+                                			<td><?php echo $results['label']; ?></td>
+                                			<td><?php echo ucfirst($results['account']); ?></td>
+                                			<td><a href="<?php echo $this->sitePath."transaction/".$hyperlink."/edit/id/".$id; ?>" target="_blank"><?php echo $key; ?></a></td>
+                                			<td><?php echo ucfirst($results['business']); ?></td>
+                                			<td style="text-align:right;"><span style="margin-right:20px;"><?php echo number_format($results['amount'],2,'.',','); ?></span></td>
+                                        </tr>
+                                    <?php 
+                                        }
+                                    ?>
+                                    </tbody>
+                                </table>
+                                <input type="hidden" name="total_count" id="total_count" />
+                                <div class="form-group" style="margin-top:20px;">
+                                <label class="col-lg-5 control-label">&nbsp;</label>
+                                    <div class="col-lg-1">
+                                         <div class="form-actions">
+                                            <input type="submit" name="approve_pending" class="btn btn-primary" id="approve_pending" value="Approve"  />
+                                          </div>
+                                      </div>
+                                      <div class="col-lg-1" style="margin-left:0px;">
+                                           <div class="form-actions">
+                                            <input type="button" name="cancel" class="btn" id="cancel" value="Cancel"  />
+                                          </div>
+                                      </div>
+                            </div>
+                            </div>
+                            
+
+                            </form>
+                        </div>
+                    </div>
+
+
+</div>
+</div>
+<script type="text/javascript">
+	    function clickable(value) {
+		if(value==1) {
+			if($('.approve_id').not(':checked')) {
+				$('.approve_id').prop('checked', true);
+			}
+			$("#checkall").val(2);
+		} else {
+			$('.approve_id').prop('checked', false);
+			$("#checkall").val(1);
+		}
+        transactionCount();
+	}
+
+
+     function transactionCount() {
+        var checked = [];
+        var amount  = 0.00;
+        $("input[name='approve_id[]']:checked").each(function ()
+        {
+            checked.push($(this).val());
+        });
+        var total_count = checked.length;
+        $("#total_count").val(total_count);
+    }
+</script>

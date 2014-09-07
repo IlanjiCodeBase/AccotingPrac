@@ -1,0 +1,117 @@
+<div class="main-container">
+<div class="container">
+
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/developer/"; ?>">Developer</a></li>
+   <li><a href="<?php echo $this->sitePath."default/developer/announcements"; ?>">Announcements</a></li>
+   <li class="active">Edit</li>
+</ul>
+
+  <div class="row">
+                                       <div class="col-md-6 col-md-offset-3">
+                                       <?php 
+                                            if(isset($this->success) && !empty($this->success)) {
+                                       ?>
+                                            <div class="alert alert-success">
+                                               <strong><?php echo $this->success; ?></strong>
+                                            </div>
+                                        <?php
+                                            } else if(isset($this->error) && !empty($this->error)) {
+                                        ?>
+                                            <div class="alert alert-danger">
+                                               <strong><?php echo $this->error; ?></strong>
+                                            </div>
+                                        <?php 
+                                            }
+                                        ?>
+                                        </div>
+                                 </div>
+
+<div class="row">
+                        <div class="col-md-12 widget-module">
+                            <div class="square-widget widget-collapsible">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i> Edit Announcement</h4>
+                                    
+                                </div>
+
+                                <div class="widget-container col-md-12 col-md-offset-3">
+                                    <form class="form-horizontal" id="send-announcement" method="post">
+
+                                    <div class="form-group">
+                                            <label class="col-lg-2 control-label">Send to all</label>
+                                            <div class="col-lg-10">
+                                                <label class="checkbox-inline">
+                                                <?php 
+                                                    $checked = '';
+                                                    $disable = '';
+                                                    if(isset($this->result[0]['companies']) && !empty($this->result[0]['companies']) && $this->result[0]['companies']=='all') {
+                                                        $checked = 'checked';
+                                                        $disable = 'disabled';
+                                                    } else { 
+                                                        $checked = '';
+                                                        $disable = '';
+                                                    }
+                                                ?>
+                                                    <input type="checkbox" name="all" id="all" value="all" onclick="return companyAnnouncement();" <?php echo $checked; ?>> Send all</label>
+                                            </div>
+                                        </div>
+
+                                    <div class="form-group">
+                                            <label class="col-lg-2 control-label">Companies</label>
+                                            <div class="col-lg-3">
+                                                <select name="company[]" id="company" class="select2" multiple="multiple"  <?php echo $disable; ?>>
+                                                 <?php 
+                                                            $companySelect = '';
+                                                            $company = explode(",", $this->result[0]['companies']);
+                                                            if(isset($this->companies) && !empty($this->companies)) {
+                                                                foreach ($this->companies as $companies) {
+                                                                    if(isset($this->result[0]['companies']) && !empty($this->result[0]['companies']) && $this->result[0]['companies']!='all' && in_array($companies['cid'], $company)) 
+                                                                        $companySelect = 'selected';
+                                                                    else
+                                                                        $companySelect = '';
+
+                                                                   
+                                                        ?>
+                    <option value="<?php echo $companies['cid']; ?>" <?php echo $companySelect; ?>><?php echo ucfirst($companies['company_name']); ?></option>
+                                                        <?php
+                                                                }
+                                                            } 
+                                                        ?>                                                      
+                                                </select>  
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Subject</label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="subject" id="subject" class="form-control" placeholder="Enter Subject" autocomplete="off" value="<?php echo $this->result[0]['subject']; ?>">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Message</label>
+                                            <div class="col-lg-3">
+                                                <textarea class="form-control" name="message" id="message" placeholder="Enter your message" autocomplete="off"><?php echo $this->result[0]['message']; ?></textarea>
+                                            </div>
+                                        </div>
+                                    
+                                       
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">&nbsp;</label>
+                                            <div class="col-lg-3">
+                                                <div class="form-actions">
+                                                    <button type="submit" id="send" class="btn btn-primary">Submit</button>
+                                                    <button type="reset" class="btn">Reset</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    </div>
+</div>

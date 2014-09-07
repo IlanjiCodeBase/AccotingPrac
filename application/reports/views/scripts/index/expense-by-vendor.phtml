@@ -1,0 +1,205 @@
+<?php
+$logSession = new Zend_Session_Namespace('sess_login');
+if(isset($logSession->proxy_name) && !empty($logSession->proxy_name)) {
+  $company_name = ucfirst($logSession->proxy_name);
+} else {
+  $company_name = ucfirst($logSession->name);
+}
+?>
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."reports"; ?>">Reports</a></li>
+   <li class="active">Expense By Vendor</li>
+</ul>
+  <div class="row">
+    <div class="col-md-12">
+
+      <form class="form-horizontal" id="report-period" method="post">
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">From Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="from_date" id="from_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->from) && !empty($this->from)) { echo $this->from; } else { echo date('01-01-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">To Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="to_date" id="to_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->to) && !empty($this->to)) { echo $this->to; } else { echo date('d-m-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+         <label class="col-lg-5 control-label">&nbsp;</label>
+           <div class="col-lg-3">
+              <div class="form-actions">
+                <button type="submit" id="update" class="btn btn-primary">Update</button>
+              </div>
+           </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+    <div class="row">
+      <div class="col-md-3 col-md-offset-2 pull-right">
+          <button class="print btn btn-inverse" type="button" rel="content"><i class="icon-print"></i> Print</button>
+          <button class="btn btn-inverse" type="button"  onclick="tableToExcel('content', 'Expense By Vendor')"><i class="icon-file-excel"></i> Excel</button>
+      </div>
+    </div>
+
+  <div class="row">
+    <div class="col-md-9 col-md-offset-2">
+
+     <h4 align="center"><?php echo $company_name; ?> </h4> 
+     <h4 align="center">Expense By Vendor</h4> 
+     <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4> 
+
+     <div class="box-widget">
+        <div class="widget-head clearfix">
+            <span class="h-icon"><i class="icon-power-cord"></i></span>
+            <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(1);" style="color:#fff;">Expense By Vendor</a></h4>
+        </div>
+        <div class="widget-container">
+        <div class="widget-block">
+        <div class="widget-content">
+        <table class="table responsive">
+            <thead>
+              <tr>
+                 <th>
+                    Vendor
+                 </th>
+                 <th style="text-align:right;">
+                    Expense
+                 </th>
+              </tr>
+            </thead>
+            <tbody>
+            <?php
+                $total_expense = 0.00;
+                foreach ($this->vendors as $key => $exp) {
+                    $total_expense += $exp;
+            ?>
+                <tr>
+                   <td>
+                    <?php
+                        foreach ($this->vendorList as $vendor) {
+                           if($key==$vendor['vid']) {
+                               echo '<a href="'.$this->sitePath."reports/index/expensevendor-coa/vendor/".base64_encode($vendor['vid'])."/from/".$this->from."/to/".$this->to."/".'">'.ucfirst($vendor['vendor_name']).'</a>';
+                           }
+                         } 
+                    ?>
+                    </td>
+                    <td style="text-align:right;"><?php echo number_format($exp,2,'.',','); ?></td>
+                </tr>
+
+            <?php
+                }
+            ?>
+            <tr>
+                <td style="text-align:right;"><strong>Total Expense</strong></td>
+                <td style="text-align:right;"><strong><?php echo number_format($total_expense,2,'.',','); ?></strong></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        </div>
+        </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+
+<div class="row" id="content" style="display:none;">
+    <div class="col-md-9 col-md-offset-2">
+
+     <h4 align="center"><?php echo $company_name; ?> </h4> 
+     <h4 align="center">Expense By Vendor</h4> 
+     <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4> 
+
+     <div class="box-widget">
+        <div class="widget-head clearfix">
+            <span class="h-icon"><i class="icon-power-cord"></i></span>
+            <!-- <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(1);" style="color:#fff;">Expense By Vendor</a></h4> -->
+        </div>
+        <div class="widget-container">
+        <div class="widget-block">
+        <div class="widget-content">
+        <table class="table responsive" align="center" width="70%" cellpadding="5" cellspacing="5" style="width:70%;">
+            <thead>
+              <tr>
+                 <th>
+                    Vendor
+                 </th>
+                 <th style="text-align:right;">
+                    Expense
+                 </th>
+              </tr>
+            </thead>
+            <tbody>
+            <?php
+                $total_expense = 0.00;
+                foreach ($this->vendors as $key => $exp) {
+                    $total_expense += $exp;
+            ?>
+                <tr>
+                   <td>
+                    <?php
+                        foreach ($this->vendorList as $vendor) {
+                           if($key==$vendor['vid']) {
+                               echo ucfirst($vendor['vendor_name']);
+                           }
+                         } 
+                    ?>
+                    </td>
+                    <td style="text-align:right;"><?php echo number_format($exp,2,'.',','); ?></td>
+                </tr>
+
+            <?php
+                }
+            ?>
+            <tr>
+                <td style="text-align:right;"><strong>Total Expense</strong></td>
+                <td style="text-align:right;"><strong><?php echo number_format($total_expense,2,'.',','); ?></strong></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        </div>
+        </div>
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript">
+  (function ($) {
+  var rules = document.styleSheets[document.styleSheets.length-1].cssRules;
+  for (var idx = 0, len = rules.length; idx < len; idx++) {
+    $(rules[idx].selectorText).each(function (i, elem) {
+      elem.style.cssText += rules[idx].style.cssText;
+    });
+  }
+  $('style').remove();
+})(jQuery);
+
+var tableToExcel = (function() {
+  var uri = 'data:application/vnd.ms-excel;base64,'
+    , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+    , base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) }
+    , format = function(s, c) { return s.replace(/{(\w+)}/g, function(m, p) { return c[p]; }) }
+  return function(table, name) {
+    if (!table.nodeType) table = document.getElementById(table)
+    var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML}
+    window.location.href = uri + base64(format(template, ctx))
+  }
+})()
+</script>

@@ -1,0 +1,300 @@
+<?php 
+  $logSession = new Zend_Session_Namespace('sess_login');
+?>
+<style type="text/css">
+    .box-widget {
+        margin-bottom: 10px !important;
+    }
+</style>
+
+
+<div class="main-container">
+<div class="container">
+
+
+
+<div class="row">
+<div class="col-md-6">
+ 
+                                 <div class="box-widget">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left">Net Income</h4>
+                                    <div class="pull-right widget-loader" id="net_income_loader">
+                                        <img width="16" height="11" alt="loader" src="<?php echo $this->imagesPath; ?>/ajax-loader/ajax-loader.gif" alt="Loading Data" title="Loading Data">
+                                    </div>
+                                    
+                                </div>
+                                <div class="widget-container">
+                                    <div class="widget-block">
+                                        <div class="widget-content">
+                                            <table class="table responsive">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            Fiscal Year
+                                                        </th>
+                                                        <th style="text-align:right;">
+                                                            <?php echo date('Y'); ?>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="net_income">
+                                                    
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                              <div class="box-widget">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left">Receivables & Payables</h4>
+                                    <div class="pull-right widget-loader" id="receivable_payable_loader">
+                                        <img width="16" height="11" alt="loader" src="<?php echo $this->imagesPath; ?>/ajax-loader/ajax-loader.gif" alt="Loading Data" title="Loading Data">
+                                    </div>
+                                    
+                                </div>
+                                <div class="widget-container">
+                                    <div class="widget-block">
+                                        <div class="widget-content">
+                                            <table class="table responsive" style="width:48%; float:left;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            Trade Receivables
+                                                        </th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="receivables">
+                                                    
+                                                </tbody>
+                                            </table>
+
+                                            <table class="table responsive" style="width:48%; float:left; margin-left:4%;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            Trade Payables
+                                                        </th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="payables">
+                                                    
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+    </div>
+
+
+
+                        
+    <div class="col-md-6">
+
+                                   <div class="box-widget widget-module">
+                                <div class="widget-head clearfix">
+                                    <span class="h-icon"><i class="icon-mic"></i></span>
+                                    <h4 class="pull-left">Recent Activities and Announcements</h4>
+                                    <div class="pull-right widget-action">
+                                        <ul>
+                                            <li><a href="#" class="widget-collapse"><i class="icon-arrow-down"></i></a></li>
+<!--                                             <li><a href="#" class="widget-remove"><i class=" icon-remove-sign"></i></a></li>
+ -->                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="widget-container" style="display: block;">
+                                    <div class="widget-block">
+                                        <div class="widget-content box-padding">
+                                            <?php 
+                                                if(isset($this->totalCount) && ($logSession->type==2 || $logSession->type==3 || $logSession->proxy_type==2 || $logSession->proxy_type==3)) {
+                                                    if(isset($this->totalCount) && !empty($this->totalCount)) {
+                                            ?>
+                                                <ul class="flag_icn">
+                                                   <li style="font-weight:bold;">Pending <?php echo $this->totalCount; ?> transactions to be verified. 
+                                                   <a href="<?php echo $this->sitePath."default/notification/transactions" ?>" target="_blank">Click here</a></li>
+                                                </ul>
+                                            <?php
+                                                    }
+                                                }
+                                            ?>
+                                            <?php 
+                                                if(isset($this->notifyMessages) && !empty($this->notifyMessages)) {
+                                                    foreach ($this->notifyMessages as $key => $message) {
+                                                        $mid = base64_encode($key);
+                                            ?>
+                                                <ul class="clip_icn">
+                                                    <li style="font-weight:bold;"><?php echo ucfirst($message['subject'])." on ".date('d-m-Y h:i:s',strtotime($message['date']))."."; ?> <a href="<?php echo $this->sitePath."default/notification/message/id/".$mid; ?>" target="_blank">Click here</a></li>
+                                                </ul>
+
+                                            <?php 
+                                                    }
+                                                }
+                                            ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+        <div class="box-widget">
+                                <div class="widget-head clearfix">
+                                    <span class="h-icon"><i class="icon-pie-4 "></i></span>
+                                    <h4 class="pull-left">Business Expenses</h4>
+                                </div>
+                                <div class="widget-container white border">
+                                    <div class="widget-block">
+                                        <div class="widget-content box-padding">
+                                            <!--box-spacing define 20px padding for all content here-->
+                                            <div id="chart_div">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+    </div>
+
+</div>
+
+
+
+<div class="row">
+
+
+    <div class="col-md-12">
+
+            <div class="box-widget">
+                                <div class="widget-head clearfix">
+                                    <span class="h-icon"><i class="icon-pie-4 "></i></span>
+                                    <h4 class="pull-left">Financial Snapshot</h4>
+                                </div>
+                                <div class="widget-container white border">
+                                    <div class="widget-block">
+                                        <div class="widget-content box-padding">
+                                            <div id="chart_div1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+    </div>
+
+
+
+
+</div>
+
+
+</div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+            $.ajax({
+              type: "POST",
+              url: "<?php echo $this->sitePath.'default/index/income-statement'; ?>",
+              data: 'action=incomes',
+              success: function (html) {
+                  if(html!='') {
+                    $("#net_income").html(html);
+                    $("#net_income_loader").hide();
+                  }
+              }
+            }); 
+
+            $.ajax({
+              type: "POST",
+              url: "<?php echo $this->sitePath.'default/index/receivables'; ?>",
+              data: 'action=receivable',
+              success: function (html) {
+                  if(html!='') {
+                    $("#receivables").html(html);
+                  }
+              }
+            }); 
+
+             $.ajax({
+              type: "POST",
+              url: "<?php echo $this->sitePath.'default/index/payables'; ?>",
+              data: 'action=payable',
+              success: function (html) {
+                  if(html!='') {
+                    $("#payables").html(html);
+                    $("#receivable_payable_loader").hide();
+                  }
+              }
+            }); 
+
+});
+
+</script>
+<!-- <script src="https://www.google.com/jsapi"></script> -->
+<script type="text/javascript">
+             google.load("visualization", "1", {
+                packages: ["corechart"]
+            });
+            google.setOnLoadCallback(drawChart);
+            function drawChart() {
+               /* var data = google.visualization.arrayToDataTable([
+                    ['Task', 'Hours per Day'],
+                    ['Work', 160],
+                    ['Eat', 200],
+                    ['Commute', 266],
+                    ['Watch TV', 122],
+                    ['Sleep', 47]
+                ]);*/
+
+                      var jsonData = $.ajax({
+                      url: "<?php echo $this->sitePath.'default/index/expense-pie'; ?>",
+                      data: "action=pie",
+                      dataType:"json",
+                      async: false
+                      }).responseText;
+                      
+
+                  var data = new google.visualization.DataTable(jsonData);
+
+                
+                var options = {
+                    is3D: true,
+                    width: 600,
+                    height: 300,
+                   /* title: 'Expense',
+                    slices: [{color: '#b51c44'}, {color: '#ce4b27'}, {color: '#009600'}, {color: '#e88a05'}, {color: '#3498db'}]*/
+                };
+                var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+                chart.draw(data,options);
+            }
+</script>
+<script type="text/javascript">
+            google.load("visualization", "1", {packages: ["corechart"]});
+            google.setOnLoadCallback(drawChart);
+            function drawChart() {
+                var data = google.visualization.arrayToDataTable([
+                    <?php
+                        echo "['Month', 'Income', 'Expense'],";
+                        foreach ($this->finance as $key => $finance) {
+                            echo "['".$key."',".$finance[1].",".$finance[2]."],";
+                        }
+                    ?>
+                ]);
+                var options = {
+                    title: 'Company Performance',
+
+                    vAxis:{title:"Amount", titleTextStyle: {color: 'red'},minValue:0},
+                    
+                    hAxis: {title: 'Month', titleTextStyle: {color: 'red'}},
+
+                    series: [{color: '#428BCA'}, {color: 'gray'}]
+                };
+                var chart = new google.visualization.ColumnChart(document.getElementById('chart_div1'));
+                chart.draw(data, options);
+            }
+</script>

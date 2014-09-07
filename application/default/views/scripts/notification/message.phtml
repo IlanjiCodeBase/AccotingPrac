@@ -1,0 +1,129 @@
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/notification/messages"; ?>">Announcement Notification</a></li>
+   <li class="active">View</li>
+</ul>
+
+  <div class="row">
+                                       <div class="col-md-6 col-md-offset-3">
+                                       <?php 
+                                            if(isset($this->success) && !empty($this->success)) {
+                                       ?>
+                                            <div class="alert alert-success">
+                                               <strong><?php echo $this->success; ?></strong>
+                                            </div>
+                                        <?php
+                                            } else if(isset($this->error) && !empty($this->error)) {
+                                        ?>
+                                            <div class="alert alert-danger">
+                                               <strong><?php echo $this->error; ?></strong>
+                                            </div>
+                                        <?php 
+                                            }
+                                        ?>
+                                        </div>
+                                 </div>
+
+<div class="row">
+                        <div class="col-md-12 widget-module">
+                            <div class="square-widget widget-collapsible">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i> View Announcement</h4>
+                                    
+                                </div>
+
+                                <div class="widget-container col-md-12 col-md-offset-3">
+                                    <form class="form-horizontal" id="send-announcement" method="post">
+
+                                   <?php
+                                      if($this->result[0]['users']=='all') {
+                                        $checked = "checked";
+                                      } else {
+                                        $selectedUsers = explode(",", $this->result[0]['users']);
+                                        $checked = "";
+                                      }
+                                    ?>
+
+
+                                    <div class="form-group">
+                                            <label class="col-lg-2 control-label">Send to all</label>
+                                            <div class="col-lg-10">
+                                                <label class="checkbox-inline">
+                                                    <input type="checkbox" name="all" id="all" value="all" disabled <?php echo $checked; ?>> Send all</label>
+                                            </div>
+                                        </div>
+
+                                         <div class="form-group">
+                                            <label class="col-lg-2 control-label">Companies <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                               <input type="text" name="company" id="company" value="<?php if(isset($this->result[0]['company_name']) && !empty($this->result[0]['company_name'])) { echo $this->result[0]['company_name']; } else { echo "All"; } ?>" readonly class="form-control"/> 
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Users <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                              <div id="company_users">
+                                                <select class="select2" multiple="multiple" name="users[]" id="users" disabled>
+                                                    <?php 
+                                                        if(isset($this->userList) && !empty($this->userList)) {
+                                                            foreach($this->userList as $user) {
+                                                                if(in_array($user['id'], $selectedUsers)) {
+                                                               if($user['account_type']==1) {
+                                                                   $account_type = 'Developer';
+                                                                } else if($user['account_type']==2) {
+                                                                   $account_type = 'Super User';
+                                                                } else if($user['account_type']==3) {
+                                                                   $account_type = 'Manager';
+                                                                } else if($user['account_type']==4) {
+                                                                   $account_type = 'User';
+                                                                } else if($user['account_type']==5) {
+                                                                   $account_type = 'Viewer';
+                                                                } 
+                                                    ?>
+                                                            <option value="<?php echo $user['id']; ?>" selected><?php echo $user['username']." (".$account_type.")"; ?></option>
+                                                    <?php 
+                                                                }
+                                                           }
+                                                        }
+                                                    ?>
+
+
+                                                </select>
+                                               </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Subject</label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="subject" id="subject" class="form-control" placeholder="Enter Subject" readonly autocomplete="off" value="<?php echo $this->result[0]['subject']; ?>">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Message</label>
+                                            <div class="col-lg-3">
+                                                <textarea class="form-control" name="message" id="message" placeholder="Enter your message" readonly autocomplete="off" style="height:180px;"><?php echo $this->result[0]['message']; ?></textarea>
+                                            </div>
+                                        </div>
+                                    
+                                       
+                                         <div class="form-group">
+                                            <label class="col-lg-2 control-label">&nbsp;</label>
+                                            <div class="col-lg-3">
+                                                <div class="form-actions">
+                                                     <a href="<?php echo $this->sitePath."notification/messages"; ?>"><button type="button" class="btn">Back</button></a>
+                                                </div>
+                                            </div>
+                                        </div> 
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    </div>
+</div>

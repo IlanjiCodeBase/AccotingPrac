@@ -1,0 +1,222 @@
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/settings/"; ?>">Settings</a></li>
+   <li class="active">Themes</li>
+</ul>
+
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+   <?php
+    $logSession = new Zend_Session_Namespace('sess_login');
+   ?>
+
+                 <div class="row" style="margin-bottom:20px;">
+                 <form class="form-horizontal" id="upload-logo" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                     <div class="col-lg-3">
+                       <h4>Upload Company Logo</h4>
+                        <!-- <input type="file" name="file" id="file" class="btn" /> -->
+                        
+                        <input type="button" class="btn btn-info" value="Choose File" id="file" name="file" /><br/><br/>
+                        <span><strong>(Upload only jpg,png with 150x30 dimensions)</strong></span>
+                     </div>
+                      
+                        <?php 
+                          if(isset($this->company[0]['company_logo']) && !empty($this->company[0]['company_logo'])) {
+                        ?>
+                        <div class="col-lg-3 attach_file"><br/>
+                       <label>Attached File : </label> <br/>
+                        <input type="hidden" name="attached_file" id="attached_file" value="<?php echo $this->company[0]['company_logo']; ?>" />
+                         <div class="view_remove_file">
+                            <a href="<?php echo $this->sitePath."..".$this->filepath.$this->company[0]['company_logo']; ?>" target='_blank'>Click to View</a> &nbsp; <a href='javascript:void(0)' title='Remove Attachment' data-title='Remove Attachment' onclick='removeAttachment();'><i class='icon-remove-sign'></i></a>
+                         </div>
+                        <?php 
+                          } else {
+                        ?>
+                        <div class="col-lg-3 attach_file" style="display:none;">
+                        <label>Attached File : </label> <br/>
+                          <input type="hidden" name="attached_file" id="attached_file" />
+                          <div class="view_remove_file" style="display:none;">
+                          
+                         </div>
+                        <?php
+                          }
+                        ?>
+                     </div>
+
+                    </div>
+
+                  <div class="col-lg-2">
+                    <div class="progress progress-striped active" id="progress-bar" style="display:none;">
+                        <div style="width: 100%" aria-valuemax="100" aria-valuemin="0" aria-valuenow="10" role="progressbar" class="progress-bar progress-bar-success">
+                            <span class="sr-only"></span>
+                        </div>
+                    </div>
+                  </div>
+                  </form>
+                </div>
+
+ <div class="row">
+                        <div class="col-md-12">
+                        <h4>Available Themes</h4>
+                            <div class="box-widget">
+                                <table class="table data-tbl-boxy responsive">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                Theme Name
+                                              </th>
+                                              <th>
+                                                Default
+                                            </th>
+                                            <th>
+                                                Description
+                                            </th>
+                                            <th>
+                                                Updated
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                      <?php 
+                                        foreach ($this->themes as $theme) {
+                                          if($theme['default_theme']==1) {
+                                            $checked = 'checked';
+                                          } else {
+                                            $checked = '';
+                                          }
+                                      ?>
+                                          <tr>
+                                            <td><?php echo ucfirst($theme['theme_name']); ?></td>
+                                            <td><input type="radio" name="default_theme" id="<?php echo "default_theme".$theme['id']; ?>" value='<?php echo $theme['id']; ?>' <?php echo $checked; ?> onclick="changeTheme(<?php echo $this->defaultTheme; ?>,<?php echo $theme['id']; ?>);"></td>
+                                            <td><?php echo ucfirst($theme['description']); ?></td>
+                                            <td><?php echo date('d-m-Y',strtotime($theme['date_modified'])); ?></td>
+                                          </tr>
+                                      <?php
+                                        }
+                                      ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+<script type="text/javascript" src="<?php echo $this->scriptpath.'SimpleAjaxUploader.min.js'; ?>"></script>
+<script type="text/javascript">
+function changeTheme(active,current) {
+  $.ajax({
+        type: "POST",
+        url: "<?php echo $this->sitePath.'default/settings/ajax-refresh'; ?>",
+        data: 'action=changeTheme&id='+current+'&activeid='+active,
+        success: function (html) {
+            if(html==1) {
+              alert("Theme Updated Successfully");
+              location.reload();
+            } else if(html==2) {
+              alert("Theme Cannot be Updated now. Kindly try again later");
+            }
+        }
+  }); 
+}
+
+   var btn = document.getElementById('file'),
+       sizeBox = document.getElementById('sizeBox'), // container for file size info
+       progress = document.getElementById('progress-bar'); // the element we're using for a progress bar
+
+window.onload = function() {
+
+
+ var uploader = new ss.SimpleUpload({
+          button: btn, // file upload button
+          url: "<?php echo $this->sitePath.'default/settings/ajax-upload/operation/upload'; ?>", // server side handler
+          name: 'uploadfile', // upload parameter name        
+        //  progressUrl: 'extras/uploadProgress.php', // enables cross-browser progress support (more info below)
+          responseType: 'json',
+          allowedExtensions: ['jpg', 'jpeg', 'png', 'gif'],
+          maxSize: 10240, // kilobytes
+          hoverClass: 'ui-state-hover',
+          focusClass: 'ui-state-focus',
+          disabledClass: 'ui-state-disabled',
+          onSubmit: function(filename, extension) {
+              this.setFileSizeBox(sizeBox); // designate this element as file size container
+              this.setProgressBar(progress); // designate as progress bar
+              $("#progress-bar").show();
+            },         
+          onComplete: function(filename, response) {
+              if (!response) {
+                  alert(filename + 'upload failed');
+                  return false;            
+              } else {
+                $("#progress-bar").hide();
+                var filename = response.data['file'];
+                var status = response.data['status'];
+                if(status=='success') {
+                  $(".view_remove_file").html("<a href='<?php echo $this->sitePath."..".$this->filepath; ?>"+ filename +"' target='_blank'>Click to View</a> &nbsp; <a href='javascript:void(0)'' title='Remove Attachment' data-title='Remove Attachment' onclick='removeAttachment();'><i class='icon-remove-sign'></i></a>");
+                  $("#attached_file").val(filename);
+                  $(".view_remove_file").show();
+                  $(".attach_file").show();
+                  $("input[name='uploadfile']").attr('disabled','disabled');  
+                } else if(status=='failure') {
+                  alert("Upload Error : "+filename);
+                  $("input[name='uploadfile']").removeAttr('disabled');
+                  return false;
+                } 
+
+              }
+
+                //console.log(filename);
+              // do something with response...
+            }
+    });     
+
+
+  <?php 
+    if(isset($this->company[0]['company_logo']) && !empty($this->company[0]['company_logo'])) {
+  ?>
+    $("input[name='uploadfile']").attr('disabled','disabled');  
+  <?php  
+    } 
+  ?>
+
+};
+function removeAttachment() {
+  var attachedFile = $("#attached_file").val();
+  if(attachedFile!='') {
+    var confirmMsg = confirm('Are you sure want to remove the attachment?');
+    if(confirmMsg) {
+      $.ajax({
+        type: "POST",
+        url: "<?php echo $this->sitePath.'default/settings/ajax-remove'; ?>",
+        data: 'action=fileRemove&id='+attachedFile,
+        success: function (html) {
+            if(html=='success') {
+              $("#attached_file").val('');
+              $(".view_remove_file").hide();
+              $(".attach_file").hide();
+              $("input[name='uploadfile']").removeAttr('disabled');
+              alert("File Removed Successfully");
+            } else {
+              alert("Unable to remove the attached file. Kindly try again later");
+            }
+        }
+      }); 
+    }
+  }
+}
+</script>

@@ -1,0 +1,473 @@
+<?php
+$logSession = new Zend_Session_Namespace('sess_login');
+if(isset($logSession->proxy_name) && !empty($logSession->proxy_name)) {
+  $company_name = ucfirst($logSession->proxy_name);
+} else {
+  $company_name = ucfirst($logSession->name);
+}
+?>
+<div class="main-container">
+<div class="container">
+
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."reports"; ?>">Reports</a></li>
+   <li class="active">Sales Tax</li>
+</ul>
+
+
+  <div class="row">
+    <div class="col-md-12">
+
+      <form class="form-horizontal" id="report-period" method="post">
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">From Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="from_date" id="from_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->from) && !empty($this->from)) { echo $this->from; } else { echo date('01-01-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">To Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="to_date" id="to_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->to) && !empty($this->to)) { echo $this->to; } else { echo date('d-m-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+         <label class="col-lg-5 control-label">&nbsp;</label>
+           <div class="col-lg-3">
+              <div class="form-actions">
+                <button type="submit" id="update" class="btn btn-primary">Update</button>
+              </div>
+           </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+    <div class="row">
+      <div class="col-md-2 pull-right">
+          <button class="print btn btn-inverse" type="button" rel="content"><i class="icon-print"></i> Print</button>
+          <button class="btn btn-inverse" type="button"  onclick="tableToExcel('content', 'Sales Tax')"><i class="icon-file-excel"></i> Excel</button>
+      </div>
+    </div>
+
+
+  <div class="row">
+    <div class="col-md-12">
+           <h4 align="center"><?php echo $company_name; ?> </h4> 
+           <h4 align="center">Sales Tax</h4> 
+           <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4> 
+    </div>
+    <div class="col-md-8 col-md-offset-2">
+     <div class="box-widget" style="margin-bottom:0px;">
+        <div class="widget-head clearfix">
+            <span class="h-icon"><i class="icon-power-cord"></i></span>
+            <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(1);" style="color:#fff;">Sales Tax</a></h4>
+        </div>
+        <div class="widget-container">
+        <div class="widget-block">
+        <div class="widget-content">
+        <table class="table responsive">
+            <thead>
+              <tr>
+                 <th>
+                    Particulars
+                 </th>
+                 <th style="text-align:right;">
+                    Base Amount
+                 </th>
+                 <th style="text-align:right;">
+                    Tax Amount
+                 </th>
+              </tr>
+            </thead>
+            <tbody>
+             
+             <tr>
+               <td><span style="margin-left:10px;font-weight:bold; font-size:13px;">Sales Tax Supply</span></td>
+               <td></td>
+             </tr>
+
+             <?php 
+                $total_supply = 0.00;
+                foreach ($this->taxPayable as $key => $payable) {
+                  foreach ($this->taxes as $tax) {
+                    if($tax['id']==$key) {
+                      foreach ($this->supply as $keys => $supply) {
+                        if($tax['tax_code']==$keys) {
+                          $code = $supply['name'];
+                        }
+                      }
+                      $total_supply += $payable['tax_amount'];
+              ?>
+                    <tr>
+                      <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><a href="<?php echo $this->sitePath."reports/index/sales-tax-detail/sales/1/tax/".base64_encode($tax['id'])."/fdate/".$this->from."/"."tdate/".$this->to."/"; ?>"><?php echo $code."-".$tax['tax_percentage']." %"; ?></a></span></td>
+                      <td style="text-align:right;">
+                        <?php 
+                        if($payable['amount']<0) {
+                          echo "(".number_format(abs($payable['amount']),2,'.',',').")"; 
+                        } else {
+                          echo number_format($payable['amount'],2,'.',','); 
+                        }
+                        
+                        ?>
+                      </td>
+                      <td style="text-align:right;">
+                        <?php 
+                        if($payable['tax_amount']<0) {
+                          echo "(".number_format(abs($payable['tax_amount']),2,'.',',').")"; 
+                        } else {
+                          echo number_format($payable['tax_amount'],2,'.',',');
+                        }
+                         ?>
+                      </td>
+                    </tr>
+             <?php
+                    }
+                  }
+                }
+             ?>
+
+            <tr>
+               <td><span style="margin-left:20px;font-weight:bold; font-size:12px;">Total Supply Tax</span></td>
+               <td></td>
+               <td style="text-align:right;">
+               <?php 
+               if($total_supply<0) {
+                  echo "(".number_format(abs($total_supply),2,'.',',').")"; 
+               } else {
+                  echo number_format($total_supply,2,'.',',');
+               } 
+               ?>
+               </td>
+             </tr>
+
+            <tr>
+               <td><span style="margin-left:10px;font-weight:bold; font-size:13px;">Sales Tax Purchase</span></td>
+               <td></td>
+               <td></td>
+             </tr>
+
+              <?php 
+               $total_purchase = 0.00;
+                foreach ($this->taxReceivable as $key => $receivable) {
+                  foreach ($this->taxes as $tax) {
+                    if($tax['id']==$key) {
+                      foreach ($this->purchase as $keys => $purchase) {
+                        if($tax['tax_code']==$keys) {
+                          $code = $purchase['name'];
+                        }
+                      }
+                       $total_purchase += $receivable['tax_amount'];
+              ?>
+                    <tr>
+                      <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><a href="<?php echo $this->sitePath."reports/index/sales-tax-detail/sales/2/tax/".base64_encode($tax['id'])."/fdate/".$this->from."/"."tdate/".$this->to."/"; ?>"><?php echo $code."-".$tax['tax_percentage']." %"; ?></a></span></td>
+                      <td style="text-align:right;">
+                        <?php 
+                        if($receivable['amount']<0) {
+                          echo "(".number_format(abs($receivable['amount']),2,'.',',').")"; 
+                        } else {
+                          echo number_format($receivable['amount'],2,'.',','); 
+                        }
+                        ?>
+                      </td>
+                      <td style="text-align:right;">
+                        <?php 
+                        if($receivable['tax_amount']<0) {
+                          echo "(".number_format(abs($receivable['tax_amount']),2,'.',',').")"; 
+                        } else {
+                          echo number_format($receivable['tax_amount'],2,'.',','); 
+                        }
+                        ?>
+                      </td>
+                    </tr>
+             <?php
+                    }
+                  }
+                }
+             ?>
+
+              <tr>
+               <td><span style="margin-left:20px;font-weight:bold; font-size:12px;">Total Purchase Tax</span></td>
+               <td></td>
+               <td style="text-align:right;">
+               <?php 
+               if($total_purchase<0) {
+                  echo "(".number_format(abs($total_purchase),2,'.',',').")"; 
+               } else {
+                  echo number_format($total_purchase,2,'.',',');
+               } 
+               ?>
+               </td>
+             </tr>
+
+             <tr>
+               <td><span style="margin-left:10px;font-weight:bold; font-size:12px;">Net Tax</span></td>
+               <td></td>
+               <td style="text-align:right;">
+               <?php 
+               //echo $total_purchase;
+               //echo $total_supply;
+               $total_tax = round($total_supply-$total_purchase,2);
+               if($total_tax<0) {
+                 echo "(".number_format(abs($total_tax),2,'.',',').")";
+               } else {
+                 echo number_format($total_tax,2,'.',',');
+               }
+                ?>
+               </td>
+             </tr>
+                                          
+
+            </tbody>
+        </table>
+        </div>
+        </div>
+        </div>
+        </div>
+    </div>
+
+    
+
+
+  </div>
+
+<!--   <div class="row">
+        <div class="col-md-12">
+        <?php 
+          $net_profit = $total_income - $total_expense;
+        ?>
+        <h4>Net Profit : 
+        <?php
+         if($net_profit<0) {
+            $negative_format = "(".number_format(abs($net_profit),2,'.',',').")";
+            echo $negative_format;
+         } else {
+            echo number_format($net_profit,2,'.',',');
+         }
+        ?></h4>
+        </div>
+  </div>
+ -->
+</div>
+</div>
+
+<div id="content" style="display:none;">
+      <h4 align="center"><?php echo $company_name; ?> </h4> 
+           <h4 align="center">Sales Tax</h4> 
+           <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4>  
+        <table class="table responsive" border="0" align="center" cellpadding="7" cellspacing="7" width="100%">
+            <thead>
+              <tr>
+                 <th>
+                    Particulars
+                 </th>
+                 <th style="text-align:right;">
+                    Base Amount
+                 </th>
+                 <th style="text-align:right;">
+                    Tax Amount
+                 </th>
+              </tr>
+            </thead>
+
+                        <tbody>
+             
+             <tr>
+               <td><span style="margin-left:10px;font-weight:bold; font-size:13px;">Sales Tax Supply</span></td>
+               <td></td>
+             </tr>
+
+             <?php 
+                $total_supply = 0.00;
+                foreach ($this->taxPayable as $key => $payable) {
+                  foreach ($this->taxes as $tax) {
+                    if($tax['id']==$key) {
+                      foreach ($this->supply as $keys => $supply) {
+                        if($tax['tax_code']==$keys) {
+                          $code = $supply['name'];
+                        }
+                      }
+                      $total_supply += $payable['tax_amount'];
+              ?>
+                    <tr>
+                      <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $code."-".$tax['tax_percentage']." %"; ?></span></td>
+                      <td style="text-align:right;">
+                        <?php 
+                        if($payable['amount']<0) {
+                          echo "(".number_format(abs($payable['amount']),2,'.',',').")"; 
+                        } else {
+                          echo number_format($payable['amount'],2,'.',','); 
+                        }
+                        
+                        ?>
+                      </td>
+                      <td style="text-align:right;">
+                        <?php 
+                        if($payable['tax_amount']<0) {
+                          echo "(".number_format(abs($payable['tax_amount']),2,'.',',').")"; 
+                        } else {
+                          echo number_format($payable['tax_amount'],2,'.',',');
+                        }
+                         ?>
+                      </td>
+                    </tr>
+             <?php
+                    }
+                  }
+                }
+             ?>
+
+            <tr>
+               <td><span style="margin-left:20px;font-weight:bold; font-size:12px;">Total Supply Tax</span></td>
+               <td></td>
+               <td style="text-align:right;">
+               <?php 
+               if($total_supply<0) {
+                  echo "(".number_format(abs($total_supply),2,'.',',').")"; 
+               } else {
+                  echo number_format($total_supply,2,'.',',');
+               } 
+               ?>
+               </td>
+             </tr>
+
+            <tr>
+               <td><span style="margin-left:10px;font-weight:bold; font-size:13px;">Sales Tax Purchase</span></td>
+               <td></td>
+               <td></td>
+             </tr>
+
+              <?php 
+               $total_purchase = 0.00;
+                foreach ($this->taxReceivable as $key => $receivable) {
+                  foreach ($this->taxes as $tax) {
+                    if($tax['id']==$key) {
+                      foreach ($this->purchase as $keys => $purchase) {
+                        if($tax['tax_code']==$keys) {
+                          $code = $purchase['name'];
+                        }
+                      }
+                       $total_purchase += $receivable['tax_amount'];
+              ?>
+                    <tr>
+                      <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $code."-".$tax['tax_percentage']." %"; ?></span></td>
+                      <td style="text-align:right;">
+                        <?php 
+                        if($receivable['amount']<0) {
+                          echo "(".number_format(abs($receivable['amount']),2,'.',',').")"; 
+                        } else {
+                          echo number_format($receivable['amount'],2,'.',','); 
+                        }
+                        ?>
+                      </td>
+                      <td style="text-align:right;">
+                        <?php 
+                        if($receivable['tax_amount']<0) {
+                          echo "(".number_format(abs($receivable['tax_amount']),2,'.',',').")"; 
+                        } else {
+                          echo number_format($receivable['tax_amount'],2,'.',','); 
+                        }
+                        ?>
+                      </td>
+                    </tr>
+             <?php
+                    }
+                  }
+                }
+             ?>
+
+              <tr>
+               <td><span style="margin-left:20px;font-weight:bold; font-size:12px;">Total Purchase Tax</span></td>
+               <td></td>
+               <td style="text-align:right;">
+               <?php 
+               if($total_purchase<0) {
+                  echo "(".number_format(abs($total_purchase),2,'.',',').")"; 
+               } else {
+                  echo number_format($total_purchase,2,'.',',');
+               } 
+               ?>
+               </td>
+             </tr>
+
+             <tr>
+               <td><span style="margin-left:10px;font-weight:bold; font-size:12px;">Net Tax</span></td>
+               <td></td>
+               <td style="text-align:right;">
+               <?php 
+               //echo $total_purchase;
+               //echo $total_supply;
+               $total_tax = round($total_supply-$total_purchase,2);
+               if($total_tax<0) {
+                 echo "(".number_format(abs($total_tax),2,'.',',').")";
+               } else {
+                 echo number_format($total_tax,2,'.',',');
+               }
+                ?>
+               </td>
+             </tr>
+                                          
+
+            </tbody>
+
+        </table>
+
+
+</div>
+<script type="text/javascript">
+/* var nowTemp = new Date();
+var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+ 
+var checkin = $('#from_date').datepicker({
+  onRender: function(date) {
+    return date.valueOf() < now.valueOf() ? 'disabled' : '';
+  }
+}).on('changeDate', function(ev) {
+  if (ev.date.valueOf() > checkout.date.valueOf()) {
+    var newDate = new Date(ev.date)
+    newDate.setDate(newDate.getDate() + 1);
+    checkout.setValue(newDate);
+  }
+  checkin.hide();
+  $('#to_date')[0].focus();
+}).data('datepicker');
+var checkout = $('#to_date').datepicker({
+  onRender: function(date) {
+    return date.valueOf() <= checkin.date.valueOf() ? 'disabled' : '';
+  }
+}).on('changeDate', function(ev) {
+  checkout.hide();
+}).data('datepicker'); */
+</script>
+<script type="text/javascript">
+
+  (function ($) {
+  var rules = document.styleSheets[document.styleSheets.length-1].cssRules;
+  for (var idx = 0, len = rules.length; idx < len; idx++) {
+    $(rules[idx].selectorText).each(function (i, elem) {
+      elem.style.cssText += rules[idx].style.cssText;
+    });
+  }
+  $('style').remove();
+})(jQuery);
+
+var tableToExcel = (function() {
+  var uri = 'data:application/vnd.ms-excel;base64,'
+    , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+    , base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) }
+    , format = function(s, c) { return s.replace(/{(\w+)}/g, function(m, p) { return c[p]; }) }
+  return function(table, name) {
+    if (!table.nodeType) table = document.getElementById(table)
+    var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML}
+    window.location.href = uri + base64(format(template, ctx))
+  }
+})()
+</script>

@@ -1,0 +1,28 @@
+<div class="main-container">
+<div class="container">
+<div class="board-widget">
+                        <div class="row">
+                            <div class="col-sm-6 col-md-3">
+                                <div class="board-widget-wrap">
+                                    <a href="#"><i class="icon-users-2"></i><span class="board-widget-label">Users</span><span class="board-widget-intro"> Integer eros lorem, tempor vitae... </span></a>
+                                </div>
+                            </div>
+                            <div class=" col-sm-6 col-md-3">
+                                <div class="board-widget-wrap">
+                                    <a href="#"><i class="icon-file-8"></i><span class="board-widget-label">Content </span><span class="board-widget-intro"> Vivamus lorem velit, tinci dunt... </span></a>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-3">
+                                <div class="board-widget-wrap">
+                                    <a href="#"><i class="icon-briefcase"></i><span class="board-widget-label">Media</span><span class="board-widget-intro"> Nullam tincidunt quam quis erat... </span><span class="count-noty">05</span></a>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-3">
+                                <div class="board-widget-wrap">
+                                    <a href="#"><i class="icon-chart"></i><span class="board-widget-label">Statistics</span><span class="board-widget-intro"> Vivamus mattis scelerisque auctor... </span><span class="count-noty">90</span></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+</div>
+</div>

@@ -1,0 +1,93 @@
+<?php 
+  $logSession = new Zend_Session_Namespace('sess_login');
+?>
+
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li class="active">Announcement Notification</li>
+</ul>
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+
+ <div class="row">
+                        <div class="col-md-12">
+
+                            <h3>Announcement Messages</h3>
+
+                            <div class="box-widget">
+                                <table class="table data-tbl-boxy responsive">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                S.No.
+                                            </th>
+                                            <th>
+                                                Subject
+                                            </th>
+                                            <th>
+                                                Message
+                                            </th>
+                                            <th>
+                                                Date & Time
+                                            </th>
+                                            <th>
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php 
+                                        $i=1;
+                                        if(isset($this->notifyMessages) && !empty($this->notifyMessages)) {
+                                            foreach ($this->notifyMessages as $key => $message) {
+                                              $mid = base64_encode($key);
+                                              if($message['seen']==1) {
+                                                $class = 'not-seen';
+                                              } else {
+                                                $class = 'seen';
+                                              }
+                                    ?>
+                                        <tr class="<?php echo $class; ?>">
+                                          <td><?php echo $i; ?></td>
+                                          <td><?php echo $message['subject']; ?></td>
+                                          <td><?php echo substr($message['message'],0,30)."..."; ?></td>
+                                          <td><?php echo date('d-m-Y h:i:s',strtotime($message['date'])); ?></td>
+                                          <td><span class="label label-success"><a href="<?php echo $this->sitePath."default/notification/message/id/".$mid; ?>"? style="color:#fff;">View</a></span></td>
+                                        </tr>
+                                    <?php 
+                                          $i++;
+                                        }
+                                      }
+                                    ?>
+                                    </tbody>
+                                </table>
+                               
+                            </div>
+                            
+
+                        </div>
+                    </div>
+
+
+</div>
+</div>
+

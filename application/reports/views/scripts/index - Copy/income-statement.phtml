@@ -1,0 +1,440 @@
+<?php
+$logSession = new Zend_Session_Namespace('sess_login');
+if(isset($logSession->proxy_name) && !empty($logSession->proxy_name)) {
+  $company_name = ucfirst($logSession->proxy_name);
+} else {
+  $company_name = ucfirst($logSession->name);
+}
+?>
+<div class="main-container">
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+
+      <form class="form-horizontal" id="report-period" method="post">
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">From Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="from_date" id="from_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->from) && !empty($this->from)) { echo $this->from; } else { echo date('01-01-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">To Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="to_date" id="to_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->to) && !empty($this->to)) { echo $this->to; } else { echo date('d-m-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+         <label class="col-lg-5 control-label">&nbsp;</label>
+           <div class="col-lg-3">
+              <div class="form-actions">
+                <button type="submit" id="update" class="btn btn-primary">Update</button>
+              </div>
+           </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+    <div class="row">
+      <div class="col-md-2 pull-right">
+          <button class="print btn btn-inverse" type="button" rel="content"><i class="icon-print"></i> Print</button>
+          <button class="btn btn-inverse" type="button"  onclick="tableToExcel('content', 'Income Statement')"><i class="icon-file-excel"></i> Excel</button>
+      </div>
+    </div>
+
+
+  <div class="row">
+    <div class="col-md-12">
+           <h4 align="center"><?php echo $company_name; ?> Company</h4> 
+           <h4 align="center">Income Statement</h4> 
+           <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4> 
+    </div>
+    <div class="col-md-6">
+     <div class="box-widget" style="margin-bottom:0px;">
+        <div class="widget-head clearfix">
+            <span class="h-icon"><i class="icon-power-cord"></i></span>
+            <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(1);" style="color:#fff;">Income</a></h4>
+        </div>
+        <div class="widget-container">
+        <div class="widget-block">
+        <div class="widget-content">
+        <table class="table responsive">
+            <thead>
+              <tr>
+                 <th>
+                    Accounts
+                 </th>
+                 <th>
+                    
+                 </th>
+              </tr>
+            </thead>
+            <tbody>
+            <?php
+                $total_income = 0.00;
+                foreach ($this->incomeAcc as $key => $inc) {
+                    $debit_amount = $inc['debit_amount'];
+                    $credit_amount = $inc['credit_amount'];
+                    $amount = $credit_amount - $debit_amount;
+                    $total_income += $amount;
+            ?>
+                <tr>
+                   <td>
+                    <?php
+                        foreach ($this->incomeCoa as $incType) {
+                           if($key==$incType['id']) {
+                               echo $incType['account_name'];
+                           }
+                         } 
+                    ?>
+                    </td>
+                    <td>
+                    <?php 
+
+                    if($amount<0) {
+                        $negative_format = "(".number_format(abs($amount),2,'.',',').")";
+                        echo $negative_format;
+                    } else {
+                        echo number_format($amount,2,'.',',');
+                    }
+
+                    ?>
+                    </td>
+                </tr>
+
+            <?php
+                }
+            ?>
+            <tr>
+                <td><strong>Total Income</strong></td>
+                <td>
+                <strong>
+                <?php 
+                 if($total_income<0) {
+                        $negative_format = "(".number_format(abs($total_income),2,'.',',').")";
+                        echo $negative_format;
+                    } else {
+                        echo number_format($total_income,2,'.',',');
+                    }
+                ?>
+                </strong></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+     <div class="box-widget" style="margin-bottom:0px;">
+        <div class="widget-head clearfix">
+            <span class="h-icon"><i class="icon-power-cord"></i></span>
+            <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(1);" style="color:#fff;">Expense</a></h4>
+        </div>
+        <div class="widget-container">
+        <div class="widget-block">
+        <div class="widget-content">
+        <table class="table responsive">
+            <thead>
+              <tr>
+                 <th>
+                    Accounts
+                 </th>
+                 <th>
+                    
+                 </th>
+              </tr>
+            </thead>
+            <tbody>
+            <?php
+                $total_expense = 0.00;
+                foreach ($this->expenseAcc as $key => $exp) {
+                    $debit_amount = $exp['debit_amount'];
+                    $credit_amount = $exp['credit_amount'];
+                    $amount = $debit_amount - $credit_amount;
+                    $total_expense += $amount;
+            ?>
+                <tr>
+                   <td>
+                    <?php
+                        foreach ($this->expenseCoa as $expType) {
+                           if($key==$expType['id']) {
+                               echo $expType['account_name'];
+                           }
+                         } 
+                    ?>
+                    </td>
+                    <td>
+                    <?php 
+                    if($amount<0) {
+                        $negative_format = "(".number_format(abs($amount),2,'.',',').")";
+                        echo $negative_format;
+                    } else {
+                        echo number_format($amount,2,'.',',');
+                    }
+                    ?>
+                    </td>
+                </tr>
+
+            <?php
+                }
+            ?>
+            <tr>
+                <td><strong>Total Expense</strong></td>
+                <td><strong>
+                <?php 
+                if($total_expense<0) {
+                  $negative_format = "(".number_format(abs($total_expense),2,'.',',').")";
+                  echo $negative_format;
+                } else {
+                  echo number_format($total_expense,2,'.',',');
+                }
+                ?>
+                </strong></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        </div>
+        </div>
+        </div>
+    </div>
+
+     <div class="col-md-12">
+        <?php 
+          $net_profit = $total_income - $total_expense;
+        ?>
+        <h4>Net Profit : 
+        <?php
+         if($net_profit<0) {
+            $negative_format = "(".number_format(abs($net_profit),2,'.',',').")";
+            echo $negative_format;
+         } else {
+            echo number_format($net_profit,2,'.',',');
+         }
+        ?></h4>
+        </div>
+  </div>
+
+<!--   <div class="row">
+        <div class="col-md-12">
+        <?php 
+          $net_profit = $total_income - $total_expense;
+        ?>
+        <h4>Net Profit : 
+        <?php
+         if($net_profit<0) {
+            $negative_format = "(".number_format(abs($net_profit),2,'.',',').")";
+            echo $negative_format;
+         } else {
+            echo number_format($net_profit,2,'.',',');
+         }
+        ?></h4>
+        </div>
+  </div>
+ -->
+</div>
+</div>
+
+<div id="content" style="display:none;">
+     <h4 align="center"><?php echo $company_name; ?> Company</h4> 
+     <h4 align="center">Income Statement</h4> 
+     <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4> 
+     <h4 align="center">Income</h4>
+        <table border="0" align="center" cellpadding="7" cellspacing="7">
+            <thead>
+              <tr>
+                 <th>
+                    Accounts
+                 </th>
+                 <th>
+                    
+                 </th>
+              </tr>
+            </thead>
+            <tbody>
+            <?php
+                $total_income = 0.00;
+                foreach ($this->incomeAcc as $key => $inc) {
+                    $debit_amount = $inc['debit_amount'];
+                    $credit_amount = $inc['credit_amount'];
+                    $amount = $credit_amount - $debit_amount;
+                    $total_income += $amount;
+            ?>
+                <tr>
+                   <td>
+                    <?php
+                        foreach ($this->incomeCoa as $incType) {
+                           if($key==$incType['id']) {
+                               echo $incType['account_name'];
+                           }
+                         } 
+                    ?>
+                    </td>
+                    <td>
+                    <?php 
+
+                    if($amount<0) {
+                        $negative_format = "(".number_format(abs($amount),2,'.',',').")";
+                        echo $negative_format;
+                    } else {
+                        echo number_format($amount,2,'.',',');
+                    }
+
+                    ?>
+                    </td>
+                </tr>
+
+            <?php
+                }
+            ?>
+            <tr>
+                <td><strong>Total Income</strong></td>
+                <td>
+                <strong>
+                <?php 
+                 if($total_income<0) {
+                        $negative_format = "(".number_format(abs($total_income),2,'.',',').")";
+                        echo $negative_format;
+                    } else {
+                        echo number_format($total_income,2,'.',',');
+                    }
+                ?>
+                </strong></td>
+            </tr>
+            </tbody>
+        </table>
+
+       <h4 align="center">Expense</h4>
+        <table border="0" align="center" cellpadding="7" cellspacing="7">
+            <thead>
+              <tr>
+                 <th>
+                    Accounts
+                 </th>
+                 <th>
+                    
+                 </th>
+              </tr>
+            </thead>
+            <tbody>
+            <?php
+                $total_expense = 0.00;
+                foreach ($this->expenseAcc as $key => $exp) {
+                    $debit_amount = $exp['debit_amount'];
+                    $credit_amount = $exp['credit_amount'];
+                    $amount = $debit_amount - $credit_amount;
+                    $total_expense += $amount;
+            ?>
+                <tr>
+                   <td>
+                    <?php
+                        foreach ($this->expenseCoa as $expType) {
+                           if($key==$expType['id']) {
+                               echo $expType['account_name'];
+                           }
+                         } 
+                    ?>
+                    </td>
+                    <td>
+                    <?php 
+                    if($amount<0) {
+                        $negative_format = "(".number_format(abs($amount),2,'.',',').")";
+                        echo $negative_format;
+                    } else {
+                        echo number_format($amount,2,'.',',');
+                    }
+                    ?>
+                    </td>
+                </tr>
+
+            <?php
+                }
+            ?>
+            <tr>
+                <td><strong>Total Expense</strong></td>
+                <td><strong>
+                <?php 
+                if($total_expense<0) {
+                  $negative_format = "(".number_format(abs($total_expense),2,'.',',').")";
+                  echo $negative_format;
+                } else {
+                  echo number_format($total_expense,2,'.',',');
+                }
+                ?>
+                </strong></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <?php 
+          $net_profit = $total_income - $total_expense;
+        ?>
+        <h4>Net Profit : 
+        <?php
+         if($net_profit<0) {
+            $negative_format = "(".number_format(abs($net_profit),2,'.',',').")";
+            echo $negative_format;
+         } else {
+            echo number_format($net_profit,2,'.',',');
+         }
+        ?></h4>
+</div>
+<script type="text/javascript">
+/* var nowTemp = new Date();
+var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+ 
+var checkin = $('#from_date').datepicker({
+  onRender: function(date) {
+    return date.valueOf() < now.valueOf() ? 'disabled' : '';
+  }
+}).on('changeDate', function(ev) {
+  if (ev.date.valueOf() > checkout.date.valueOf()) {
+    var newDate = new Date(ev.date)
+    newDate.setDate(newDate.getDate() + 1);
+    checkout.setValue(newDate);
+  }
+  checkin.hide();
+  $('#to_date')[0].focus();
+}).data('datepicker');
+var checkout = $('#to_date').datepicker({
+  onRender: function(date) {
+    return date.valueOf() <= checkin.date.valueOf() ? 'disabled' : '';
+  }
+}).on('changeDate', function(ev) {
+  checkout.hide();
+}).data('datepicker'); */
+</script>
+<script type="text/javascript">
+  (function ($) {
+  var rules = document.styleSheets[document.styleSheets.length-1].cssRules;
+  for (var idx = 0, len = rules.length; idx < len; idx++) {
+    $(rules[idx].selectorText).each(function (i, elem) {
+      elem.style.cssText += rules[idx].style.cssText;
+    });
+  }
+  $('style').remove();
+})(jQuery);
+
+var tableToExcel = (function() {
+  var uri = 'data:application/vnd.ms-excel;base64,'
+    , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+    , base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) }
+    , format = function(s, c) { return s.replace(/{(\w+)}/g, function(m, p) { return c[p]; }) }
+  return function(table, name) {
+    if (!table.nodeType) table = document.getElementById(table)
+    var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML}
+    window.location.href = uri + base64(format(template, ctx))
+  }
+})()
+</script>

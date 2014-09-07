@@ -1,0 +1,142 @@
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/developer/"; ?>">Developer</a></li>
+   <li class="active">IRAS Tax Codes</li>
+</ul>
+
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+   <?php
+    $logSession = new Zend_Session_Namespace('sess_login');
+   ?>
+   <?php 
+        if($logSession->type!=5) {
+   ?>
+   <div class="row">
+       <div class="col-md-12 grid-spacing">
+       <a href="<?php echo $this->sitePath."developer/add-irastax"; ?>" class="btn btn-primary" type="button" >Add New Tax Code</a>
+            <!-- Element to pop up -->    
+       </div>
+   </div>
+   <?php 
+        }
+    ?>
+   <div class="row">
+
+
+                        <div class="col-md-12">
+                            
+                            <div class="box-widget">
+                                <div class="widget-head clearfix">
+                                    <span class="h-icon"><i class="icon-power-cord"></i></span>
+                                    <h4 class="pull-left">IRAS Tax Codes</h4>
+                                </div>
+                                <div class="widget-container">
+                                    <div class="widget-block">
+                                        <div class="widget-content">
+                                            <table class="table responsive">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                Tax Type
+                                            </th>
+                                            <th>
+                                                Tax Code
+                                            </th>
+                                            <th>
+                                                Percentage
+                                            </th>
+                                            <th>
+                                                Description
+                                            </th>
+                                            <th>
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php 
+                                      if(isset($this->taxes) && !empty($this->taxes)) {
+                                        $i=1;
+                                        foreach($this->taxes as $tax) {
+                                    ?>
+                                        <tr>
+                                        <td>
+                                        <?php 
+                                          if($tax['type']==1) {
+                                            echo "Purchase";
+                                          } else if($tax['type']==2) {
+                                            echo "Supply";
+                                          }
+                                        ?>
+                                        </td>
+                                        <td>
+                                        <?php 
+                                            echo $tax['name'];
+                                        ?>
+                                        </td>
+                                        <td>
+                                        <?php 
+                                            echo $tax['percentage']." %";
+                                        ?>
+                                        </td>
+                                        <td>
+                                        <?php 
+                                            echo $tax['description'];
+                                        ?>
+                                        </td>
+                                        <td>
+                                        <?php
+                                          if($tax['status']==1) {
+                                        ?>
+                                        <a href="<?php echo $this->sitePath."developer/irastax/set-tax-id/".base64_encode($tax['id'])."/status/2/tax-name/".base64_encode($tax['name']); ?>" data-original-title="Unset Tax" title="Unset Tax"><i class="icon-checkbox-checked"></i></a>
+                                        <?php 
+                                          } else if($tax['status']==2) {
+                                        ?>
+                                        <a href="<?php echo $this->sitePath."developer/irastax/set-tax-id/".base64_encode($tax['id'])."/status/1/tax-name/".base64_encode($tax['name']); ?>" data-original-title="Set Tax" title="Set Tax"><i class="icon-checkbox-unchecked"></i></a>
+                                        <?php 
+                                          }
+                                        ?>
+                                        </td>
+                                        </tr>
+                                    <?php 
+                                        }
+                                      } else {
+                                    ?>
+                                    <tr>
+                                    <td colspan="5" align="center" style="text-align:center;"><h5>No Results Found</h5></td>
+                                    </tr>
+
+                                    <?php
+                                      }
+                                    ?>
+                                      </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+<script type="text/javascript">
+
+</script>

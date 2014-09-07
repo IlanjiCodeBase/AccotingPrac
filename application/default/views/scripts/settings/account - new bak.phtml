@@ -1,0 +1,765 @@
+<div id="popup">
+<span class="button b-close"><span>X</span></span>
+<div class="row" id="account_all">
+<?php
+$accountArray = array();
+ foreach ($this->getAccount as $account) {
+    $accountArray[$account['account_type']][$account['account_name']] = $account['account_id'];
+ }
+// echo '<pre>'; print_r($accountArray); echo '</pre>';
+?>
+ <h3>Select an account</h3>
+                            <div>
+                                <ul class="nav nav-tabs" id="myTab">
+                                    <li class="active"><a data-toggle="tab" href="#asset">Assets</a></li>
+                                    <li class=""><a data-toggle="tab" href="#liability">Liabilities</a></li>
+                                    <li class=""><a data-toggle="tab" href="#income">Income</a></li>
+                                    <li class=""><a data-toggle="tab" href="#expenses">Expenses</a></li>
+                                    <li class=""><a data-toggle="tab" href="#equity">Equity</a></li>
+                                </ul>
+                                <div class="tab-content" id="myTabContent">
+                                    <div id="asset" class="tab-pane fade active in">
+                                    <ul class="filetree treeview-famfamfam">
+                                    <?php
+                                        foreach ($this->asset as $levelOne => $listOne) {
+                                    ?>
+                                        <li class="closed"><span class="folder"><?php echo "&nbsp;".$levelOne; ?></span> 
+                                        <ul>
+                                            <?php
+                                                foreach ($listOne as $levelTwo => $listTwo) {
+                                            ?>
+                                                <li class="closed"><span class="folder"><?php echo "&nbsp;".$levelTwo; ?></span>
+                                                <ul>
+                                                    <?php
+                                                        foreach ($listTwo as $levelThree => $listThree) {
+                                                            if((isset($accountArray[1][$listThree]) && $accountArray[1][$listThree]!=$levelThree) || (!isset($accountArray[1][$listThree]))) {
+                                                    ?>
+                                                        <li><span class="file"><a href="javascript:void(0)" onclick="return accountSelect('1','<?php echo $levelThree; ?>','<?php echo $listThree; ?>');"><?php echo "&nbsp;".$listThree; ?></a></span></li>
+                                                    <?php
+                                                            }
+                                                        }
+                                                    ?>
+                                                </li>
+                                                </ul>
+                                            <?php
+                                                }
+                                            ?>
+                                        </ul>
+                                    <?php
+                                        }
+                                    ?>
+                                    </ul>
+                                    </div>
+
+                                     <div id="liability" class="tab-pane fade">
+                                    <ul class="filetree treeview-famfamfam">
+                                    <?php
+                                        foreach ($this->liability as $levelOne => $listOne) {
+                                    ?>
+                                        <li class="closed"><span class="folder"><?php echo "&nbsp;".$levelOne; ?></span> 
+                                        <ul>
+                                            <?php
+                                                foreach ($listOne as $levelTwo => $listTwo) {
+                                            ?>
+                                                <li class="closed"><span class="folder"><?php echo "&nbsp;".$levelTwo; ?></span>
+                                                <ul>
+                                                    <?php
+                                                        foreach ($listTwo as $levelThree => $listThree) {
+                                                               if((isset($accountArray[2][$listThree]) && $accountArray[2][$listThree]!=$levelThree) || (!isset($accountArray[2][$listThree]))) {
+                                                    ?>
+                                                        <li><span class="file"><a href="javascript:void(0)" onclick="return accountSelect('2','<?php echo $levelThree; ?>','<?php echo $listThree; ?>');"><?php echo "&nbsp;".$listThree; ?></a></span></li>
+                                                    <?php
+                                                                }
+                                                        }
+                                                    ?>
+                                                </li>
+                                                </ul>
+                                            <?php
+                                                }
+                                            ?>
+                                        </ul>
+                                    <?php
+                                        }
+                                    ?>
+                                    </ul>
+                                    </div>
+
+                                    <div id="income" class="tab-pane fade">
+                                    <ul class="filetree treeview-famfamfam">
+                                    <?php
+                                        foreach ($this->income as $levelOne => $listOne) {
+                                    ?>
+                                        <li class="closed"><span class="folder"><?php echo "&nbsp;".$levelOne; ?></span> 
+                                        <ul>
+                                            <?php
+                                                foreach ($listOne as $levelTwo => $listTwo) {
+                                            ?>
+                                                <li class="closed"><span class="folder"><?php echo "&nbsp;".$levelTwo; ?></span>
+                                                <ul>
+                                                    <?php
+                                                        foreach ($listTwo as $levelThree => $listThree) {
+                                                           if((isset($accountArray[3][$listThree]) && $accountArray[3][$listThree]!=$levelThree) || (!isset($accountArray[3][$listThree]))) {
+                                                    ?>
+                                                        <li><span class="file"><a href="javascript:void(0)" onclick="return accountSelect('3','<?php echo $levelThree; ?>','<?php echo $listThree; ?>');"><?php echo "&nbsp;".$listThree; ?></a></span></li>
+                                                    <?php
+                                                            }
+                                                        }
+                                                    ?>
+                                                </li>
+                                                </ul>
+                                            <?php
+                                                }
+                                            ?>
+                                        </ul>
+                                    <?php
+                                        }
+                                    ?>
+                                    </ul>
+                                    </div>
+
+                                    <div id="expenses" class="tab-pane fade">
+                                    <ul class="filetree treeview-famfamfam">
+                                    <?php
+                                        foreach ($this->expense as $levelOne => $listOne) {
+                                    ?>
+                                        <li class="closed"><span class="folder"><?php echo "&nbsp;".$levelOne; ?></span> 
+                                        <ul>
+                                            <?php
+                                                foreach ($listOne as $levelTwo => $listTwo) {
+                                            ?>
+                                                <li class="closed"><span class="folder"><?php echo "&nbsp;".$levelTwo; ?></span>
+                                                <ul>
+                                                    <?php
+                                                        foreach ($listTwo as $levelThree => $listThree) {
+                                                            if((isset($accountArray[4][$listThree]) && $accountArray[4][$listThree]!=$levelThree) || (!isset($accountArray[4][$listThree]))) {
+                                                    ?>
+                                                        <li><span class="file"><a href="javascript:void(0)" onclick="return accountSelect('4','<?php echo $levelThree; ?>','<?php echo $listThree; ?>');"><?php echo "&nbsp;".$listThree; ?></a></span></li>
+                                                    <?php
+                                                            }
+                                                        }
+                                                    ?>
+                                                </li>
+                                                </ul>
+                                            <?php
+                                                }
+                                            ?>
+                                        </ul>
+                                    <?php
+                                        }
+                                    ?>
+                                    </ul>
+                                    </div>
+
+                                    <div id="equity" class="tab-pane fade">
+                                    <ul class="filetree treeview-famfamfam">
+                                    <?php
+                                        foreach ($this->equity as $levelOne => $listOne) {
+                                    ?>
+                                        <li class="closed"><span class="folder"><?php echo "&nbsp;".$levelOne; ?></span> 
+                                        <ul>
+                                            <?php
+                                                foreach ($listOne as $levelTwo => $listTwo) {
+                                            ?>
+                                                <li class="closed"><span class="folder"><?php echo "&nbsp;".$levelTwo; ?></span>
+                                                <ul>
+                                                    <?php
+                                                        foreach ($listTwo as $levelThree => $listThree) {
+                                                          if((isset($accountArray[5][$listThree]) && $accountArray[5][$listThree]!=$levelThree) || (!isset($accountArray[5][$listThree]))) {
+                                                    ?>
+                                                        <li><span class="file"><a href="javascript:void(0)" onclick="return accountSelect('5','<?php echo $levelThree; ?>','<?php echo $listThree; ?>');"><?php echo "&nbsp;".$listThree; ?></a></span></li>
+                                                    <?php
+                                                           }
+                                                        }
+                                                    ?>
+                                                </li>
+                                                </ul>
+                                            <?php
+                                                }
+                                            ?>
+                                        </ul>
+                                    <?php
+                                        }
+                                    ?>
+                                    </ul>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+</div>
+<div class="row" id="income_expense" style="display:none;">
+
+ <h3>Edit Account</h3>
+ <form class="form-horizontal"  name="inc_exp" id="inc_exp" method="post">
+<div class="form-group">
+    <label class="col-lg-8 control-label">None of the fields for this account are editable. Are you sure you want to add this account?</label>
+    <input type="hidden" name="action" id="action" value="inc_exp">
+    <input type="hidden" name="inc_exp_acc_type" id="inc_exp_acc_type" />
+    <input type="hidden" name="inc_exp_acc_val" id="inc_exp_acc_val" />
+    <input type="hidden" name="inc_exp_acc_name" id="inc_exp_acc_name" />
+ </div>
+
+<div class="form-group">
+    <label class="col-lg-2 control-label">&nbsp;</label>
+    <div class="col-lg-3">
+       <div class="form-actions">
+          <button type="submit" id="save" class="btn btn-primary">Save</button>
+          <button type="reset" class="btn b-close">Close</button>
+      </div>
+   </div>
+  </div>
+
+</form>
+ </div>
+
+
+ <div class="row" id="other_accounts" style="display:none;">
+<h3>Edit Account</h3>
+<hr/>
+ <div class="widget-container col-md-12 col-md-offset-1">
+     <form class="form-horizontal" id="oth_acc" method="post">
+         <div class="form-group">
+            <label class="col-lg-2 control-label">Account Name</label>
+              <div class="col-lg-5">
+                <input type="hidden" name="action" id="action" value="others">
+                <input type="hidden" name="oth_acc_type" id="oth_acc_type" />
+                <input type="hidden" name="oth_acc_val" id="oth_acc_val" />
+                <input type="text" name="oth_acc_name" id="oth_acc_name" class="form-control" />
+              </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-2 control-label">Payment / Accruals Account</label>
+              <div class="col-lg-6">
+               <input type="checkbox" name="pay_account" id="pay_account" value="1" checked />
+               &nbsp; This account is for receipt / payment of money (e.g., cash equivalents) or  to record receivables/ payables
+              </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-2 control-label">Currency</label>
+                <div class="col-lg-3">
+                    <select name="currency" class="select2">
+                            <?php 
+                              $logSession = new Zend_Session_Namespace('sess_login');
+                               $currencySelect = '';
+                                if(isset($this->currencies) && !empty($this->currencies)) {
+                                foreach ($this->currencies as $key => $currencies) {
+                                  if(isset($logSession->currency) && !empty($logSession->currency)  && $key==$logSession->currency ) {
+                                            $currencySelect = 'selected';
+                                   } 
+                                    else if($key=="SGD"){
+                                        $currencySelect = 'selected';
+                                    }
+                                   else{ 
+                                            $currencySelect = '';
+                                    }
+                            ?>
+                    <option value="<?php echo $key?>" <?php echo $currencySelect; ?>><?php echo $currencies; ?></option>
+                            <?php
+                                    }
+                                } 
+                            ?>
+                    </select>  
+                 </div>
+                </div>
+
+
+<div class="form-group">
+    <label class="col-lg-2 control-label">&nbsp;</label>
+    <div class="col-lg-3">
+       <div class="form-actions">
+          <button type="submit" id="save" class="btn btn-primary">Save</button>
+          <button type="reset" class="btn b-close">Close</button>
+      </div>
+   </div>
+  </div>
+
+     </form>
+ </div>
+</div>
+
+
+<div class="row" id="edit_other_account" style="display:none;">
+<h3>Edit Account</h3>
+<hr/>
+ <div class="widget-container col-md-12 col-md-offset-1">
+     <form class="form-horizontal" id="oth_edit_acc" method="post">
+
+     </form>
+ </div>
+</div>
+
+
+</div> 
+
+<div class="main-container">
+<div class="container">
+
+ <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            <div class="alert alert-success" id="success" style="display:none;">
+            </div>
+            </div>
+ </div>
+
+  <div class="row">
+     <div class="col-md-1 grid-spacing">
+        <button class="btn btn-primary" id="add-account" type="button">Add an account</button>
+     </div>
+  </div>
+
+
+   <div class="row">
+
+
+                        <div class="col-md-12">
+                            
+                            <div class="box-widget">
+                                <div class="widget-head clearfix">
+                                    <span class="h-icon"><i class="icon-power-cord"></i></span>
+                                    <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(1);" style="color:#fff;">List of Accounts</a></h4>
+                                    <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(2);" style="color:#fff;">Balance Sheet</a></h4>
+                                    <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(3);" style="color:#fff;">Income & Expenses</a></h4>
+                                </div>
+                                <div class="widget-container">
+                                    <div class="widget-block">
+                                        <div class="widget-content">
+                                            <table class="table responsive">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            GL Number
+                                                        </th>
+                                                        <th>
+                                                            Chart of Accounts
+                                                        </th>
+                                                        <th>
+                                                            Actions
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                <?php
+                                                    $l=1;
+                                                ?>
+                                                   <tr class="balance_account">
+                                                    <td><?php echo $l."-0000-00"; ?></td>
+                                                    <td><span style="font-weight:bold; font-size:14px;">Assets</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->asset as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account">
+                                                            <td><?php echo $l."-".$l2."00-00"; ?></td>
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account">
+                                                        <td><?php echo $l."-".$l2.$l3."-00"; ?></td>
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(1,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                        if($account['account_type'] == 1 && $account['account_id']==$levelThree) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                            ?>
+                                                 <tr class="balance_account success assets_<?php echo $l2."_".$l3; ?>" style="display:none;">
+                                                        <td><?php echo $l."-".$l2.$l3."-".$l4; ?></td>
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td>
+                                                        <a href="javascript:void(0)" onclick="editAccount('<?php echo base64_encode($account['id']); ?>','edit')" data-original-title="Edit" title="Edit"><i class="icon-pencil-3"></i></a>
+
+                                                            <a href="javascript:void(0)" onclick="getConfirm('<?php echo base64_encode($account['id']); ?>','<?php echo base64_encode($account['account_name']); ?>','<?php echo base64_encode(1); ?>')"  data-original-title="Delete" title="Delete"><i class="icon-remove-2"></i></a>
+                                                        </td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                    }
+                                                }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+                                             <?php 
+                                                $l = 2;
+                                             ?>
+                                             <tr class="balance_account">
+                                                    <td><?php echo $l."-0000-00"; ?></td>
+                                                    <td><span style="font-weight:bold; font-size:14px;">Liability/Credit Card</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->liability as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account">
+                                                            <td><?php echo $l."-".$l2."00-00"; ?></td>
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account">
+                                                        <td><?php echo $l."-".$l2.$l3."-00"; ?></td>
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(2,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                        if($account['account_type'] == 2 && $account['account_id']==$levelThree) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                            ?>
+                                                 <tr class="balance_account success liabilities_<?php echo $l2."_".$l3; ?>" style="display:none;">
+                                                        <td><?php echo $l."-".$l2.$l3."-".$l4; ?></td>
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td>
+                                                        <a href="javascript:void(0)" onclick="editAccount('<?php echo base64_encode($account['id']); ?>','edit')" data-original-title="Edit" title="Edit"><i class="icon-pencil-3"></i></a>
+                                                            <a href="javascript:void(0)" onclick="getConfirm('<?php echo base64_encode($account['id']); ?>','<?php echo base64_encode($account['account_name']); ?>','<?php echo base64_encode(2); ?>')"  data-original-title="Delete" title="Delete"><i class="icon-remove-2"></i></a>
+                                                        </td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                    }
+                                                }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+
+                                             <?php 
+                                                $l = 3;
+                                             ?>
+                                             <tr class="other_account">
+                                                    <td><?php echo $l."-0000-00"; ?></td>
+                                                    <td><span style="font-weight:bold; font-size:14px;">Income</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->income as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="other_account">
+                                                            <td><?php echo $l."-".$l2."00-00"; ?></td>
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="other_account">
+                                                        <td><?php echo $l."-".$l2.$l3."-00"; ?></td>
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(3,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                        if($account['account_type'] == 3 && $account['account_id']==$levelThree) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                            ?>
+                                                 <tr class="other_account success incomes_<?php echo $l2."_".$l3; ?>" style="display:none;">
+                                                        <td><?php echo $l."-".$l2.$l3."-".$l4; ?></td>
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td><a href="javascript:void(0)" onclick="getConfirm('<?php echo base64_encode($account['id']); ?>','<?php echo base64_encode($account['account_name']); ?>','<?php echo base64_encode(3); ?>')"  data-original-title="Delete" title="Delete"><i class="icon-remove-2"></i></a></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                    }
+                                                }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+
+                                            <?php 
+                                                $l = 4;
+                                             ?>
+                                             <tr class="other_account">
+                                                    <td><?php echo $l."-0000-00"; ?></td>
+                                                    <td><span style="font-weight:bold; font-size:14px;">Expense</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->expense as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="other_account">
+                                                            <td><?php echo $l."-".$l2."00-00"; ?></td>
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="other_account">
+                                                        <td><?php echo $l."-".$l2.$l3."-00"; ?></td>
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(4,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                        if($account['account_type'] == 4 && $account['account_id']==$levelThree) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                            ?>
+                                                 <tr class="other_account success expenses_<?php echo $l2."_".$l3; ?>"  style="display:none;">
+                                                        <td><?php echo $l."-".$l2.$l3."-".$l4; ?></td>
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td><a href="javascript:void(0)" onclick="getConfirm('<?php echo base64_encode($account['id']); ?>','<?php echo base64_encode($account['account_name']); ?>','<?php echo base64_encode(4); ?>')" data-original-title="Delete" title="Delete"><i class="icon-remove-2"></i></a></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                    }
+                                                }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+                                             
+
+                                             <?php 
+                                                $l = 5;
+                                             ?>
+                                             <tr class="balance_account">
+                                                    <td><?php echo $l."-0000-00"; ?></td>
+                                                    <td><span style="font-weight:bold; font-size:14px;">Equity</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->equity as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account">
+                                                            <td><?php echo $l."-".$l2."00-00"; ?></td>
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account">
+                                                        <td><?php echo $l."-".$l2.$l3."-00"; ?></td>
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(5,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                        if($account['account_type'] == 5 && $account['account_id']==$levelThree) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                            ?>
+                                                 <tr class="balance_account success equities_<?php echo $l2."_".$l3; ?>" style="display:none;">
+                                                        <td><?php echo $l."-".$l2.$l3."-".$l4; ?></td>
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td>
+                                                        <a href="javascript:void(0)" onclick="editAccount('<?php echo base64_encode($account['id']); ?>','edit')" data-original-title="Edit" title="Edit"><i class="icon-pencil-3"></i></a>
+                                                            <a href="javascript:void(0)" onclick="getConfirm('<?php echo base64_encode($account['id']); ?>','<?php echo base64_encode($account['account_name']); ?>','<?php echo base64_encode(5); ?>')"  data-original-title="Delete" title="Delete"><i class="icon-remove-2"></i></a>
+                                                        </td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                    }
+                                                }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+</div>
+</div>
+<script type="text/javascript">
+function accountSelect(accountType,accountValue,accountName) {
+    if(accountType==3 || accountType==4) {
+        $("#account_all").hide();
+        $("#other_accounts").hide();
+        $("#inc_exp_acc_type").val(accountType);
+        $("#inc_exp_acc_val").val(accountValue);
+        $("#inc_exp_acc_name").val(accountName);
+        $("#income_expense").show();
+    } else if(accountType==1 || accountType==2 || accountType==5) {
+        $("#account_all").hide();
+        $("#income_expense").hide();
+        $("#oth_acc_type").val(accountType);
+        $("#oth_acc_val").val(accountValue);
+        $("#oth_acc_name").val(accountName);
+        $("#other_accounts").show();
+    }
+}
+ $("#add-account").click(function() {
+    $("#account_all").show();
+    $('#popup').bPopup({
+            modalClose: false,
+            easing: 'easeOutBack', //uses jQuery easing plugin
+            speed: 1000,
+            transition: 'slideDown',
+            follow: [false, false], //x, y
+         //   position: [150, 400] //x, y
+    });
+ });
+ $(".b-close").click(function() {
+    $(".filetree").treeview();
+    $("#income_expense").hide();
+    $("#other_accounts").hide();
+    $("#edit_other_account").hide();
+    $("#account_all").hide();
+ });
+
+function getConfirm(Idvalue,Accname,Acctype) {
+        var confirmMsg = confirm("Are you sure want to delete this account?");
+        if(confirmMsg) {
+            window.location.href='<?php echo $this->sitePath; ?>settings/account/delid/'+Idvalue+'/delname/'+Accname+'/deltype/'+Acctype;
+        }
+    }
+function editAccount(Idvalue,action) {
+    $("#account_all").hide();
+    $("#edit_other_account").show();
+    $('#popup').bPopup({
+        contentContainer:'#oth_edit_acc',
+        loadUrl: '<?php echo $this->sitePath."settings/"; ?>ajax-display/ajaxAction/edit-account/id/'+Idvalue+'/action/'+action
+    });
+}
+
+function show(value,location1,location2) {
+    if(location1<=9) {
+       location1 = "0"+location1;
+    }
+    if(location2<=9) {
+       location2 = "0"+location2;
+    }
+    if(value==1) {
+        $(".assets_"+location1+"_"+location2).slideToggle(1000);
+    } else if(value==2) {
+        $(".liabilities_"+location1+"_"+location2).slideToggle(1000);
+    } else if(value==3) {
+        $(".incomes_"+location1+"_"+location2).slideToggle(1000);
+    } else if(value==4) {
+        $(".expenses_"+location1+"_"+location2).slideToggle(1000);
+    } else if(value==5) {
+        $(".equities_"+location1+"_"+location2).slideToggle(1000);
+    }
+} 
+
+function account(value) {
+    if(value==1) {
+        $(".balance_account").show();
+        $(".other_account").show();
+    } else if(value==2) {
+        $(".balance_account").show();
+        $(".other_account").hide();
+    }  else if(value==3) {
+        $(".balance_account").hide();
+        $(".other_account").show();
+    }
+}
+
+</script>

@@ -1,0 +1,214 @@
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/settings/"; ?>">Settings</a></li>
+   <li><a href="<?php echo $this->sitePath."default/settings/products"; ?>">Products</a></li>
+   <li class="active">Add</li>
+</ul>
+
+
+                                <div class="row">
+                                       <div class="col-md-6 col-md-offset-3">
+                                       <?php 
+                                            if(isset($this->success) && !empty($this->success)) {
+                                       ?>
+                                            <div class="alert alert-success">
+                                               <strong><?php echo $this->success; ?></strong>
+                                            </div>
+                                        <?php
+                                            } else if(isset($this->error) && !empty($this->error)) {
+                                        ?>
+                                            <div class="alert alert-danger">
+                                               <strong><?php echo $this->error; ?></strong>
+                                            </div>
+                                        <?php 
+                                            }
+                                        ?>
+                                        </div>
+                                 </div>
+
+                                    <?php
+                                        $productTitle = 'Product';
+                                        if(isset($this->product[0]['default_product_title']) && $this->product[0]['default_product_title']==1) {
+                                          $productTitle = 'Product';
+                                        } else if(isset($this->product[0]['default_product_title']) && $this->product[0]['default_product_title']==2) {
+                                          $productTitle = 'Service';
+                                        } else if(isset($this->product[0]['default_product_title']) && $this->product[0]['default_product_title']==3) {
+                                          $productTitle = 'Product / Service';
+                                        }
+                                    ?>
+
+<div class="row">
+                        <div class="col-md-12 widget-module">
+                            <div class="square-widget widget-collapsible">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i> Add <?php echo $productTitle; ?></h4>
+                                    
+                                </div>
+
+                                <div class="widget-container col-md-12 col-md-offset-3">
+                                    <form class="form-horizontal" id="add-product" method="post">
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label"><?php echo $productTitle; ?> Name <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="product_name" id="product_name" class="form-control" placeholder="Enter Name" autocomplete="off" onchange="checkProductName(this.value);">
+                                                <label for="product_name" generated="true" class="error product_name_error" style="display:none;"></label>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label"><?php echo $productTitle; ?> ID <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="product_id" id="product_id" class="form-control" placeholder="Enter Product ID" autocomplete="off" onchange="checkProductId(this.value);">
+                                                <label for="product_id" generated="true" class="error product_id_error" style="display:none;"></label>
+                                            </div>
+                                        </div>
+
+                                         <div class="form-group">
+                                            <label class="col-lg-2 control-label">Income Account Type <span class="mandatory">*</span> </label>
+                                            <div class="col-lg-3">
+                                            <div id="incomeRefresh">
+                                                <select name="income_account" id="income_account" class="form-control">
+                                                    <option value="">Select</option>
+                                                        <?php 
+                                                            if(isset($this->incomeSelected) && !empty($this->incomeSelected)) {
+                                                                foreach ($this->incomeSelected as $income) {
+                                                        ?>
+                                                            <option value="<?php echo $income['id']; ?>"><?php echo $income['account_name']; ?></option>
+                                                        <?php
+                                                                }
+                                                            } 
+                                                        ?>
+                                                    </select>  
+                                                    </div>
+                                                    <a href="<?php echo $this->sitePath."settings/account"; ?>" title="Click to add new income" data-title="Click to add new income" id="add-incomeaccount" target="_blank"><i class="icon-plus-circle-2"></i> Add New Income</a>
+                                            </div>
+                                            <a href="javascript:void(0)" title="Refresh List" data-title="Refresh List" target="_blank" onclick="return refreshList(3);" class="incomeaccount-refresh" style="margin-top:5px;"><i class="icon-refresh"></i></a> 
+                                            
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Unit Price <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="price" id="price" class="form-control amount-align" autocomplete="off" onchange="return numberWithCommas(this.value,this.id);">
+                                            </div>
+                                        </div>
+
+                                         <div class="form-group">
+                                            <label class="col-lg-2 control-label">Currency <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <select name="currency" class="form-control">
+                                                    <option value="">Select</option>
+                                                        <?php 
+                                                            if(isset($this->currencies) && !empty($this->currencies)) {
+                                                                foreach ($this->currencies as $key => $currencies) {
+                                                                  if($this->currency==$key)
+                                                                    $selected = 'selected';
+                                                                  else
+                                                                    $selected = '';
+                                                        ?>
+                    <option value="<?php echo $key?>" <?php echo $selected; ?>><?php echo $currencies; ?></option>
+                                                        <?php
+                                                                }
+                                                            } 
+                                                        ?>
+                                                    </select>  
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Additional Description / Notes</label>
+                                            <div class="col-lg-3">
+                                                <textarea class="form-control" name="description" id="description" placeholder="Description / Notes if any" autocomplete="off"></textarea>
+                                            </div>
+                                        </div>
+                                    
+                                       
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">&nbsp;</label>
+                                            <div class="col-lg-3">
+                                                <div class="form-actions">
+                                                    <button type="submit" id="send" class="btn btn-primary">Submit</button>
+                                                   <a href="<?php echo $this->sitePath."settings/products"; ?>"> 
+                                                   <button type="button" class="btn">Cancel</button>
+                                                   </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    </div>
+</div>
+<script type="text/javascript">
+function numberWithCommas(x,id) {
+  var amount = parseFloat(x).toFixed(2);
+  var value  = amount.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
+  $("#"+id).val(value);
+}
+
+
+function refreshList(type) {
+   if(type==3) {
+        var incomeId = $("#income_account").val();
+        $.ajax({
+        type: "POST",
+        url: "<?php echo $this->sitePath.'default/settings/ajax-refresh'; ?>",
+        data: 'action=incomeRefresh&id='+incomeId,
+        success: function (html) {
+            $("#incomeRefresh").html(html);
+        }
+      }); 
+  }
+}
+
+ function checkProductName(value) {
+        if((value!='')) {
+            $.ajax({
+              type: "POST",
+              url: "<?php echo $this->sitePath.'default/settings/ajax-check'; ?>",
+              data: 'action=check_product_name&product_name='+value,
+              success: function (html) {
+                  if(html=='1') {
+                     $(".product_name_error").html("");
+                     $(".product_name_error").hide();
+                     return true;
+                  } else if(html=='2') {
+                     $(".product_name_error").html("Product name "+ value +" already exists");
+                     $("#product_name").val("");
+                     $(".product_name_error").show();
+                  }
+              }
+            }); 
+        } 
+   }
+
+
+
+ function checkProductId(value) {
+        if((value!='')) {
+            $.ajax({
+              type: "POST",
+              url: "<?php echo $this->sitePath.'default/settings/ajax-check'; ?>",
+              data: 'action=check_product_id&product_id='+value,
+              success: function (html) {
+                  if(html=='1') {
+                     $(".product_id_error").html("");
+                     $(".product_id_error").hide();
+                     return true;
+                  } else if(html=='2') {
+                     $(".product_id_error").html("Product ID "+ value +" already exists");
+                     $("#product_id").val("");
+                     $(".product_id_error").show();
+                  }
+              }
+            }); 
+        } 
+   }
+
+</script>

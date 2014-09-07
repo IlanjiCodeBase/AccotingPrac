@@ -1,0 +1,168 @@
+<div class="main-container">
+<div class="container">
+
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/developer"; ?>">Developer</a></li>
+   <li class="active">Account Registration</li>
+</ul>
+
+ <div class="row">
+      <div class="col-md-6 col-md-offset-3">
+            <?php 
+                if(isset($this->success) && !empty($this->success)) {
+            ?>
+                 <div class="alert alert-success">
+                      <strong><?php echo $this->success; ?></strong>
+                 </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                 <div class="alert alert-danger">
+                       <strong><?php echo $this->error; ?></strong>
+                 </div>
+            <?php 
+                }
+            ?>
+        </div>
+    </div>
+
+<div class="row">
+                        <div class="col-md-12 widget-module">
+                            <div class="square-widget widget-collapsible">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i> Account Registration</h4>
+                                    
+                                </div>
+
+                               
+
+                                <div class="widget-container col-md-12">
+                                    <form class="form-horizontal" id="add-company" method="post">
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Username (Email) <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="email" name="username" id="username" class="form-control" placeholder="Enter Email ID" value="<?php if(isset($this->username)) { echo $this->username; } ?>">
+                                            </div>
+                                             <label class="col-lg-2 control-label">Password <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="password" name="password" id="password" class="form-control" placeholder="Enter password" pattern="(?=^.{8,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$" title="Password must contain one uppercase, lowercase, number/special chars and minimum of 8 chars">
+                                            </div>                                           
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Confirm Password <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="password" name="cpassword" id="cpassword" class="form-control" placeholder="Enter confirm password">
+                                            </div>
+                                            <label class="col-lg-2 control-label">Company Name <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="company" id="company" class="form-control" placeholder="Enter company name" value="<?php if(isset($this->company)) { echo $this->company; } ?>">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Company Unique Entity Number <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="cuen" id="cuen" class="form-control" placeholder="Enter 16 character unique entity number" value="<?php if(isset($this->cuen)) { echo $this->cuen; } ?>">
+                                            </div>
+                                            <label class="col-lg-2 control-label">GST Registration Number <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="gst" id="gst" class="form-control" placeholder="Enter 16 character gst registration number" value="<?php if(isset($this->gst)) { echo $this->gst; } ?>">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Phone Number</label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="phone" id="phone" class="form-control" placeholder="Enter phone number" value="<?php if(isset($this->phone)) { echo $this->phone; } ?>">
+                                            </div>
+                                            <label class="col-lg-2 control-label">Block No</label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="block_no" id="block_no" class="form-control" placeholder="Enter block number" value="<?php if(isset($this->block_no)) { echo $this->block_no; } ?>">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Street Name <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="street_name" id="street_name" class="form-control" placeholder="Enter Street Name" value="<?php if(isset($this->street_name)) { echo $this->street_name; } ?>">
+                                            </div>
+                                            <label class="col-lg-2 control-label">Level</label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="level" id="level" class="form-control" placeholder="Enter Level" value="<?php if(isset($this->level)) { echo $this->level; } ?>">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Unit No</label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="unit_no" id="unit_no" class="form-control" placeholder="Enter Unit No" value="<?php if(isset($this->unit_no)) { echo $this->unit_no; } ?>">
+                                            </div>
+                                            <label class="col-lg-2 control-label">City</label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="city" id="city" class="form-control" placeholder="Enter City" value="<?php if(isset($this->city)) { echo $this->city; } ?>">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Postal Code</label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="zip_code" id="zip_code" class="form-control" placeholder="Enter Postal Code" value="<?php if(isset($this->zip_code)) { echo $this->zip_code; } ?>">
+                                            </div>
+                                            <label class="col-lg-2 control-label">Region</label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="region" id="region" class="form-control" placeholder="Enter Region" value="<?php if(isset($this->region)) { echo $this->region; } ?>">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Country <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <select name="country" class="form-control">
+                                                        <option value="">--Select--</option>
+                                                        <?php 
+                                                            $countrySelect = '';
+                                                            if(isset($this->countries) && !empty($this->countries)) {
+                                                                foreach ($this->countries as $key => $countries) {
+                                                                    if(isset($this->country) && !empty($this->country)  && $key==$this->country )
+                                                                        $countrySelect = 'selected';
+                                                                    else 
+                                                                        $countrySelect = '';
+                                                        ?>
+                    <option value="<?php echo $key?>" <?php echo $countrySelect?>><?php echo ucfirst($countries); ?></option>
+                                                        <?php
+                                                                }
+                                                            } 
+                                                        ?>
+                                                    </select>  
+                                            </div>
+                                            <?php
+                                                $today_date = date('d-M');
+                                                $end_date = date('d-M',time()-86400);
+                                                /*$mod_date   = strtotime($today_date."+ 12 months");
+                                                $end_date   = date("d-M",$mod_date);*/
+                                            ?>
+                                            <label class="col-lg-2 control-label">Financial Year Start Date <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="start_date" id="start_date" class="form-control date-pick-finance" placeholder="Enter Start Date" value="<?php if(isset($this->start_date)) { echo $this->start_date; } else { echo $today_date; } ?>" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Financial Year End Date <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="end_date" id="end_date" class="form-control date-pick-finance" placeholder="Enter End Date" value="<?php if(isset($this->end_date)) { echo ""; } else { echo $end_date; } ?>" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-5 control-label">&nbsp;</label>
+                                            <div class="col-lg-3">
+                                                <div class="form-actions">
+                                                    <button type="submit" id="register" class="btn btn-primary">Submit</button>
+                                                    <button type="reset" class="btn">Reset</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    </div>
+</div>

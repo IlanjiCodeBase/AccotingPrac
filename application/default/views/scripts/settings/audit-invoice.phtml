@@ -1,0 +1,409 @@
+<?php
+   $logSession = new Zend_Session_Namespace('sess_login');
+    $productTitle = 'Product';
+    if(isset($this->invoiceCustom[0]['default_product_title']) && $this->invoiceCustom[0]['default_product_title']==1) {
+         $productTitle = 'Product';
+    } else if(isset($this->invoiceCustom[0]['default_product_title']) && $this->invoiceCustom[0]['default_product_title']==2) {
+         $productTitle = 'Service';
+    } else if(isset($this->invoiceCustom[0]['default_product_title']) && $this->invoiceCustom[0]['default_product_title']==3) {
+         $productTitle = 'Product / Service';
+    }
+
+
+?>
+
+
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."settings/audit-trail/"; ?>">Audit Log</a></li>
+   <li class="active">Invoice View</li>
+</ul>
+
+
+
+<div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+            
+              <div class="container">
+                <div class="row">                 
+                  <!-- <div class="btn-toolbar profile-toolbar pull-right">
+                      <div class="btn-group">
+                         <button class="btn">Pay Now </button>
+                        <button class="print btn" rel="invoice_template">Print </button>
+                      </div>
+                  </div> -->
+                </div>
+                <div id="invoice_template">
+
+              <?php 
+                if($this->invoiceCustom[0]['template']==1) {
+              ?>
+                 <div class="row">
+                        <div class="col-md-7">
+                            <h4>INVOICE</h4>
+                            <img src="<?php echo $this->sitePath."..".$this->filepath."/".$this->invoiceCustom[0]['company_logo']; ?>" alt="<?php echo $this->company[0]['company_name']." Logo"; ?>" title="<?php echo $this->company[0]['company_name']." Logo"; ?>" style="margin-top:30px;">
+                        </div>
+                        <div class="col-md-3">
+                            <!-- <div class="btn-toolbar profile-toolbar pull-right">
+                                <div class="btn-group">
+                                    <button class="btn">Pay Now </button>
+                                    <button class="btn">Print </button>
+                                </div>
+                            </div> -->
+                            <h4>From</h4>
+                            <address>
+                                <strong><?php echo $this->company[0]['company_name']."."; ?></strong><br>
+                                <?php echo $this->company[0]['block_no']." ". $this->company[0]['street_name']." ". $this->company[0]['city']; ?><br>
+                                <?php echo $this->country[$this->company[0]['country']]; ?><br>
+                                <abbr title="Phone">P:</abbr> <?php echo $this->company[0]['telephone']; ?> </address>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-7">
+                            <ul class="invoice-info">
+                                <li><label>Invoice ID</label> <?php echo $this->invoice_no; ?></li>
+                                <!-- <li><label>Customer</label> <?php echo $this->invoice[0]['customer_name']; ?></li> -->
+                                <li><label>Issue Date</label> <?php echo date("d-m-Y",strtotime($this->invoice[0]['date'])); ?></li>
+                                <li><label>Due Date</label> <?php echo date("d-m-Y",strtotime($this->invoice[0]['due_date'])); ?> 
+                                (<?php 
+                                          if(isset($this->creditTerm) && !empty($this->creditTerm)) {
+                                              foreach ($this->creditTerm as $key => $credit) {
+                                                if($key==$this->invoice[0]['credit_term']) {
+                                                  if($key==1) {
+                                                      echo $credit;
+                                                  } else if($key!=1) {
+                                                      echo $credit." Days";
+                                                  }
+                                                }
+                                              }
+                                          }
+                                        ?>)</li>
+                                <li><label>Currency</label> <?php 
+                                          if(isset($this->currencies) && !empty($this->currencies)) {
+                                            foreach ($this->currencies as $key => $currency) {
+                                              if($key==$this->invoice[0]['transaction_currency']) {
+                                                  echo $currency." - ".$key;
+                                                }
+                                            }
+                                          }
+                                        ?></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-3">
+                            <h4>Invoice To</h4>
+                            <address>
+                                <strong><?php echo $this->invoice[0]['customer_name']."."; ?></strong><br>
+                                <?php 
+                                  if($this->invoice[0]['fkshipping_address']==0) {
+                                ?>
+                                <?php echo $this->invoice[0]['address1'].", ".$this->invoice[0]['city']; ?><br>
+                                <?php echo $this->invoice[0]['state'].", ".$this->country[$this->invoice[0]['country']]."-".$this->invoice[0]['postcode']; ?><br>
+                                <abbr title="Phone">P:</abbr> <?php echo $this->invoice[0]['office_number']; ?>
+                                <?php
+                                  } else {
+                                ?>
+                                <?php echo $this->shipping[0]['shipping_address1'].", ".$this->shipping[0]['shipping_city']; ?><br>
+                                <?php echo $this->shipping[0]['shipping_state'].", ".$this->country[$this->shipping[0]['shipping_country']]."-".$this->shipping[0]['shipping_postcode']; ?><br>
+                                <abbr title="Phone">P:</abbr> <?php echo $this->invoice[0]['office_number']; ?>
+                                <?php
+                                  }
+                                ?>
+                                </address>
+                        </div>
+                    </div>
+                    <?php
+                      } else if($this->invoiceCustom[0]['template']==2) {
+                    ?>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <img src="<?php echo $this->sitePath."..".$this->filepath."/".$this->invoiceCustom[0]['company_logo']; ?>" alt="<?php echo $this->company[0]['company_name']." Logo"; ?>" title="<?php echo $this->company[0]['company_name']." Logo"; ?>">
+                            <h4>From</h4>
+                            <address>
+                                <strong><?php echo $this->company[0]['company_name']."."; ?></strong><br>
+                                <?php echo $this->company[0]['block_no']." ". $this->company[0]['street_name']." ". $this->company[0]['city']; ?><br>
+                                <?php echo $this->country[$this->company[0]['country']]; ?><br>
+                                <abbr title="Phone">P:</abbr> <?php echo $this->company[0]['telephone']; ?> </address>
+                        </div>
+
+                         <div class="col-md-3">
+                         <br/><br/>
+                            <h4>Invoice To</h4>
+                            <address>
+                                <strong><?php echo $this->invoice[0]['customer_name']."."; ?></strong><br>
+                                <?php 
+                                  if($this->invoice[0]['fkshipping_address']==0) {
+                                ?>
+                                <?php echo $this->invoice[0]['address1'].", ".$this->invoice[0]['city']; ?><br>
+                                <?php echo $this->invoice[0]['state'].", ".$this->country[$this->invoice[0]['country']]."-".$this->invoice[0]['postcode']; ?><br>
+                                <abbr title="Phone">P:</abbr> <?php echo $this->invoice[0]['office_number']; ?>
+                                 <?php
+                                  } else {
+                                ?>
+                                <?php echo $this->shipping[0]['shipping_address1'].", ".$this->shipping[0]['shipping_city']; ?><br>
+                                <?php echo $this->shipping[0]['shipping_state'].", ".$this->country[$this->shipping[0]['shipping_country']]."-".$this->shipping[0]['shipping_postcode']; ?><br>
+                                <abbr title="Phone">P:</abbr> <?php echo $this->invoice[0]['office_number']; ?>
+                                <?php
+                                  }
+                                ?>
+                                </address>
+                        </div>
+
+                        <div class="col-md-4">
+                             <h4>INVOICE</h4> <br/>
+                            <ul class="invoice-info">
+                                <li><label>Invoice ID</label> <?php echo $this->invoice_no; ?></li>
+                                <li><label>Issue Date</label> <?php echo date("d-m-Y",strtotime($this->invoice[0]['date'])); ?></li>
+                                <li><label>Due Date</label> <?php echo date("d-m-Y",strtotime($this->invoice[0]['due_date'])); ?> 
+                                (<?php 
+                                          if(isset($this->creditTerm) && !empty($this->creditTerm)) {
+                                              foreach ($this->creditTerm as $key => $credit) {
+                                                if($key==$this->invoice[0]['credit_term']) {
+                                                  if($key==1) {
+                                                      echo $credit;
+                                                  } else if($key!=1) {
+                                                      echo $credit." Days";
+                                                  }
+                                                }
+                                              }
+                                          }
+                                        ?>)</li>
+                                <li><label>Currency</label> <?php 
+                                          if(isset($this->currencies) && !empty($this->currencies)) {
+                                            foreach ($this->currencies as $key => $currency) {
+                                              if($key==$this->invoice[0]['transaction_currency']) {
+                                                  echo $currency." - ".$key;
+                                                }
+                                            }
+                                          }
+                                        ?></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        
+                       
+                    </div>
+                    <?php
+                      } else if($this->invoiceCustom[0]['template']==3) {
+                    ?>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <img src="<?php echo $this->sitePath."..".$this->filepath."/".$this->invoiceCustom[0]['company_logo']; ?>" alt="<?php echo $this->company[0]['company_name']." Logo"; ?>" title="<?php echo $this->company[0]['company_name']." Logo"; ?>">
+                        </div>
+                        <div class="col-md-5">
+                            
+                        </div>
+                        <div class="col-md-3">
+                            <h4>INVOICE</h4>
+                            <h4>From</h4>
+                            <address>
+                                <strong><?php echo $this->company[0]['company_name']."."; ?></strong><br>
+                                <?php echo $this->company[0]['block_no']." ". $this->company[0]['street_name']." ". $this->company[0]['city']; ?><br>
+                                <?php echo $this->country[$this->company[0]['country']]; ?><br>
+                                <abbr title="Phone">P:</abbr> <?php echo $this->company[0]['telephone']; ?> </address>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-7">
+                            <ul class="invoice-info">
+                                <li><label>Invoice ID</label> <?php echo $this->invoice_no; ?></li>
+                                <li><label>Issue Date</label> <?php echo date("d-m-Y",strtotime($this->invoice[0]['date'])); ?></li>
+                                <li><label>Due Date</label> <?php echo date("d-m-Y",strtotime($this->invoice[0]['due_date'])); ?> 
+                                (<?php 
+                                          if(isset($this->creditTerm) && !empty($this->creditTerm)) {
+                                              foreach ($this->creditTerm as $key => $credit) {
+                                                if($key==$this->invoice[0]['credit_term']) {
+                                                  if($key==1) {
+                                                      echo $credit;
+                                                  } else if($key!=1) {
+                                                      echo $credit." Days";
+                                                  }
+                                                }
+                                              }
+                                          }
+                                        ?>)</li>
+                                <li><label>Currency</label> <?php 
+                                          if(isset($this->currencies) && !empty($this->currencies)) {
+                                            foreach ($this->currencies as $key => $currency) {
+                                              if($key==$this->invoice[0]['transaction_currency']) {
+                                                  echo $currency." - ".$key;
+                                                }
+                                            }
+                                          }
+                                        ?></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-3">
+                            <h4>Invoice To</h4>
+                            <address>
+                                <strong><?php echo $this->invoice[0]['customer_name']."."; ?></strong><br>
+                                <?php 
+                                  if($this->invoice[0]['fkshipping_address']==0) {
+                                ?>
+                                <?php echo $this->invoice[0]['address1'].", ".$this->invoice[0]['city']; ?><br>
+                                <?php echo $this->invoice[0]['state'].", ".$this->country[$this->invoice[0]['country']]."-".$this->invoice[0]['postcode']; ?><br>
+                                <abbr title="Phone">P:</abbr> <?php echo $this->invoice[0]['office_number']; ?>
+                                 <?php
+                                  } else {
+                                ?>
+                                <?php echo $this->shipping[0]['shipping_address1'].", ".$this->shipping[0]['shipping_city']; ?><br>
+                                <?php echo $this->shipping[0]['shipping_state'].", ".$this->country[$this->shipping[0]['shipping_country']]."-".$this->shipping[0]['shipping_postcode']; ?><br>
+                                <abbr title="Phone">P:</abbr> <?php echo $this->invoice[0]['office_number']; ?>
+                                <?php
+                                  }
+                                ?>
+                                </address>
+                        </div>
+                    </div>
+                    <?php
+                      }
+                    ?>
+                    <div class="row">
+                        <div class="col-md-9">
+                            <table class="table table-striped table-well block-head responsive">
+                                <thead>
+                                    <tr>
+                                        <th class="invoice-id">
+                                            <?php echo $productTitle; ?> ID
+                                        </th>
+                                        <th class="invoice-type">
+                                            <?php echo $productTitle; ?> Description
+                                        </th>
+                                        <th class="invoice-qty">
+                                            Quantity
+                                        </th>
+                                        <th class="invoice-unit">
+                                            Unit Price
+                                        </th>
+                                        <th class="invoice-unit">
+                                            Discount
+                                        </th>
+                                        <th class="invoice-type">
+                                            Tax Code
+                                        </th>
+                                        <th class="invoice-amount">
+                                            Amount
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                      <?php
+                                            $j=1;
+                                            $total_gst = 0.00;
+                                            $sub_total = 0.00;
+                                            foreach ($this->invoiceProductList  as $invoiceProduct) {
+                                                $net_amount = $invoiceProduct['quantity'] * $invoiceProduct['unit_price'] - $invoiceProduct['discount_amount'];
+                                                $total_gst += $net_amount * $invoiceProduct['tax_value'] / 100;
+                                                $sub_total += $net_amount;
+                                      ?>          
+                                    <tr>
+                                        <td class="invoice-type">
+                                            <?php echo $invoiceProduct['product_id']; ?>
+                                        </td>
+                                        <td class="invoice-type">
+                                            <?php
+                                               foreach ($this->product as $product) {
+                                                 if($invoiceProduct['product_description']==$product['id']) {
+                                                     echo ucfirst($product['name']);
+                                                  }
+                                                }
+                                             ?>
+                                        </td>
+                                        <td class="invoice-qty">
+                                            <?php echo $invoiceProduct['quantity']; ?>
+                                        </td>
+                                        <td class="invoice-unit">
+                                            <?php echo number_format($invoiceProduct['unit_price'],2,'.',','); ?>
+                                        </td>
+                                         <td class="invoice-unit">
+                                            <?php echo number_format($invoiceProduct['discount_amount'],2,'.',','); ?>
+                                        </td>
+                                        <td class="invoice-type">
+                                            <?php
+                                                        if(isset($this->taxCode) && !empty($this->taxCode) && $invoiceProduct['fktax_id']!=0) {
+                                                            foreach ($this->taxCode as $tax) {
+                                                                if($invoiceProduct['fktax_id']==$tax['id']) {
+                                                                  foreach ($this->supply as $key => $supply) {
+                                                                      if($tax['tax_code']==$key) {
+                                                                        echo $supply['name']." - ".$tax['tax_percentage']." %";
+                                                                      }
+                                                                  }
+                                                                }
+                                                            }
+                                                        } else {
+                                                         echo "NA - Not Applicable";
+                                                        }
+                                                    ?>  
+                                        </td>
+                                        <td class="invoice-amount">
+                                            <span id="net_amount_<?php echo $j; ?>"><?php echo number_format($net_amount,2,'.',','); ?></span>
+                                        </td>
+                                    </tr>
+                                    <?php 
+                                        $j++;
+                                      }
+                                    ?>
+                                    <tr class="invoice-cal">
+                                        <td colspan="6">
+                                            <span><strong>Sub Total</strong></span>
+                                            <span><strong>Total GST</strong></span>
+                                            <span><strong>Grand Total</strong></span>
+                                            <span><strong>Exchange Rate</strong></span>
+                                            <span><strong>Grand Total SGD</strong></span><!-- <span class="amount-due">Amount Due</span> -->
+                                        </td>
+                                        <td>
+                                            <span><strong id="sub_total"><?php echo number_format($sub_total,2,'.',','); ?></strong></span>
+                                            <span><strong id="total_gst"><?php echo number_format($total_gst,2,'.',','); ?></strong></span>
+                                            <span><strong id="grand_total"><?php 
+                                             $over_all = $sub_total+$total_gst; 
+                                                  echo number_format($over_all,2,'.',',');
+                                             ?></strong></span>
+                                             <span><strong><?php echo $this->invoice[0]['exchange_rate']; ?></strong></span>
+                                             <span><strong id="grand_total_sgd">
+                                               <?php 
+                                                  $calculate_all = $this->invoice[0]['exchange_rate']*$over_all;
+                                                  echo number_format($calculate_all,2,'.',','); 
+                                                  if($this->invoice[0]['transaction_currency']!='SGD') {
+                                                    $totAmoumt = $calculate_all;
+                                                  } else {
+                                                    $totAmoumt = $over_all;
+                                                  }
+                                              ?>
+                                             </strong></span><!-- <span class="amount-due">$180</span> -->
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                        </div>
+                    </div>
+
+                    
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                        <!-- <h6>Notes:</h6>
+                            <p>
+                                Aenean tincidunt, sapien ut gravida viverra, turpis justo facilisis metus, et iaculis purus nibh vel sem. Maecenas ante diam, molestie vitae ultricies quis, sodales nec leo. Duis id arcu vel mi luctus sodales vel at dui. Aliquam dapibus rutrum nisl. Curabitur mattis, lectus ac volutpat pellentesque, ante nisi pharetra ipsum, ut tempus diam massa in nisl.
+                            </p> -->
+                        </div>
+                    </div>
+                    </div>
+                  </div>

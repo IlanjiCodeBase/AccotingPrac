@@ -1,0 +1,529 @@
+<div id="popup">
+<span class="button b-close"><span>X</span></span>
+
+
+ <div class="row" id="other_accounts" style="display:none;">
+<h3>Add COA</h3>
+<hr/>
+ <div class="widget-container col-md-12 col-md-offset-1">
+     <form class="form-horizontal" id="add-coa" method="post">
+         <div class="form-group">
+            <label class="col-lg-3 control-label">Account Name</label>
+              <div class="col-lg-7">
+                <input type="hidden" name="action" id="action" value="add_coa">
+                <input type="hidden" name="oth_acc_type" id="oth_acc_type" value="2" />
+                <input type="hidden" name="oth_acc_l1" id="oth_acc_l1" value="1" />
+                <input type="hidden" name="oth_acc_l2" id="oth_acc_l2" value="8" />
+                <input type="text" name="oth_acc_name" id="oth_acc_name" class="form-control" />
+              </div>
+        </div>
+<!--         <div class="form-group hidden_details">
+            <label class="col-lg-3 control-label">Payment / Accruals Account</label>
+              <div class="col-lg-7">
+               <input type="checkbox" name="pay_account" id="pay_account" value="1" checked />
+               &nbsp; This account is for receipt / payment of money (e.g., cash equivalents) or  to record receivables/ payables
+              </div>
+        </div> -->
+        <div class="form-group">
+            <label class="col-lg-3 control-label">Currency</label>
+                <div class="col-lg-7">
+                    <select name="currency" class="form-control">
+                            <?php 
+                              $logSession = new Zend_Session_Namespace('sess_login');
+                               $currencySelect = '';
+                                if(isset($this->currencies) && !empty($this->currencies)) {
+                                foreach ($this->currencies as $key => $currencies) {
+                                 /* if(isset($logSession->currency) && !empty($logSession->currency)  && $key==$logSession->currency ) {
+                                            $currencySelect = 'selected';
+                                   } 
+                                    else */if($key=="SGD"){
+                                        $currencySelect = 'selected';
+                                    }
+                                   else { 
+                                        $currencySelect = '';
+                                    }
+                            ?>
+                    <option value="<?php echo $key?>" <?php echo $currencySelect; ?>><?php echo $currencies; ?></option>
+                            <?php
+                                    }
+                                } 
+                            ?>
+                    </select>  
+                 </div>
+                </div>
+
+
+<div class="form-group">
+    <label class="col-lg-2 control-label">&nbsp;</label>
+    <div class="col-lg-3">
+       <div class="form-actions">
+          <button type="submit" id="save" class="btn btn-primary">Save</button>
+          <button type="reset" class="btn b-close">Close</button>
+      </div>
+   </div>
+  </div>
+
+     </form>
+ </div>
+</div>
+
+
+
+</div>
+
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."business/vendor/"; ?>">Vendor</a></li>
+   <li class="active">Copy</li>
+</ul>
+
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+<div class="row">
+<div class="col-md-12 widget-module">
+<div class="box-widget">
+          <div class="widget-head clearfix">
+             <span class="h-icon"><i class="icon-menu"></i></span>
+              <h4 class="pull-left">Copy Vendor</h4>
+                                    
+           </div>
+<div class="widget-container">
+          <div class="widget-block">
+             <div class="widget-content box-padding">
+          		<form class="form-horizontal" id="add-vendor" method="post">
+					<div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                    <label class="col-lg-2 control-label">Vendor / Company Name <span class="mandatory">*</span></label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="vendor_name"  name="vendor_name"  class="form-control" onchange="checkVendor(this.value,'<?php echo $this->vendor[0]['id']; ?>');" autocomplete="off" />
+                                            <label for="vendor_name" generated="true" class="error vendor_error" style="display:none;"></label>
+                                        </div>
+                                    <label class="col-lg-2 control-label">Vendor ID</label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="vendor_id" readonly name="vendor_id"  class="form-control"  value="<?php echo $this->vendor[0]['vendor_id']; ?>" autocomplete="off"  />
+                                        </div>
+                            </div>
+
+                            <div class="form-group">
+                                    <label class="col-lg-2 control-label">Address Line 1 <span class="mandatory">*</span></label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="address1"  name="address1"  class="form-control" value="<?php echo $this->vendor[0]['address1']; ?>" autocomplete="off"  />
+                                        </div>
+                                    <label class="col-lg-2 control-label">Vendor Company Reg No <span class="mandatory">*</span></label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="vendor_reg_no" name="vendor_reg_no"  class="form-control" value="<?php echo $this->vendor[0]['company_registration_no']; ?>"  autocomplete="off"/>
+                                        </div>
+                            </div>
+
+                             <div class="form-group">
+                                    <label class="col-lg-2 control-label">Address Line 2 </label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="address2"  name="address2"  class="form-control" value="<?php echo $this->vendor[0]['address2']; ?>" autocomplete="off" />
+                                        </div>
+                                    <label class="col-lg-2 control-label">Main Office Number <span class="mandatory">*</span></label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="office_number" name="office_number"  class="form-control" value="<?php echo $this->vendor[0]['office_number']; ?>" autocomplete="off" />
+                                        </div>
+                            </div>
+
+                             <div class="form-group">
+                                    <label class="col-lg-2 control-label">City <span class="mandatory">*</span></label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="city"  name="city"  class="form-control" value="<?php echo ucfirst($this->vendor[0]['city']); ?>" autocomplete="off" />
+                                        </div>
+                                    <label class="col-lg-2 control-label">Fax Number </label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="fax_number" name="fax_number"  class="form-control" value="<?php echo $this->vendor[0]['fax_number']; ?>" autocomplete="off" />
+                                        </div>
+                            </div>
+
+                            <div class="form-group">
+                                    <label class="col-lg-2 control-label">State </label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="state"  name="state"  class="form-control" value="<?php echo ucfirst($this->vendor[0]['state']); ?>" autocomplete="off" />
+                                        </div>
+                                    <label class="col-lg-2 control-label">Website </label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="website" name="website"  class="form-control" value="<?php echo $this->vendor[0]['website']; ?>" autocomplete="off"/>
+                                        </div>
+                            </div>
+
+                            <div class="form-group">
+                                    <label class="col-lg-2 control-label">Country <span class="mandatory">*</span></label>
+                                        <div class="col-lg-3">
+                                             <select name="country" class="form-control">
+                                                        <?php 
+                                                            $countrySelect = '';
+                                                            if(isset($this->countries) && !empty($this->countries)) {
+                                                                foreach ($this->countries as $key => $countries) {
+                                                                    if(isset($this->vendor[0]['country']) && !empty($this->vendor[0]['country'])  && $key==$this->vendor[0]['country'])
+                                                                        $countrySelect = 'selected';
+                                                                    else 
+                                                                        $countrySelect = '';
+                                                        ?>
+                    <option value="<?php echo $key?>" <?php echo $countrySelect; ?>><?php echo ucfirst($countries); ?></option>
+                                                        <?php
+                                                                }
+                                                            } 
+                                                        ?>
+                                                    </select> <br/>
+                                                    <label for="country" generated="true" class="error"></label>
+                                        </div>
+                                    <label class="col-lg-2 control-label">General Email </label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="email" name="email"  autocomplete="off" class="form-control" value="<?php echo $this->vendor[0]['email']; ?>"/>
+                                        </div>
+                            </div>
+
+                            <div class="form-group">
+                                    <label class="col-lg-2 control-label">Company GST No </label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="company_gst_no"  name="company_gst_no"  class="form-control" value="<?php echo $this->vendor[0]['company_gst_no']; ?>" autocomplete="off" />
+                                        </div>
+                                    <label class="col-lg-2 control-label">Postcode <span class="mandatory">*</span></label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="postcode" name="postcode" class="form-control" value="<?php echo $this->vendor[0]['postcode']; ?>" autocomplete="off" />
+                                        </div>
+                            </div>
+
+                            <div class="form-group">
+                                    <label class="col-lg-2 control-label">Date GST Status Verified </label>
+                                        <div class="col-lg-3">
+                                            <input type="text" id="gst_status" readonly name="gst_status" autocomplete="off"  class="form-control date-pick"  value="<?php if($this->vendor[0]['gst_verified_date']==0) { echo ""; } else { echo date("d-m-Y",strtotime($this->vendor[0]['gst_verified_date'])); } ?>"  />
+                                        </div>
+
+
+                                    <label class="col-lg-2 control-label">COA <span class="mandatory">*</span></label>
+                                        <div class="col-lg-3">
+                                             <select name="coa_link" id="coa_link" class="form-control" required>
+                                             <?php 
+                                                if($this->vendor[0]['coa_link']==5) {
+                                             ?>
+                                                <option value="5" selected>Trade Creditors</option>
+                                                <option value="6">Account Payables - Others</option>
+                                             <?php
+                                                } else if($this->vendor[0]['coa_link']==6) {
+                                             ?>
+                                                <option value="5">Trade Creditors</option>
+                                                <option value="6" selected>Account Payables - Others</option>
+                                             <?php 
+                                                } else {
+                                            ?>
+                                                <option value="5">Trade Creditors</option>
+                                                <option value="6">Account Payables - Others</option>
+                                            <?php
+                                                }
+                                            ?>
+                                            <?php
+                                                if(isset($this->otherPayable) && !empty($this->otherPayable)) {
+                                                  foreach ($this->otherPayable as $payable) {
+                                                    if($payable['id']==$this->vendor[0]['coa_link'])
+                                                        $payable_select = 'selected';
+                                                    else
+                                                        $payable_select = '';
+                                              ?>
+                                                <option value="<?php echo $payable['id']; ?>" <?php echo $payable_select; ?>><?php echo $payable['account_name']; ?></option>
+                                              <?php
+                                                  }
+                                                }
+                                              ?>
+                                            </select>
+                                            <a href="javascript:void(0)" title="Click to add account" data-title="Click to add new account" target="_blank" id="add-account" onclick="addCoa();"><i class="icon-plus-circle-2"></i> Add Account</a>
+                                        </div>
+                            </div>
+
+                            <!--   <div class="form-group">
+
+                                     <label class="col-lg-2 control-label">Other COA </label>
+                                        <div class="col-lg-3">
+                                             <select name="other_coa_link[]" id="other_coa_link" class="select2" multiple>
+                                              <?php
+                                                $payable_link = explode(",", $this->vendor[0]['other_coa_link']);
+                                                if(isset($this->otherPayable) && !empty($this->otherPayable)) {
+                                                  foreach ($this->otherPayable as $payable) {
+                                                    if(in_array($payable['id'], $payable_link))
+                                                        $payable_select = 'selected';
+                                                    else
+                                                        $payable_select = '';
+                                              ?>
+                                                <option value="<?php echo $payable['id']; ?>" <?php echo $payable_select; ?>><?php echo $payable['account_name']; ?></option>
+                                              <?php
+                                                  }
+                                                }
+                                              ?>
+                                            </select> <br/>
+                                            <a href="javascript:void(0)" title="Click to add account" data-title="Click to add new account" target="_blank" id="add-account" onclick="addCoa();"><i class="icon-plus-circle-2"></i> Add Account</a>
+                                        </div>
+                            </div>
+ -->
+                            
+
+
+                            <div class="form-group">
+                             <label class="col-lg-2 control-label">Key Contact Person(s)</label>
+                                    <div class="col-lg-3">
+                                        <a href="javascript:void(0)" id="key_contact" class="btn btn-primary green" type="button" >Add Key Contact Person</a>
+                                    </div>
+                            </div>
+
+							<div id="key_contact_detail">
+                                <?php
+                                   $j=1;
+                                    if(isset($this->contacts) && !empty($this->contacts)) {
+                                        foreach($this->contacts as $contact) {
+                                ?>
+                                    <div id="TextBoxDivs<?php echo $j; ?>">
+
+                                    <div class="form-group">
+                                        <label class="col-lg-2 control-label"><h5><b>Key Contact Person - <?php echo $j; ?></b></h5> </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-2 control-label">Contact Person Name<span class="mandatory">*</span> </label>
+                                    <div class="col-lg-3">  
+                                        <input type="text" autocomplete="off" name="key_contact_person_<?php echo $j; ?>" id="key_contact_person_<?php echo $j; ?>" required class="form-control" value="<?php echo ucfirst($contact['contact_name']); ?>" />
+                                    </div>
+                                        <label class="col-lg-2 control-label">Designation/Title <span class="mandatory">*</span></label>
+                                    <div class="col-lg-3">
+                                        <input type="text" autocomplete="off" name="key_designation_<?php echo $j; ?>" id="key_designation_<?php echo $j; ?>" required  class="form-control" value="<?php echo ucfirst($contact['designation']); ?>" />
+                                    </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-2 control-label">Contact Number - Office </label>
+                                    <div class="col-lg-3">
+                                        <input type="text" autocomplete="off" name="key_contact_office_<?php echo $j; ?>" id="key_contact_office_<?php echo $j; ?>" class="form-control" value="<?php echo $contact['contact_office_number']; ?>" />
+                                    </div>
+                                    <label class="col-lg-2 control-label">Email </label>
+                                    <div class="col-lg-3">
+                                        <input type="email"  autocomplete="off" name="key_email_<?php echo $j; ?>" id="key_email_<?php echo $j; ?>"  class="form-control" value="<?php echo $contact['contact_email']; ?>" />
+                                    </div>
+                                    </div>
+                                    <div class="form-group">
+                                       <label class="col-lg-2 control-label">Contact Number - Mobile </label>
+                                    <div class="col-lg-3">
+                                        <input type="text" autocomplete="off" name="key_contact_mobile_<?php echo $j; ?>" id="key_contact_office_<?php echo $j; ?>"  class="form-control" value="<?php echo $contact['contact_mobile_number']; ?>" />
+                                    </div>
+                                        <label class="col-lg-2 control-label">Default Key Person to Contact? <span class="mandatory">*</span></label>
+                                    <div class="col-lg-3">
+                                        <select name="key_default_person_<?php echo $j; ?>" id="key_default_person_<?php echo $j; ?>" required class="form-control" onchange="return key_default(this.value,'<?php echo $j; ?>',this.id);">
+                                        <?php 
+                                            if($contact['default_key_contact']==1) {
+                                        ?>
+                                            <option value="1" selected>Yes</option>
+                                            <option value="2">No</option>
+                                        <?php 
+                                            } else if($contact['default_key_contact']==2) {
+                                        ?>
+                                            <option value="1">Yes</option>
+                                            <option value="2" selected>No</option>
+                                        <?php 
+                                            }
+                                        ?>
+                                        </select>
+                                    </div>
+                                    <input type="hidden" name="contact_id_<?php echo $i; ?>" id="contact_id_<?php echo $i; ?>" value="<?php echo $contact['id']; ?>" />
+                                    </div>
+
+                                    </div>
+
+                                <?php
+                                       $j++;
+                                        }
+                                    }
+                                ?>
+
+                            </div>
+                            
+                            <div class="form-group">
+                            <label class="col-lg-5 control-label">&nbsp;</label>
+                                <div class="col-lg-4">
+                                        <div class="form-actions">
+                                            <input type="hidden" name="update_contact_counter" id="update_contact_counter" value="<?php echo --$j; ?>" />
+                                            <input type="hidden" name="contact_counter" id="contact_counter" value="<?php echo $j; ?>" />
+                                            <input type="submit" name="submit" class="btn btn-primary" value="Save" />
+                                            <button type="button" class="btn" onclick="return back();">Cancel</button>
+                                        </div>
+                            	</div>
+                            </div>
+                    </div>
+                                       
+          </form>
+          </div>
+          </div>
+          </div>
+</div>
+</div>
+</div>
+<script type="text/javascript">
+    
+ $(function() {
+            $("#add-coa").validate({
+                rules: {
+                    oth_acc_name: {
+                        required: true
+                    }, 
+                    currency: {
+                        required: true,
+                    },
+                }, 
+                invalidHandler: function(form, validator) {
+                    var errors = validator.numberOfInvalids();
+                    if (errors) {
+                        var message = errors == 1
+                        ? 'You missed 1 field. It has been highlighted'
+                        : 'You missed ' + errors + ' fields. They have been highlighted';
+                        $("#da-ex-val1-error").html(message).show();
+                    } else {
+                        $("#da-ex-val1-error").hide();
+                    }
+                },
+                submitHandler: function (form) {
+                      $.ajax({
+                          type: "POST",
+                          url: "<?php echo $this->sitePath.'business/vendor/ajax-call'; ?>",
+                          data: $("#add-coa").serialize(),
+                          success: function (html) {
+                              if(html=='false') {
+                                 alert("Unable to add COA. Kindly try again later");
+                                 //return true;
+                              } else if(html=='false1') {
+                                 alert("Account Name already exists. Kindly try with different name");
+                                 //return true;
+                              } else  {
+                                 var coa = $("#oth_acc_name").val();
+                                 $("#coa_link").append('<option value="'+html+'">'+coa+'</option>');
+                                 alert("Account Added Successfully");
+                                 $("#popup").bPopup().close();
+                              }
+
+                          }
+                        }); 
+                    return false;
+                }
+            });
+});
+
+    var keycounter = <?php echo $j; ?>;
+    keycounter++;
+    $("#key_contact").on("click", function () {
+         if(keycounter>5){
+                alert("Only 5 contact persons allowed");
+                return false;
+         }   
+
+         var default_contact =  '<select name="key_default_person_' + keycounter + '" id="key_default_person_' + keycounter + '" required class="form-control" onchange="return key_default(this.value,'+keycounter+',this.id);"><option value="">Select</option><option value="1">Yes</option><option value="2">No</option></select>';
+
+         var newTextBoxDiv   = $(document.createElement('div'))
+              .attr("id", 'TextBoxDivs' + keycounter);
+        
+        newTextBoxDiv.html('<div class="form-group">'+'<label class="col-lg-2 control-label"><h5><b>Key Contact Person - ' + keycounter +'</b>&nbsp;<a href="javascript:void(0)" value="removeButton" title="Remove" class="remove_key_contact"><i class="icon-cancel-circle-2"></i></a></h5> </label>'+'       </div>' + '<div class="form-group">' +
+        '<label class="col-lg-2 control-label">Contact Person Name<span class="mandatory">*</span> </label>' + 
+        '<div class="col-lg-3">' +  
+        '<input type="text" autocomplete="off" name="key_contact_person_' + keycounter + 
+        '" id="key_contact_person_' + keycounter + '" required class="form-control" value="" ></div>' +
+        '<label class="col-lg-2 control-label">Designation/Title <span class="mandatory">*</span></label>' + 
+        '<div class="col-lg-3">' +
+        '<input type="text" autocomplete="off" name="key_designation_' + keycounter + 
+        '" id="key_designation_' + keycounter + '" required  class="form-control" value="" ></div>'+'</div>' + '<div class="form-group">' +
+        '<label class="col-lg-2 control-label">Contact Number - Office </label>' + 
+        '<div class="col-lg-3">' +  
+        '<input type="text" autocomplete="off" name="key_contact_office_' + keycounter + 
+        '" id="key_contact_office_' + keycounter + '" class="form-control" value="" ></div>' +
+        '<label class="col-lg-2 control-label">Email </label>' + 
+        '<div class="col-lg-3">' +
+        '<input type="email" autocomplete="off" name="key_email_' + keycounter + 
+        '" id="key_email_' + keycounter + '"  class="form-control" value="" ></div>'+'</div>'+
+        '<div class="form-group">' +
+        '<label class="col-lg-2 control-label">Contact Number - Mobile </label>' + 
+        '<div class="col-lg-3">' +  
+        '<input type="text" autocomplete="off" name="key_contact_mobile_' + keycounter + 
+        '" id="key_contact_office_' + keycounter + '"  class="form-control" value="" ></div>' +
+        '<label class="col-lg-2 control-label">Default Key Person to Contact? <span class="mandatory">*</span></label>' + 
+        '<div class="col-lg-3">' + default_contact +
+        '</div>'+
+        '</div>');
+
+         newTextBoxDiv.appendTo("#key_contact_detail");
+
+         $("#contact_counter").val(keycounter);
+
+         keycounter++;
+    });
+
+$(document).on('click',".remove_key_contact",function (){   
+        if(keycounter==1){
+            alert("No more contact persons to remove");
+            return false;
+        }   
+
+        keycounter--;
+
+        $("#TextBoxDivs" + keycounter).remove();
+        $("#contact_counter").val(keycounter-1);
+
+    });
+
+    function key_default(values,counts,ids) {
+        if(value==2) {
+            for(var i=1; i<=counts.length;i++) {
+                if('key_default_person_'+i != ids) {
+                    
+                }
+            }
+        }
+    }
+
+    function checkVendor(value) {
+        if((value!='')) {
+            $.ajax({
+              type: "POST",
+              url: "<?php echo $this->sitePath.'business/vendor/ajax-call'; ?>",
+              data: 'action=check_vendor&vendor_name='+value,
+              success: function (html) {
+                  if(html=='1') {
+                     $(".vendor_error").html("");
+                     $(".vendor_error").hide();
+                     return true;
+                  } else if(html=='2') {
+                     $(".vendor_error").html("Vendor name "+ value +" already exists");
+                     $("#vendor_name").val("");
+                     $(".vendor_error").show();
+                  }
+              }
+            }); 
+        } 
+   }
+
+    function back() {
+        window.location.href='<?php echo $this->sitePath; ?>business/vendor';
+    }
+
+    function addCoa() {
+        $("#other_accounts").show();
+        $('#popup').bPopup({
+            modalClose: false,
+            easing: 'easeOutBack', //uses jQuery easing plugin
+            speed: 1000,
+            transition: 'slideDown',
+            follow: [false, false], //x, y
+         //   position: [150, 400] //x, y
+        });
+    }
+</script>

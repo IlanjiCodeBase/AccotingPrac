@@ -1,0 +1,109 @@
+<div class="main-container">
+<div class="container">
+
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/settings/"; ?>">Settings</a></li>
+   <li class="active">Notifications</li>
+</ul>
+
+
+                                <div class="row">
+                                       <div class="col-md-6 col-md-offset-3">
+                                       <?php 
+                                            if(isset($this->success) && !empty($this->success)) {
+                                       ?>
+                                            <div class="alert alert-success">
+                                               <strong><?php echo $this->success; ?></strong>
+                                            </div>
+                                        <?php
+                                            } else if(isset($this->error) && !empty($this->error)) {
+                                        ?>
+                                            <div class="alert alert-danger">
+                                               <strong><?php echo $this->error; ?></strong>
+                                            </div>
+                                        <?php 
+                                            }
+                                        ?>
+                                        </div>
+                                 </div>
+
+
+<div class="row">
+                        <div class="col-md-12 widget-module">
+                            <div class="square-widget widget-collapsible">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i> Notification</h4>
+                                    
+                                </div>
+
+                                <div class="widget-container col-md-12 col-md-offset-3">
+                                    <form class="form-horizontal" id="notification" method="post">
+
+                                        <div class="form-group">
+                                            <input type="hidden" name="notify_id" id="notify_id" value="<?php echo $this->notification[0]['id']; ?>">
+                                            <?php 
+                                                if($this->notification[0]['notification']==1) {
+                                                    $onCheck  = 'checked';
+                                                    $offCheck = '';
+                                                } else if($this->notification[0]['notification']==2) {
+                                                    $onCheck  = '';
+                                                    $offCheck = 'checked';
+                                                }
+                                                if($this->notification[0]['email_setting']==1) {
+                                                    $immediateCheck = 'checked';
+                                                    $dailyCheck     = '';
+                                                } else if($this->notification[0]['email_setting']==2) {
+                                                    $immediateCheck = '';
+                                                    $dailyCheck     = 'checked';
+                                                }
+                                            ?>
+                                            <label class="col-lg-2 control-label">Notification Setting <span class="mandatory">*</span></label>
+                                            <div class="col-lg-4">
+                                                <div class="styled-chekbox">
+                                                <input type="radio" name="notify" id="on" <?php echo $onCheck; ?> class="icheck-box" value="1"> 
+                                                </div>
+                                                <span class="checkbox-label">On</span>
+                                                <div class="styled-chekbox">
+                                                <input type="radio" name="notify" id="off" <?php echo $offCheck; ?> class="icheck-box" value="2"> 
+                                                </div>
+                                                <span class="checkbox-label">Off</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Email Setting <span class="mandatory">*</span></label>
+                                            <div class="col-lg-5">
+                                                <div class="styled-chekbox">
+                                                <input type="radio" name="email" id="immediate" <?php echo $immediateCheck; ?> class="icheck-box" value="1" /> 
+                                                </div>
+                                                <span class="checkbox-label">Immediate - Approver will be notified immediately</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label"></label>
+                                            <div class="col-lg-5">
+                                               <div class="styled-chekbox">
+                                                <input type="radio" name="email" id="daily" <?php echo $dailyCheck; ?> class="icheck-box" value="2" /> 
+                                                </div>
+                                                <span class="checkbox-label">Daily - Approver will be notified at the end of the day (SG time 7pm) </span>
+                                            </div>
+                                        </div>
+                                       
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">&nbsp;</label>
+                                            <div class="col-lg-3">
+                                                <div class="form-actions">
+                                                    <button type="submit" id="send" class="btn btn-primary">Save</button>
+                                                    <a href="<?php echo $this->sitePath."default/settings"; ?>"><button type="button" class="btn">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    </div>
+</div>

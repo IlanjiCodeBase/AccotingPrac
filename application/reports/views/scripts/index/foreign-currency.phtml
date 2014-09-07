@@ -1,0 +1,366 @@
+<?php
+$logSession = new Zend_Session_Namespace('sess_login');
+if(isset($logSession->proxy_name) && !empty($logSession->proxy_name)) {
+  $company_name = ucfirst($logSession->proxy_name);
+} else {
+  $company_name = ucfirst($logSession->name);
+}
+?>
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."reports"; ?>">Reports</a></li>
+   <li class="active">Foreign Currency Gain / (Loss)</li>
+</ul>
+  <div class="row">
+    <div class="col-md-12">
+
+      <form class="form-horizontal" id="report-period" method="post">
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">From Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="from_date" id="from_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->from) && !empty($this->from)) { echo $this->from; } else { echo date('01-01-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">To Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="to_date" id="to_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->to) && !empty($this->to)) { echo $this->to; } else { echo date('d-m-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+         <label class="col-lg-5 control-label">&nbsp;</label>
+           <div class="col-lg-3">
+              <div class="form-actions">
+                <button type="submit" id="update" class="btn btn-primary">Update</button>
+              </div>
+           </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+    <div class="row">
+      <div class="col-md-2 pull-right">
+          <button class="print btn btn-inverse" type="button" rel="content"><i class="icon-print"></i> Print</button>
+          <button class="btn btn-inverse" type="button"  onclick="tableToExcel('content', 'Income Statement')"><i class="icon-file-excel"></i> Excel</button>
+      </div>
+    </div>
+
+
+  <div class="row">
+    <div class="col-md-12">
+           <h4 align="center"><?php echo $company_name; ?> </h4> 
+           <h4 align="center">Gain/Loss on Foreign Currency Exchange</h4> 
+           <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4> 
+    </div>
+    <div class="col-md-12">
+     <div class="box-widget" style="margin-bottom:0px;">
+        <div class="widget-head clearfix">
+            <span class="h-icon"><i class="icon-power-cord"></i></span>
+            <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(1);" style="color:#fff;">Gain/Loss on Foreign Currency Exchange</a></h4>
+        </div>
+        <div class="widget-container">
+        <div class="widget-block">
+        <div class="widget-content">
+        <table class="table responsive"> 
+            <thead>
+              <tr>
+                 <th>
+                    Date
+                 </th>
+                 <th>
+                    Reference No
+                 </th>
+                 <th>
+                    Counterparties
+                 </th>
+                 <th style="text-align:right;">
+                    Amount
+                 </th>
+                 <th style="text-align:right;">
+                    Exchange Rate
+                 </th>
+                 <th style="text-align:right;">
+                    Amt in Base Currency
+                 </th>
+                 <th style="text-align:right;">
+                    Receipt / Payment Amount
+                 </th>
+                 <th style="text-align:right;">
+                    Realised Gain/(Loss)
+                 </th>
+              </tr>
+            </thead>
+            <tbody>
+            <?php 
+              $total = 0.00;
+              foreach ($this->foreignExchange as $key => $exchange) {
+                $sub_total = 0.00;
+                $amounts   = 0.00;
+                if($exchange['type']==1) {
+                  $amount = $exchange['convert_amount'] - $exchange['paid'];
+                  if($amount>0) {
+                    $sub_total = "(".number_format(abs($amount),2,'.',',').")";
+                    $amounts   = -$amount;
+                  } else {
+                    $sub_total = number_format(abs($amount),2,'.',',');
+                    $amounts   = -($amount);
+                  }
+                } else if($exchange['type']==2) { 
+                  $amount = $exchange['convert_amount'] - $exchange['paid'];
+                  if($amount<0) {
+                    $sub_total = "(".number_format(abs($amount),2,'.',',').")";
+                    $amounts   = $amount;
+                  } else {
+                    $sub_total = number_format(abs($amount),2,'.',',');
+                    $amounts   = +$amount;
+                  }
+                }
+                $total += $amounts;
+                if($amount!=0 || $amount!=0.00) {
+            ?>
+            <tr>
+              <td><?php echo date('d-m-Y',strtotime($exchange['date'])); ?></td>
+              <td><?php echo $exchange['no']; ?></td>
+              <td><?php echo ucfirst($exchange['name']); ?></td>
+              <td style="text-align:right;"><?php echo number_format($exchange['amount'],2,'.',','); ?></td>
+              <td style="text-align:right;"><?php echo $exchange['rate']; ?></td>
+              <td style="text-align:right;"><?php echo number_format($exchange['convert_amount'],2,'.',','); ?></td>
+              <td style="text-align:right;"><?php echo number_format($exchange['paid'],2,'.',','); ?></td>
+              <td style="text-align:right;">
+              <?php 
+                echo $sub_total;
+              ?>
+              </td>
+            </tr>
+            <?php
+                }
+              }
+            ?>
+            <tr>
+              <td colspan="7" style="text-align:right;"><strong>Total Realised Gain/(Loss)</strong></td>
+              <td style="text-align:right;">
+              <strong>
+                <?php 
+                if($total<0) {
+                  echo "$ (".number_format(abs($total),2,'.',',').")"; 
+                } else {
+                  echo "$ ".number_format($total,2,'.',','); 
+                }
+              ?>
+              </strong>
+              </td>
+              <td></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        </div>
+        </div>
+        </div>
+    </div>
+
+    
+
+
+  </div>
+
+<!--   <div class="row">
+        <div class="col-md-12">
+        <?php 
+          $net_profit = $total_income - $total_expense;
+        ?>
+        <h4>Net Profit : 
+        <?php
+         if($net_profit<0) {
+            $negative_format = "(".number_format(abs($net_profit),2,'.',',').")";
+            echo $negative_format;
+         } else {
+            echo number_format($net_profit,2,'.',',');
+         }
+        ?></h4>
+        </div>
+  </div>
+ -->
+</div>
+</div>
+
+
+  <div class="row" id="content" style="display:none;">
+    <div class="col-md-12">
+           <h4 align="center"><?php echo $company_name; ?> </h4> 
+           <h4 align="center">Gain/Loss on Foreign Currency Exchange</h4> 
+           <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4> 
+    </div>
+    <div class="col-md-12">
+     <div class="box-widget" style="margin-bottom:0px;">
+        <div class="widget-head clearfix">
+            <span class="h-icon"><i class="icon-power-cord"></i></span>
+            <!-- <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(1);" style="color:#fff;">Gain/Loss on Foreign Currency Exchange</a></h4> -->
+        </div>
+        <div class="widget-container">
+        <div class="widget-block">
+        <div class="widget-content">
+        <table class="table responsive" align="center" width="100%" cellpadding="5" cellspacing="5" style="width:100%;"> 
+            <thead>
+              <tr>
+                 <th>
+                    Date
+                 </th>
+                 <th>
+                    Reference No
+                 </th>
+                 <th>
+                    Counterparties
+                 </th>
+                 <th style="text-align:right;">
+                    Amount
+                 </th>
+                 <th style="text-align:right;">
+                    Exchange Rate
+                 </th>
+                 <th style="text-align:right;">
+                    Amt in Base Currency
+                 </th>
+                 <th style="text-align:right;">
+                    Receipt / Payment Amount
+                 </th>
+                 <th style="text-align:right;">
+                    Realised Gain/(Loss)
+                 </th>
+              </tr>
+            </thead>
+            <tbody>
+            <?php 
+              $total = 0.00;
+              foreach ($this->foreignExchange as $key => $exchange) {
+                $sub_total = 0.00;
+                $amounts   = 0.00;
+                if($exchange['type']==1) {
+                  $amount = $exchange['convert_amount'] - $exchange['paid'];
+                  if($amount>0) {
+                    $sub_total = "(".number_format(abs($amount),2,'.',',').")";
+                    $amounts   = -$amount;
+                  } else {
+                    $sub_total = number_format(abs($amount),2,'.',',');
+                    $amounts   = -($amount);
+                  }
+                } else if($exchange['type']==2) { 
+                  $amount = $exchange['convert_amount'] - $exchange['paid'];
+                  if($amount<0) {
+                    $sub_total = "(".number_format(abs($amount),2,'.',',').")";
+                    $amounts   = $amount;
+                  } else {
+                    $sub_total = number_format(abs($amount),2,'.',',');
+                    $amounts   = +$amount;
+                  }
+                }
+                $total += $amounts;
+                if($amount!=0 || $amount!=0.00) {
+            ?>
+            <tr>
+              <td><?php echo date('d-m-Y',strtotime($exchange['date'])); ?></td>
+              <td><?php echo $exchange['no']; ?></td>
+              <td><?php echo ucfirst($exchange['name']); ?></td>
+              <td style="text-align:right;"><?php echo number_format($exchange['amount'],2,'.',','); ?></td>
+              <td style="text-align:right;"><?php echo $exchange['rate']; ?></td>
+              <td style="text-align:right;"><?php echo number_format($exchange['convert_amount'],2,'.',','); ?></td>
+              <td style="text-align:right;"><?php echo number_format($exchange['paid'],2,'.',','); ?></td>
+              <td style="text-align:right;">
+              <?php 
+                echo $sub_total;
+              ?>
+              </td>
+            </tr>
+            <?php
+                }
+              }
+            ?>
+            <tr>
+              <td colspan="7" style="text-align:right;"><strong>Total Realised Gain/(Loss)</strong></td>
+              <td style="text-align:right;">
+              <strong>
+                <?php 
+                if($total<0) {
+                  echo "$ (".number_format(abs($total),2,'.',',').")"; 
+                } else {
+                  echo "$ ".number_format($total,2,'.',','); 
+                }
+              ?>
+              </strong>
+              </td>
+              <td></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        </div>
+        </div>
+        </div>
+    </div>
+
+    
+
+
+  </div>
+
+
+
+<script type="text/javascript">
+/* var nowTemp = new Date();
+var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+ 
+var checkin = $('#from_date').datepicker({
+  onRender: function(date) {
+    return date.valueOf() < now.valueOf() ? 'disabled' : '';
+  }
+}).on('changeDate', function(ev) {
+  if (ev.date.valueOf() > checkout.date.valueOf()) {
+    var newDate = new Date(ev.date)
+    newDate.setDate(newDate.getDate() + 1);
+    checkout.setValue(newDate);
+  }
+  checkin.hide();
+  $('#to_date')[0].focus();
+}).data('datepicker');
+var checkout = $('#to_date').datepicker({
+  onRender: function(date) {
+    return date.valueOf() <= checkin.date.valueOf() ? 'disabled' : '';
+  }
+}).on('changeDate', function(ev) {
+  checkout.hide();
+}).data('datepicker'); */
+</script>
+<script type="text/javascript">
+
+  (function ($) {
+  var rules = document.styleSheets[document.styleSheets.length-1].cssRules;
+  for (var idx = 0, len = rules.length; idx < len; idx++) {
+    $(rules[idx].selectorText).each(function (i, elem) {
+      elem.style.cssText += rules[idx].style.cssText;
+    });
+  }
+  $('style').remove();
+})(jQuery);
+
+var tableToExcel = (function() {
+  var uri = 'data:application/vnd.ms-excel;base64,'
+    , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+    , base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) }
+    , format = function(s, c) { return s.replace(/{(\w+)}/g, function(m, p) { return c[p]; }) }
+  return function(table, name) {
+    if (!table.nodeType) table = document.getElementById(table)
+    var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML}
+    window.location.href = uri + base64(format(template, ctx))
+  }
+})()
+</script>

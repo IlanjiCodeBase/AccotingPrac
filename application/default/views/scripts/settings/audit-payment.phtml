@@ -1,0 +1,120 @@
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."settings/audit-trail"; ?>">Audit Log</a></li>
+   <li class="active">Payment</li>
+</ul>
+<div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+
+<div class="row">
+<div class="col-md-12">
+                            <div class="square-widget">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-user-4"></i> Payment Detail</h4>
+                                </div>
+                                <div class="widget-container" style="margin-left:50px;">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <strong>Payment </strong> <br/>
+                                        <span><?php echo "PMT".$this->payment[0]['id'];; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Date </strong> <br/>
+                                        <span><?php echo date("d-m-Y",strtotime($this->payment[0]['date'])); ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Payment For  </strong><br/>
+                                        <span>
+                                        <?php 
+                                          if($this->payment[0]['payment_status']==1) {
+                                            echo "Income";
+                                          } else if($this->payment[0]['payment_status']==2) {
+                                            echo "Expense";
+                                          } else if($this->payment[0]['payment_status']==3) {
+                                            echo "Invoice";
+                                          }
+                                        ?>
+                                        </span> 
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Payment Account </strong><br/>
+                                        <span>
+                                         <?php
+                                         if(isset($this->cashAccount) && !empty($this->cashAccount)) {
+                                          foreach ($this->cashAccount as $cash) {
+                                            if($cash['id']==$this->payment[0]['fkpayment_account']) {
+                                              echo $cash['account_name'];
+                                            }
+                                          }
+                                         }
+                                         ?>
+                                        </span> 
+                                    </div>
+                                    
+                                </div><br/>
+                                <div class="row">
+
+                                   <div class="col-md-3">
+                                        <strong>Payment Amount </strong><br>
+                                        <span>
+                                          <?php echo number_format($this->payment[0]['payment_amount'],'2','.',',');  ?>
+                                        </span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Discount Amount </strong><br>
+                                        <?php echo number_format($this->payment[0]['discount_amount'],'2','.',',');  ?>
+                                        </span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Payment Method </strong><br>
+                                       <?php
+                                         if(isset($this->payMethod) && !empty($this->payMethod)) {
+                                          foreach ($this->payMethod as $key => $pay) {
+                                            if($key==$this->payment[0]['payment_method']) {
+                                              echo $pay;
+                                            }
+                                          }
+                                         }
+                                         ?>
+                                        </span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Cheque / Draft No </strong><br>
+                                        <span>
+                                        <?php echo $this->payment[0]['cheque_draft_no'];; ?>
+                                        </span>
+                                    </div>
+                                </div><br/>
+
+                                <div class="row">
+
+                                  <div class="col-md-3">
+                                        <strong>Payment Description </strong><br>
+                                        <span>
+                                        <?php echo $this->payment[0]['payment_description'];; ?>
+                                        </span>
+                                    </div>
+
+                                </div>
+                               
+                                </div>
+                            </div>
+                        </div>
+                    </div>

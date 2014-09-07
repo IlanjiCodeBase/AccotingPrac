@@ -1,0 +1,498 @@
+<?php
+  $logSession = new Zend_Session_Namespace('sess_login');
+?>
+<div id="popup">
+<span class="button b-close"><span>X</span></span>
+<div class="row" id="add_receipt" style="display:none;">
+<h4>Add Receipts</h4>
+<div class="widget-container col-md-12 col-md-offset-1">
+ <form class="form-horizontal" id="add-receipt" method="post">
+<div class="form-group">
+    <label class="control-label col-lg-4">Receipts <span class="mandatory">*</span></label>
+      <div class="col-lg-5" id="receipt_add">
+        <select name="receipts" id="receipts"  class="form-control" required>
+        <option value="">Select</option>
+         <?php
+            foreach ($this->receipts as $receipt) {
+              if($this->income[0]['fkcustomer_id']==$receipt['fkbusiness_id']) {
+                  $id   = $receipt['id']."-".$receipt['name']."-".$receipt['receipt'];
+                  $name = $receipt['name'];
+                  if($this->income[0]['fkreceipt_id']==$receipt['id'])
+                    $receiptSelect = 'selected';
+                  else
+                    $receiptSelect = '';
+         ?>
+           <option value="<?php echo $id; ?>" <?php echo $receiptSelect; ?>><?php echo $name; ?></option>
+         <?php
+                }
+            }
+         ?>
+         </select>
+      </div>
+</div>
+   <div class="form-group">
+        <div class="col-lg-8 col-lg-offset-3">
+            <div class="form-actions">
+               <input type="button" name="attach_receipts" class="btn btn-primary " id="attach_receipts" value="Attach Receipt" onclick="return addReceipt();" />
+                <button type="reset" class="btn" onclick="return bPopup_close();">Cancel</button>
+            </div>
+        </div>
+     </div>
+</form>
+</div>
+</div>
+</div> 
+
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            <div class="alert alert-success" id="success" style="display:none;">
+            </div>
+            <div class="alert alert-danger" id="failure" style="display:none;">
+            </div>
+            </div>
+   </div>
+
+ 
+
+     <div class="row">
+ 
+
+                        <div class="col-md-12 widget-module">
+
+                            <div class="square-widget widget-collapsible">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i> Update Income Transaction</h4>
+
+                                </div>
+
+                                <div class="widget-container col-md-12">
+
+                                <form class="form-horizontal" id="add-income" method="post" enctype="multipart/form-data">
+                                        <div class="form-group">
+                                            <div class="col-lg-3">
+                                              <label>Date <span class="mandatory">*</span></label>
+                                                <input type="text" name="date" id="date" class="form-control date-pick" placeholder="Select Date" value="<?php echo date('d-m-Y',strtotime($this->income[0]['date'])); ?>" />
+                                                <input type="hidden" name="transaction_status" id="transaction_status" value="<?php echo $this->income[0]['transaction_status']; ?>">
+                                            </div>
+                                             
+                                            <div class="col-lg-3">
+                                            <label>Receipt No <span class="mandatory">*</span></label>
+                                                <input type="text" name="receipt" id="receipt" class="form-control" placeholder="Enter Receipt No" value="<?php echo $this->income[0]['receipt_no']; ?>" />
+                                            </div>    
+                                            <div class="col-lg-2">
+                                             <label>Customer / Payee <span class="mandatory">*</span></label>
+                                                <select class="select2" name="customer" id="customer" onchange="return getReceipt(this.value);">
+                                                    <?php
+                                                        if(isset($this->customer) && !empty($this->customer)) {
+                                                            foreach ($this->customer as $customer) {
+                                                                if($customer['id']==$this->income[0]['fkcustomer_id'])
+                                                                    $customerSelect = 'selected';
+                                                                else
+                                                                    $customerSelect = '';
+                                                    ?>
+                                                        <option value="<?php echo $customer['id']; ?>" <?php echo $customerSelect; ?>><?php echo $customer['customer_name']; ?></option>
+                                                    <?php
+                                                            }
+                                                        }
+                                                    ?>                                                    
+                                                </select>
+                                                <?php 
+                                                      if($logSession->type!= 5) {
+                                                 ?>
+                                                <a href="<?php echo $this->sitePath."business/customer/add"; ?>" title="Click to add new customer" data-title="Click to add new customer" target="_blank"><i class="icon-plus-circle-2"></i> Add New Customer</a>
+                                                <?php 
+                                                        }
+                                                ?>
+                                            </div> 
+                                            <div class="col-lg-2">
+                                             <label>Payment / Accruals Account <span class="mandatory">*</span></label>
+                                                <select class="form-control" name="pay_account">
+                                                     <?php
+                                                        if(isset($this->payAccount) && !empty($this->payAccount)) {
+                                                            foreach ($this->payAccount as $pay) {
+                                                                if($pay['id']==$this->income[0]['fkpayment_account'])
+                                                                    $paySelect = 'selected';
+                                                                else
+                                                                    $paySelect = '';
+                                                    ?>
+                                                        <option value="<?php echo $pay['id']; ?>" <?php echo $paySelect; ?>><?php echo $pay['account_name']; ?></option>
+                                                    <?php
+                                                            }
+                                                        }
+                                                    ?>                                                       
+                                                </select>
+                                            </div>  
+                                            <div class="col-lg-2">
+                                             <label>Credit Term <span class="mandatory">*</span></label>
+                                                <select class="form-control" name="credit_term">
+                                                    <?php
+                                                        if(isset($this->creditTerm) && !empty($this->creditTerm)) {
+                                                            foreach ($this->creditTerm as $key => $credit) {
+                                                               if($key!=1) {
+                                                                    $credits = $credit." Days";
+                                                                } else {
+                                                                    $credits = $credit;
+                                                                }
+                                                                if($key==$this->income[0]['credit_term'])
+                                                                    $creditSelect = 'selected';
+                                                                else
+                                                                    $creditSelect = '';
+                                                    ?>
+                                                        <option value="<?php echo $key; ?>" <?php echo $creditSelect; ?>><?php echo $credits; ?></option>
+                                                    <?php
+                                                            }
+                                                        }
+                                                    ?>                                                       
+                                                </select>
+                                            </div> 
+                                        </div>
+
+                                        <div class="form-group">
+
+                                             <div class="col-lg-2">
+                                             <label>Currency <span class="mandatory">*</span></label>
+                                                <select class="select2" name="currency">
+                                                     <?php
+                                                        if(isset($this->currencies) && !empty($this->currencies)) {
+                                                            foreach ($this->currencies as $key => $currency) {
+                                                                if($key==$this->income[0]['transaction_currency']) 
+                                                                    $currencySelect = "selected";
+                                                                else
+                                                                    $currencySelect = "";
+                                                    ?>
+                                                        <option value="<?php echo $key; ?>" <?php echo $currencySelect; ?>><?php echo $currency; ?></option>
+                                                    <?php
+                                                            }
+                                                        }
+                                                    ?>                                                      
+                                                </select>
+                                            </div> 
+
+                                            <div class="col-lg-2">
+                                             <label>Type of Income <span class="mandatory">*</span></label>
+                                                <select class="form-control" name="income_type">
+                                                    <?php
+                                                        if(isset($this->incomeAccount) && !empty($this->incomeAccount)) {
+                                                            foreach ($this->incomeAccount as $income) {
+                                                                if($income['id']==$this->income[0]['fkincome_type']) 
+                                                                    $incomeSelect = "selected";
+                                                                else
+                                                                    $incomeSelect = "";
+                                                    ?>
+                                                        <option value="<?php echo $income['id']; ?>" <?php echo $incomeSelect; ?>><?php echo $income['account_name']; ?></option>
+                                                    <?php
+                                                            }
+                                                        }
+                                                    ?>                                                      
+                                                </select>
+                                                <?php 
+                                                      if($logSession->type!= 3 && $logSession->type!= 4 && $logSession->type!= 5) {
+                                                 ?>
+                                                <a href="<?php echo $this->sitePath."settings/account"; ?>" title="Click to add new income" data-title="Click to add new income" target="_blank"><i class="icon-plus-circle-2"></i> Add New Income</a>
+                                                <?php
+                                                        }
+                                                ?>
+                                            </div> 
+
+                                            <div class="col-lg-4">
+                                            <label>Description <span class="mandatory">*</span></label>
+                                                <input type="text" name="description" id="description" class="form-control" placeholder="Enter Description" value="<?php echo $this->income[0]['transaction_description']; ?>">
+                                            </div> 
+
+                                            <div class="col-lg-2">
+                                            <label>Amount <span class="mandatory">*</span></label>
+                                                <input type="text" name="amount" id="amount" class="form-control amount-align" value="<?php echo number_format($this->income[0]['amount'],2,'.',','); ?>">
+                                            </div> 
+
+                                             <div class="col-lg-2">
+                                             <label>Tax Code </label>
+                                                <select class="form-control" name="tax_code">
+                                                    <option value="0" title="Not Applicable">NA</option>  
+                                                    <?php
+                                                        if(isset($this->taxCode) && !empty($this->taxCode)) {
+                                                            foreach ($this->taxCode as $tax) {
+                                                                if($tax['id']==$this->income[0]['fktax_id']) 
+                                                                    $taxSelect = "selected";
+                                                                else
+                                                                    $taxSelect = "";
+                                                    ?>
+                                                        <option value="<?php echo $tax['id']."_".$tax['tax_percentage']; ?>" <?php echo $taxSelect; ?> title="<?php echo ucfirst($tax['description']); ?>"><?php echo $tax['tax_code']." - ".$tax['tax_percentage']." %"; ?></option>
+                                                    <?php
+                                                            }
+                                                        }
+                                                    ?>                                                  
+                                                </select>
+                                            </div> 
+
+                                        </div>
+
+                          <div class="form-group">
+                             <div class="col-lg-3">
+                             <label>Change Attachment </label><br/>
+                                <input type="file" name="file" id="file" />
+                             </div>
+                             <div class="col-lg-3">
+                              <input type="hidden" name="attachment" id="attachment" value="<?php echo $this->income[0]['fkreceipt_id']; ?>" />
+                             <?php
+                              if(isset($this->income[0]['fkreceipt_id']) && $this->income[0]['fkreceipt_id']!='') {
+                             ?>
+
+                              <label>Attachment is available. <a href="<?php echo $this->filepath.$this->income[0]['fkreceipt_id']; ?>" target="_blank">Click to view</a> </label>
+                              <?php 
+                              } else {
+                              ?>
+                              <label>No attachments available</label>
+                              <?php 
+                                }
+                              ?>
+                                
+                             </div>
+                            </div>
+
+                                <div class="form-group">
+                                <?php 
+                                  if($this->income[0]['transaction_status']==3) {
+                                ?>
+                                    <div class="col-lg-1">
+                                         <div class="form-actions">
+                                            <input type="hidden" name="action" id="action" value="update_draft_income" />
+                                            <input type="hidden" name="income_id" id="income_id" value="<?php echo $this->income[0]['id']; ?>" />
+                                            <input type="button" name="save_draft_income" class="btn btn-primary" id="save_draft_income" value="Save as Draft" onclick="return saveDraft();" /><br/>
+                                            <i>Save Draft Income</i>
+                                          </div>
+                                      </div>
+                                <?php
+                                    }
+                                ?>
+                                <?php 
+                                  if($this->income[0]['transaction_status']==2) {
+                                    if($logSession->id==$this->income[0]['approval_for']) {
+                                ?>
+                                       <div class="col-lg-3" style="margin-left:10px;">
+                                        <div class="form-actions">
+                                            <select class="form-control" name="approval_for" id="approval_for">
+                                            <option value="">For Approval</option>
+                                                        <?php
+                                                            if(isset($this->approveUser) && !empty($this->approveUser)) {
+                                                                foreach ($this->approveUser as $approve) {
+                                                                  if($approve['account_type']==2) {
+                                                                     $account_type = "Super User";
+                                                                  } else if($approve['account_type']==3) {
+                                                                     $account_type = "Manager";
+                                                                  }
+                                                                  if($approve['id']==$this->income[0]['approval_for']) 
+                                                                    $approveSelect = 'selected';
+                                                                  else
+                                                                    $approveSelect = '';
+                                                        ?>
+                                                            <option value="<?php echo $approve['id']; ?>" <?php echo $approveSelect; ?>><?php echo $approve['username']." - ".$account_type; ?></option>
+                                                        <?php
+                                                                }
+                                                            }
+                                                        ?>                                                      
+                                                    </select>
+                                          </div>
+                                          
+                                      </div>
+                                      <div class="col-lg-1">
+                                          <div class="form-actions">
+                                            <input type="submit" name="unapprove_save" class="btn btn-primary add_approve_income_transaction" id="unapprove_save" value="For Approval" /><br/>
+                                            <i>Save Income for approval</i>
+                                          </div>
+                                      </div>
+                                      <?php 
+                                              if($logSession->type!=4) {
+                                      ?>
+                                       <div class="col-lg-1" style="margin-left:10px;">
+                                         <div class="form-actions">
+                                            <input type="submit" name="approve_income" class="btn btn-primary add_income_transaction" id="approve_income" value="Approve" /><br/>
+                                            <i>Approve Income for account posting</i>
+                                            </div>
+                                         </div>
+                                       <?php
+                                                }
+                                        ?>
+                                <?php
+                                        }
+                                    } else if($this->expense[0]['transaction_status']==3) {
+                                ?>
+                                      <div class="col-lg-3" style="margin-left:10px;">
+                                        <div class="form-actions">
+                                            <select class="form-control" name="approval_for" id="approval_for">
+                                            <option value="">For Approval</option>
+                                                        <?php
+                                                            if(isset($this->approveUser) && !empty($this->approveUser)) {
+                                                                foreach ($this->approveUser as $approve) {
+                                                                  if($approve['account_type']==2) {
+                                                                     $account_type = "Super User";
+                                                                  } else if($approve['account_type']==3) {
+                                                                     $account_type = "Manager";
+                                                                  }
+                                                                  if($approve['id']==$this->income[0]['approval_for']) 
+                                                                    $approveSelect = 'selected';
+                                                                  else
+                                                                    $approveSelect = '';
+                                                        ?>
+                                                            <option value="<?php echo $approve['id']; ?>" <?php echo $approveSelect; ?>><?php echo $approve['username']." - ".$account_type; ?></option>
+                                                        <?php
+                                                                }
+                                                            }
+                                                        ?>                                                      
+                                                    </select>
+                                          </div>
+                                          
+                                      </div>
+                                      <div class="col-lg-1">
+                                          <div class="form-actions">
+                                            <input type="submit" name="unapprove_save" class="btn btn-primary add_approve_income_transaction" id="unapprove_save" value="For Approval" /><br/>
+                                            <i>Save Income for approval</i>
+                                          </div>
+                                      </div>
+                                      <?php 
+                                              if($logSession->type!=4) {
+                                         ?>
+                                       <div class="col-lg-1" style="margin-left:10px;">
+                                         <div class="form-actions">
+                                            <input type="submit" name="approve_income" class="btn btn-primary add_income_transaction" id="approve_income" value="Approve" /><br/>
+                                            <i>Approve Income for account posting</i>
+                                            </div>
+                                         </div>
+                                       <?php
+
+                                            }
+                                        ?>
+
+                                <?php 
+                                    }
+                                ?>
+
+                                         <div class="col-lg-1" style="margin-left:0px;">
+                                         <div class="form-actions">
+                                            <button type="button" class="btn"><a href="<?php echo $this->sitePath."transaction/income"; ?>">Cancel</a></button>
+                                            </div>
+                                         </div>
+                                    </div>
+                               
+                                </form>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+<script type="text/javascript">
+
+function getReceipt(value) {
+  if(value!='') {
+      var i=0;
+      var customer_receipt = '<select name="receipts" id="receipts"  class="form-control" required><option value="">Select</option>';
+
+         <?php
+            foreach ($this->receipts as $receipt) {
+        ?>
+          if(value==<?php echo $receipt['fkbusiness_id'] ?>) {
+        <?php
+                $id   = $receipt['id']."-".$receipt['name']."-".$receipt['receipt'];
+                $name = $receipt['name'];
+         ?>
+           customer_receipt += '<option value="<?php echo $id; ?>"><?php echo $name; ?></option>';
+           i++;
+          }
+         <?php
+            }
+         ?>
+         customer_receipt += '</select>';
+         if(i==0) {
+           $("#receipt_add").html("<p>No Receipts Found</p>");
+         } else {
+           $("#receipt_add").html(customer_receipt);
+         }
+         $("#receipt_id").val("");
+         $("#customer_receipts").html("");
+         $("#customer_receipts").hide();
+         $("#attach").show();
+
+  }
+}
+
+ function attachReceipt() {
+    var customer = $("#customer").val();
+    if(customer=='') {
+        alert('Select any customer to attach receipt');
+    } else {
+        $("#add_payment").hide();
+        $("#add_receipt").show();
+        $('#popup').bPopup({
+                modalClose: false,
+                easing: 'easeOutBack', 
+                speed: 1000,
+                transition: 'slideDown',
+                follow: [false, false], 
+        });
+    }
+ }
+
+
+ function addReceipt() {
+    var receipts      = $("#receipts").val();
+    var receiptSplit  = receipts.split('-');
+    var receiptId     = receiptSplit[0];
+    var receiptName   = receiptSplit[1];
+    var receiptFile   = receiptSplit[2];
+    if(receiptId!='' && receiptName!='' && receiptFile!='') {
+      var receipturl = '<a href="<?php echo $this->filepath; ?>'+receiptFile+'" target="_blank"> '+receiptName+' </a>';
+      $("#receipt_id").val(receiptId);
+      $("#attach").hide();
+      $("#customer_receipts").html("Receipt "+ receipturl +" have been attached");
+      $("#customer_receipts").show();
+    }
+    $("#popup").bPopup().close();
+ }
+   
+
+function saveDraft() {
+  $(".btn").attr("disabled",true);
+    $.ajax({
+      type: "POST",
+      url: "<?php echo $this->sitePath.'transaction/income/ajax-call'; ?>",
+      data: $('#add-income').serialize(),
+      success: function (html) {
+          if(html=='success') {
+             $('#add_income').slideToggle(1000);
+             $(".btn").attr("disabled",false);
+              window.location.href='<?php echo $this->sitePath; ?>transaction/income';
+          } else {
+             $('#failure').html('<strong>Income cannot be saved as draft</strong>');
+             $('#failure').fadeIn(1000);
+             $('#failure').fadeOut(9000);
+             $(".btn").attr("disabled",false);
+          }
+      }
+    }); 
+ }
+
+  function bPopup_close() {
+    $("#popup").bPopup().close();
+ }
+
+ function numberWithCommas(x) {
+  var amount = parseFloat(x).toFixed(2);
+  var value  = amount.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
+  $("#amount").val(value);
+}
+
+</script>   

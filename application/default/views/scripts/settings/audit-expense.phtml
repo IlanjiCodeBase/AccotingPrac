@@ -1,0 +1,348 @@
+<?php
+   $logSession = new Zend_Session_Namespace('sess_login');
+?>
+
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."settings/audit-trail/"; ?>">Audit Log</a></li>
+   <li class="active">Expense View</li>
+</ul>
+
+
+<div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+<div class="row">
+<div class="col-md-12">
+                            <div class="square-widget">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-user-4"></i> Expense Transaction Details</h4>
+                                </div>
+                                <div class="widget-container" style="margin-left:50px;">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <strong>Expense No  </strong> <br/>
+                                        <span><?php echo $this->expense_no; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Date </strong> <br/>
+                                        <span><?php echo date("d-m-Y",strtotime($this->expense[0]['date'])); ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Receipt No  </strong> <br/>
+                                        <span><?php echo $this->expense[0]['receipt_no']; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Vendor  </strong> <br/>
+                                        <span><?php echo $this->expense[0]['vendor_name']; ?></span>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <strong>Credit Term </strong> <br>
+                                        <span>
+                                        <?php 
+                                          if(isset($this->creditTerm) && !empty($this->creditTerm)) {
+                                              foreach ($this->creditTerm as $key => $credit) {
+                                                if($key==$this->expense[0]['credit_term']) {
+                                                  echo $credit;
+                                                }
+                                              }
+                                          }
+                                        ?>
+                                        </span>
+                                       
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Transaction Currency </strong> <br>
+                                        <span>
+                                        <?php 
+                                          if(isset($this->currencies) && !empty($this->currencies)) {
+                                            foreach ($this->currencies as $key => $currency) {
+                                              if($key==$this->expense[0]['transaction_currency']) {
+                                                  echo $currency." - ".$key;
+                                                }
+                                            }
+                                          }
+                                        ?>
+                                        </span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Shipping Address </strong> <br>
+                                        <span><?php if($this->expense[0]['shipping_address']==1) { echo "Default Shipping Address";} ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Due Date </strong> <br>
+                                        <span><?php echo date("d-m-Y",strtotime($this->expense[0]['due_date'])); ?></span>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <strong>Prompt Payment Discount  </strong><br>
+                                        <span><?php if($this->expense[0]['discount_status']==1) { echo "Yes";} else if($this->expense[0]['discount_status']==2) { echo "No"; } ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Permit No  </strong><br>
+                                        <span><?php echo $this->expense[0]['permit_no']; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>D.O / S.O No  </strong><br>
+                                        <span><?php echo $this->expense[0]['do_so_no']; ?></span> 
+                                    </div>
+                                    
+                                     <div class="col-md-3">
+                                            <strong>Receipt if any </strong><br>
+                                            <span>
+                                        <?php
+                                          if(isset($this->expense[0]['fkreceipt_id']) && !empty($this->expense[0]['fkreceipt_id']) && file_exists("..".$this->filepath.$this->expense[0]['fkreceipt_id'])) {
+                                         ?>
+                                            <a href="<?php echo $this->sitePath."..".$this->filepath.$this->expense[0]['fkreceipt_id']; ?>" target="_blank">Click to view</a>
+                                             <?php 
+                                          } else {
+                                          ?>
+                                          No attachments available
+                                          <?php 
+                                            }
+                                          ?>
+                                          </span>
+                                    </div>
+                                </div>
+                                <br/>
+                                 <div class="row">
+                                 
+                                    <div class="col-md-3">
+                                        <strong>Approval By / For </strong><br>
+                                        <span>
+                                        <?php 
+                                            if(isset($this->approveUser) && !empty($this->approveUser)) {
+                                                foreach ($this->approveUser as $approve) {
+                                                 if($approve['account_type']==0) {
+                                                        $account_type = "Developer";
+                                                  } 
+                                                  else if($approve['account_type']==1) {
+                                                        $account_type = "Developer";
+                                                  } 
+                                                  else if($approve['account_type']==2) {
+                                                        $account_type = "Super User";
+                                                  } else if($approve['account_type']==3) {
+                                                        $account_type = "Manager";
+                                                  }
+                                                  if($approve['id']==$this->expense[0]['approval_for']) {
+                                                        echo $approve['username']." - ".$account_type;
+                                                  }
+                                                }
+                                            }
+                                        ?>
+                                        </span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Status </strong><br>
+                                        <span>
+                                        <?php 
+                                            if($this->expense[0]['transaction_status']==1) {
+                                                echo "Approved / Verified";
+                                            } else if($this->expense[0]['transaction_status']==2) {
+                                                echo "Saved / Unverified";
+                                            } else if($this->expense[0]['transaction_status']==3) {
+                                                echo "Draft";
+                                            }
+                                        ?>
+                                        </span>
+                                    </div>
+                                 </div>
+
+                                </div>
+                            </div>
+                        </div>
+                </div>
+
+<div class="row">
+        <div class="col-md-12">
+                            <div class="square-widget">
+                                <h5 class="pull-left"><i class="icon-user-4"></i> Product Details</h5>
+                                <div class="widget-container">
+                                    <table class="table responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    Expense Type
+                                                </th>
+                                                <th>
+                                                    Product ID
+                                                </th>
+                                                <th>
+                                                    Product Description
+                                                </th>
+                                                <th>
+                                                    Quantity
+                                                </th>
+                                                <th>
+                                                    Unit Price
+                                                </th>
+                                                <th>
+                                                    Tax Code
+                                                </th>
+                                                <th>
+                                                    Amount
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="expense_detail">
+                                        <?php
+                                            $i = 1;
+                                            $total_gst = 0.00;
+                                            $sub_total = 0.00;
+                                            if(isset($this->expenseList) && !empty($this->expenseList)) {
+                                                foreach ($this->expenseList as $expenseList) {
+                                                    $net_amount = $expenseList['quantity'] * $expenseList['unit_price'];
+                                                    $total_gst += $net_amount * $expenseList['tax_value'] / 100;
+                                                    $sub_total += $net_amount;
+                                        ?>
+                                            <tr>
+                                                <td style="width:20%;">
+                                                <input type="hidden" name="update_expense_counter" id="update_expense_counter" value="<?php echo $i; ?>" />  
+                                                    <?php
+                                                        if(isset($this->expenseAccount) && !empty($this->expenseAccount)) {
+                                                            foreach ($this->expenseAccount as $expense) {
+                                                                if($expenseList['fkexpense_type']==$expense['id']) {
+                                                                    echo $expense['account_name'];
+                                                                }
+                                                            }
+                                                        }
+                                                    ?>                                                      
+                                                </td>
+                                                <td style="width:15%;">
+                                                    <?php echo $expenseList['product_id']; ?>
+                                                </td>
+                                                <td style="width:20%;">
+                                                    <?php echo $expenseList['product_description']; ?>
+                                                </td>
+                                                <td style="width:5%;">
+                                                    <?php echo $expenseList['quantity']; ?>
+                                                </td>
+                                                <td>
+                                                   <?php echo number_format($expenseList['unit_price'],2,'.',','); ; ?>
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                        if(isset($this->taxCode) && !empty($this->taxCode) && $expenseList['fktax_id']!=0) {
+                                                            foreach ($this->taxCode as $tax) {
+                                                                if($expenseList['fktax_id']==$tax['id']) {
+                                                                  foreach ($this->purchase as $key => $purchase) {
+                                                                    if($tax['tax_code']==$key) {
+                                                                        echo $purchase['name']." - ".$tax['tax_percentage']." %";
+                                                                    }
+                                                                  }
+                                                                   // echo $tax['tax_code']." - ".$tax['tax_percentage']." %";
+                                                                }
+                                                            }
+                                                        } else {
+                                                            echo "NA - Not Applicable";
+                                                        }
+                                                    ?>                                                  
+                                                </td>
+                                                <td>
+                                                    <strong id="net_amount_<?php echo $i; ?>">
+                                                    <?php
+                                                       // $net_amount = ($expenseList['quantity'] * $expenseList['unit_price']) - $this->expense[0]['discount_amount'];
+                                                       // $net_amount -= $this->expense[0]['discount_amount'];
+                                                        echo number_format($net_amount,2,'.',',');
+                                                    ?>
+                                                    </strong>
+                                                </td>
+                                            </tr>
+
+                                            <?php
+                                                    //echo $expenseList['fktax_id'];
+                                                     $i++;
+                                                    }
+                                                }
+                                            ?>
+                                            <input type="hidden" name="expense_counter" id="expense_counter" />
+                                            
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr/>
+                        <div class="row">
+                            <div class="col-md-4 col-md-offset-9">
+                                   <label class="col-lg-4 control-label" style="padding-top:0px;">Sub Total : </label>
+                                    <span id="sub_total"><?php 
+                                   $net_total = $sub_total; 
+                                   echo number_format($net_total,2,'.',',');
+                                   ?></span> <br/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-md-offset-9">
+                                   <label class="col-lg-4 control-label" style="padding-top:0px;">Total GST : </label>
+                                    <span id="total_gst"><?php echo number_format($total_gst,2,'.',','); ?></span>
+                             </div>
+                        </div>
+
+                            <div class="row">
+                            <div class="col-md-4 col-md-offset-9">
+                                   <label class="col-lg-4 control-label" style="padding-top:0px;">Grand Total : </label>
+                                    <span id="grand_total"><?php 
+                                    $over_all = $net_total+$total_gst; 
+                                    echo number_format($over_all,2,'.',',');
+
+                                    ?></span>
+                                </div>
+                             </div>
+                             <div class="row">
+                            <div class="col-md-4 col-md-offset-9">
+                                   <label class="col-lg-4 control-label" style="padding-top:0px;">Exchange Rate :</label>
+                                   <span><?php echo $this->expense[0]['exchange_rate']; ?></span>
+                             </div>
+                             </div>
+                             <div class="row">
+                            <div class="col-md-4 col-md-offset-9">
+                                   <label class="col-lg-4 control-label" style="padding-top:0px;">SGD GST :</label>
+                                   <span><?php echo $this->expense[0]['total_gst']; ?></span>
+                             </div>
+                             </div>
+                            <div class="row">
+                            <div class="col-md-4 col-md-offset-9">
+                                   <label class="col-lg-4 control-label" style="padding-top:0px;">Grand Total SGD :</label>
+                                    <span id="grand_total_sgd">
+                                      <?php 
+                                        if($this->expense[0]['total_gst']!=0.00) {
+                                          $calculate_all = ($this->expense[0]['exchange_rate']*$net_total)+($this->expense[0]['total_gst']);
+                                        } else {
+                                          $calculate_all = $this->expense[0]['exchange_rate']*$over_all;
+                                        }
+                                        echo number_format($calculate_all,2,'.',','); 
+                                        if($this->expense[0]['transaction_currency']!='SGD') {
+                                          $totAmoumt = $calculate_all;
+                                        } else {
+                                          $totAmoumt = $over_all;
+                                        }
+                                    ?>
+                                    </span>
+                                </div>
+                             </div>
+
+</div>
+

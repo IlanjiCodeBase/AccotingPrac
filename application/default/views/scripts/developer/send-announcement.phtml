@@ -1,0 +1,217 @@
+<?php
+    $logSession = new Zend_Session_Namespace('sess_login');
+?>
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/developer/"; ?>">Developer</a></li>
+   <li><a href="<?php echo $this->sitePath."default/developer/announcements"; ?>">Announcements</a></li>
+   <li class="active">Send</li>
+</ul>
+
+
+                                <div class="row">
+                                       <div class="col-md-6 col-md-offset-3">
+                                       <?php 
+                                            if(isset($this->success) && !empty($this->success)) {
+                                       ?>
+                                            <div class="alert alert-success">
+                                               <strong><?php echo $this->success; ?></strong>
+                                            </div>
+                                        <?php
+                                            } else if(isset($this->error) && !empty($this->error)) {
+                                        ?>
+                                            <div class="alert alert-danger">
+                                               <strong><?php echo $this->error; ?></strong>
+                                            </div>
+                                        <?php 
+                                            }
+                                        ?>
+                                        </div>
+                                 </div>
+
+
+<div class="row">
+                        <div class="col-md-12 widget-module">
+                            <div class="square-widget widget-collapsible">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-paragraph-justify-2"></i> Send Announcement</h4>
+                                    
+                                </div>
+
+                                <div class="widget-container col-md-12 col-md-offset-3">
+                                    <form class="form-horizontal" id="send-announcement" method="post">
+
+                                    <div class="form-group">
+                                            <label class="col-lg-2 control-label">Send to all</label>
+                                            <div class="col-lg-10">
+                                                <label class="checkbox-inline">
+                                                    <input type="checkbox" name="all" id="all" value="all" onclick="return companyAnnouncement();"> Send all</label>
+                                            </div>
+                                        </div>
+
+                             <?php
+                                 if(isset($logSession->type) && $logSession->type==0) {
+                             ?>
+
+                                    <div class="form-group">
+                                            <label class="col-lg-2 control-label">Companies <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <select name="company" id="company" class="form-control" onchange="return companyUsers(this.value);">
+                                                <option value="">Select</option>
+                                                 <?php 
+                                                            $companySelect = '';
+                                                            if(isset($this->companies) && !empty($this->companies)) {
+                                                                foreach ($this->companies as $companies) {
+                                                                   
+                                                        ?>
+                    <option value="<?php echo $companies['cid']; ?>" <?php echo $companySelect; ?>><?php echo ucfirst($companies['company_name']); ?></option>
+                                                        <?php
+                                                                }
+                                                            } 
+                                                        ?>                                                      
+                                                </select>  
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Users <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                              <div id="company_users">
+                                                <select class="form-control" multiple="multiple" name="users[]" id="users">
+                                                    <!-- <option value="">Select</option> -->
+                                                </select>
+                                               </div>
+                                            </div>
+                                        </div>
+                            <?php 
+                                } else if(isset($logSession->type) && $logSession->type==1) {
+                            ?>
+                            <input type="hidden" name="companies" id="companies" value="<?php echo $logSession->cid; ?>">
+                            <div class="form-group">
+                                            <label class="col-lg-2 control-label">Companies <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <select name="companys" id="companys" class="form-control" disabled>
+                                                 <?php 
+                                                            $companySelect = 'selected';
+                                                            if(isset($this->companies) && !empty($this->companies)) {
+                                                                foreach ($this->companies as $companies) {
+                                                                    if($logSession->cid==$companies['cid']) {
+                                                                   
+                                                        ?>
+                    <option value="<?php echo $companies['cid']; ?>" <?php echo $companySelect; ?>><?php echo ucfirst($companies['company_name']); ?></option>
+                                                        <?php
+                                                                    }
+                                                                }
+                                                            } 
+                                                        ?>                                                      
+                                                </select>  
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Users <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                              <div id="company_users">
+                                                <select class="form-control" multiple="multiple" name="users[]" id="users">
+                                                     <?php
+                                                      $userSelect = '';
+                                                        if(isset($this->userList) && !empty($this->userList)) {
+                                                            foreach ($this->userList as $user) {
+                                                                 if($user['account_type']==1) {
+                                                                   $account_type = 'Developer';
+                                                                } else if($user['account_type']==2) {
+                                                                   $account_type = 'Super User';
+                                                                } else if($user['account_type']==3) {
+                                                                   $account_type = 'Manager';
+                                                                } else if($user['account_type']==4) {
+                                                                   $account_type = 'User';
+                                                                } else if($user['account_type']==5) {
+                                                                   $account_type = 'Viewer';
+                                                                }         
+                                                    ?>
+                                                        <option value="<?php echo $user['id']; ?>" <?php echo $userSelect; ?>><?php echo $user['username']." (".$account_type.")"; ?></option>
+                                                    <?php
+                                                               }
+                                                            }
+                                                    ?>  
+                                                </select>
+                                               </div>
+                                            </div>
+                                        </div>
+
+                            <?php
+                                }
+                            ?>
+
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Subject <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <input type="text" name="subject" id="subject" class="form-control" placeholder="Enter Subject" autocomplete="off">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">Message <span class="mandatory">*</span></label>
+                                            <div class="col-lg-3">
+                                                <textarea class="form-control" name="message" id="message" placeholder="Enter your message" autocomplete="off" style="height:180px;"></textarea>
+                                            </div>
+                                        </div>
+                                    
+                                       
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">&nbsp;</label>
+                                            <div class="col-lg-3">
+                                                <div class="form-actions">
+                                                    <button type="submit" id="send" class="btn btn-primary">Submit</button>
+                                                    <a href="<?php echo $this->sitePath."developer/announcements"; ?>"><button type="button" class="btn">Cancel</button></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+/*$(document).ready(function() {
+    $(".selectmulti").select2();
+});
+*/
+
+function companyUsers(value) {
+    var account_type = '';
+      $.ajax({
+        type: "POST",
+        url: "<?php echo $this->sitePath.'default/developer/ajax-refresh'; ?>",
+        data: 'action=companyUsers&id='+value,
+        success: function (html) {
+ 
+            var userJson = $.parseJSON(html);
+            var users = '<select name="users[]" id="users"  class="form-control" multiple="multiple">';
+              $.each(userJson, function(){
+                  if(this.account_type==1) {
+                     account_type = 'Developer';
+                  } else if(this.account_type==2) {
+                     account_type = 'Super User';
+                  } else if(this.account_type==3) {
+                     account_type = 'Manager';
+                  } else if(this.account_type==4) {
+                     account_type = 'User';
+                  } else if(this.account_type==5) {
+                     account_type = 'Viewer';
+                  }
+                  users += '<option value='+this.id+'>'+this.username+'&nbsp;('+account_type+')</option>';
+             
+              });
+            users += '</select>';
+            $("#company_users").html(users);
+        }
+      }); 
+}
+</script>

@@ -1,0 +1,2133 @@
+<?php
+$logSession = new Zend_Session_Namespace('sess_login');
+if(isset($logSession->proxy_name) && !empty($logSession->proxy_name)) {
+  $company_name = ucfirst($logSession->proxy_name);
+} else {
+  $company_name = ucfirst($logSession->name);
+}
+?>
+<div class="main-container">
+<div class="container">
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."reports"; ?>">Reports</a></li>
+   <li class="active">Cash Flow Analysis</li>
+</ul>
+  <div class="row">
+    <div class="col-md-12">
+
+      <form class="form-horizontal" id="report-period" method="post">
+
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">From Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="from_date" id="from_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->from) && !empty($this->from)) { echo $this->from; } else { echo date('01-01-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">To Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="to_date" id="to_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->to) && !empty($this->to)) { echo $this->to; } else { echo date('d-m-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+         <label class="col-lg-5 control-label">&nbsp;</label>
+           <div class="col-lg-3">
+              <div class="form-actions">
+                <button type="submit" id="update" class="btn btn-primary">Update</button>
+              </div>
+           </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+    <div class="row">
+      <div class="col-md-3 col-md-offset-2 pull-right">
+          <button class="print btn btn-inverse" type="button" rel="content"><i class="icon-print"></i> Print</button>
+          <button class="btn btn-inverse" type="button"  onclick="tableToExcel('content', 'Account Receivables')"><i class="icon-file-excel"></i> Excel</button>
+      </div>
+    </div>
+
+
+
+       <div class="row">
+
+
+                        <div class="col-md-9 col-md-offset-2">
+
+                             <h4 align="center"><?php echo $company_name; ?> </h4> 
+                             <h4 align="center">Cash Flow Analysis</h4> 
+                             <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4> 
+                            
+                            <div class="box-widget">
+                                <div class="widget-head clearfix">
+                                    <span class="h-icon"><i class="icon-power-cord"></i></span>
+                                    <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(1);" style="color:#fff;">Cash Flow Analysis</a></h4>
+                                </div>
+                                <div class="widget-container">
+                                    <div class="widget-block">
+                                        <div class="widget-content">
+                                            <table class="table responsive">
+                                                 <thead>
+                                                    <tr>
+                                                        <th  style="font-weight:bold; font-size:15px;">
+                                                          Inflow
+                                                        </th>
+                                                        <th>
+                                                        </th>
+                                                        
+                                                    </tr>
+                                                </thead> 
+                                                <tbody>
+                                                <?php
+                                                    $inflowAmount = 0.00;
+                                                    $as1 = 0;
+                                                    $l=1;
+                                                    $active = array();
+                                                    $asset_level1 = 1;
+                                                    $asset_level2 = 2;
+                                                ?>
+                                                   <tr class="balance_account assets_active">
+                                                    <td><span style="font-weight:bold; font-size:14px; cursor: pointer;">Assets</span></td>
+                                                    <td></td>
+                                                   </tr>
+
+
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->asset as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account assets_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account assets_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(1,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                               //  foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 1 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "assets_".$l2."_".$l3;
+                                                        $as1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+
+                                            ?>
+                                                 <tr class="balance_account success assets_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                          }
+                                                        }
+                                                    }
+                                               // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+                                             <?php 
+                                                $li1 = 0;
+                                                $l = 2;
+                                             ?>
+                                             <tr class="balance_account liability_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;  cursor:pointer;">Liability/Credit Card</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->liability as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account liability_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+
+
+                                             <?php
+                                               //  foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 2 && $account['level1']==$l2 && $account['level2']==0) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "liability_".$l2."_".$l3;
+                                                        $li1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="balance_account success liability_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php         }
+                                                        }
+                                                    }
+                                            ?>
+
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account liability_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(2,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+
+<!--                                                      <?php
+                                                             $l4 = "1";
+                                                            foreach ($this->taxes as $tax) {
+                                                                if($l2==1 && $l3==4) {
+                                                                   if($l4<=9) {
+                                                                        $l4 = "0".$l4;
+                                                                    }
+                                                                    $active[] = "liability_".$l2."_".$l3;
+                                                        ?>
+
+                                                     <tr class="balance_account success liability_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><?php echo $l."-".$l2.$l3."-".$l4; ?></td>
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php 
+                                                                if($tax['tax_type']==1) {
+                                                                    foreach ($this->purchase as $key => $purchase) {
+                                                                      if($tax['tax_code']==$key) {
+                                                                        echo $purchase['name'];
+                                                                      }
+                                                                    }
+                                                                  } else if($tax['tax_type']==2) {
+                                                                    foreach ($this->supply as $key => $supply) {
+                                                                      if($tax['tax_code']==$key) {
+                                                                        echo $supply['name'];
+                                                                      }
+                                                                    }
+                                                                  } 
+                                                             ?></span></td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <?php 
+                                                $l4++;
+                                                        }
+                                                    }
+                                             ?> -->
+                                             
+                                            <?php
+                                               //  foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 2 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "liability_".$l2."_".$l3;
+                                                        $li1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="balance_account success liability_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                        }
+                                                    }
+                                               // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+
+                                             <?php 
+                                                $l = 3;
+                                             ?>
+                                             <tr class="other_account income_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;">Income</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $in1 = 0;
+                                                      $l2 = "1";
+                                                      foreach ($this->income as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="other_account income_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+
+                                                 <?php
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 3 && $account['level1']==$l2 && $account['level2']==0) {
+                                                       /*if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }*/
+                                                        $active[] = "income_".$l2."_0";
+                                                        $in1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="other_account success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                    }
+                                                       
+                                                    }
+                                                }
+                                            ?>
+
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="other_account income_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(3,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 //foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 3 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "income_".$l2."_".$l3;
+                                                        $in1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="other_account success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                      }
+                                                       
+                                                    }
+                                                }
+                                             // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+
+                                            <?php 
+                                                $ex1 = 0;
+                                                $l = 4;
+                                             ?>
+                                             <tr class="other_account expense_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;">Expense</span></td>
+                                                    <td></td>
+                                                   </tr>
+<!-- 
+                                            <?php
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 4 && $account['level1']==0 && $account['level2']==0) {
+                                                      /* if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }*/
+                                                        $active[] = "expense_".$l2."_0";
+                                                        $ex1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="other_account success expense_<?php echo $l2."_".$l3; ?>"  style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php   }
+                                                        }
+                                                    }
+                                            ?> -->
+
+
+
+
+
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->expense as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="other_account expense_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+
+                                           <?php
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 4 && $account['level1']==$l2 && $account['level2']==0) {
+                                                      /* if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }*/
+                                                        $active[] = "expense_".$l2."_0";
+                                                        $ex1++;
+                                                        $inflowAmount += abs($this->cashFlow[$account['id']]['debit']);
+                                            ?>
+                                                 <tr class="other_account success expense_<?php echo $l2."_".$l3; ?>"  style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format(abs($this->cashFlow[$account['id']]['debit']),2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                          }
+                                                        }
+                                                    }
+                                            ?>
+
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="other_account expense_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(4,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                // foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 4 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "expense_".$l2."_".$l3;
+                                                        $ex1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="other_account success expense_<?php echo $l2."_".$l3; ?>"  style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                        }
+                                                    }
+                                               // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+                                             
+
+                                             <?php 
+                                                $l = 5;
+                                             ?>
+                                             <tr class="balance_account equity_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;">Equity</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $eq1 = 0;
+                                                      $l2 = "1";
+                                                      foreach ($this->equity as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account equity_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account equity_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(5,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                         <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                           //      foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 5 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                         $active[] = "equity_".$l2."_".$l3;
+                                                         $eq1++;
+                                                         $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="balance_account success equity_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                        }
+                                                    }
+                                              //  }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+                                             <tr>
+                                               <td style="text-align:right; "><span style="font-size:14px; font-weight:bold;">Total Inflow</span></td>
+                                                <td style="text-align:right;"><?php echo number_format($inflowAmount,2,'.',','); ?></td>
+                                             </tr>
+
+
+
+
+
+
+
+
+                                              <tr>
+                                                        <th  style="font-weight:bold; font-size:15px;">
+                                                          Outflow
+                                                        </th>
+                                                        <th>
+                                                        </th>
+                                                        
+                                                    </tr>
+
+
+
+                                             <?php
+                                                    $outflowAmount = 0.00;
+                                                    $as2 = 0;
+                                                    $l=1;
+                                                    $active = array();
+                                                    $asset_level1 = 1;
+                                                    $asset_level2 = 2;
+                                                ?>
+                                                   <tr class="balance_account assets1_active">
+                                                    <td><span style="font-weight:bold; font-size:14px; cursor: pointer;">Assets</span></td>
+                                                    <td></td>
+                                                   </tr>
+
+
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->asset as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account assets1_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account assets1_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(1,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                               //  foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 1 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "assets1_".$l2."_".$l3;
+                                                        $as2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+
+                                            ?>
+                                                 <tr class="balance_account success assets1_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                          }
+                                                        }
+                                                    }
+                                               // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+                                             <?php 
+                                                $li2 = 0;
+                                                $l = 2;
+                                             ?>
+                                             <tr class="balance_account liability1_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;  cursor:pointer;">Liability/Credit Card</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->liability as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account liability1_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+
+
+                                             <?php
+                                               //  foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 2 && $account['level1']==$l2 && $account['level2']==0) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "liability1_".$l2."_".$l3;
+                                                        $li2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="balance_account success liability1_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php         }
+                                                        }
+                                                    }
+                                            ?>
+
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account liability1_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(2,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+
+<!--                                                      <?php
+                                                             $l4 = "1";
+                                                            foreach ($this->taxes as $tax) {
+                                                                if($l2==1 && $l3==4) {
+                                                                   if($l4<=9) {
+                                                                        $l4 = "0".$l4;
+                                                                    }
+                                                                    $active[] = "liability_".$l2."_".$l3;
+                                                        ?>
+
+                                                     <tr class="balance_account success liability_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><?php echo $l."-".$l2.$l3."-".$l4; ?></td>
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php 
+                                                                if($tax['tax_type']==1) {
+                                                                    foreach ($this->purchase as $key => $purchase) {
+                                                                      if($tax['tax_code']==$key) {
+                                                                        echo $purchase['name'];
+                                                                      }
+                                                                    }
+                                                                  } else if($tax['tax_type']==2) {
+                                                                    foreach ($this->supply as $key => $supply) {
+                                                                      if($tax['tax_code']==$key) {
+                                                                        echo $supply['name'];
+                                                                      }
+                                                                    }
+                                                                  } 
+                                                             ?></span></td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <?php 
+                                                $l4++;
+                                                        }
+                                                    }
+                                             ?> -->
+                                             
+                                            <?php
+                                               //  foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 2 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "liability1_".$l2."_".$l3;
+                                                        $li2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="balance_account success liability1_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                        }
+                                                    }
+                                               // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+
+                                             <?php 
+                                                $l = 3;
+                                             ?>
+                                             <tr class="other_account income1_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;">Income</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $in2 = 0;
+                                                      $l2 = "1";
+                                                      foreach ($this->income as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="other_account income1_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+
+                                                 <?php
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 3 && $account['level1']==$l2 && $account['level2']==0) {
+                                                       /*if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }*/
+                                                        $active[] = "income1_".$l2."_0";
+                                                        $in2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="other_account success income1_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                    }
+                                                       
+                                                    }
+                                                }
+                                            ?>
+
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="other_account income_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(3,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 //foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 3 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "income1_".$l2."_".$l3;
+                                                        $in2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="other_account success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                      }
+                                                       
+                                                    }
+                                                }
+                                             // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+
+                                            <?php 
+                                                $ex2 = 0;
+                                                $l = 4;
+                                             ?>
+                                             <tr class="other_account expense1_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;">Expense</span></td>
+                                                    <td></td>
+                                                   </tr>
+
+                                           <!--  <?php
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 4 && $account['level1']==0 && $account['level2']==0) {
+                                                      /* if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }*/
+                                                        $active[] = "expense1_".$l2."_0";
+                                                        $ex2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="other_account success expense1_<?php echo $l2."_".$l3; ?>"  style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php   }
+                                                        }
+                                                    }
+                                            ?> -->
+
+
+
+
+
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->expense as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="other_account expense1_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+
+                                           <?php
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 4 && $account['level1']==$l2 && $account['level2']==0) {
+                                                      /* if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }*/
+                                                        $active[] = "expense1_".$l2."_0";
+                                                        $ex2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="other_account success expense1_<?php echo $l2."_".$l3; ?>"  style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format(abs($this->cashFlow[$account['id']]['credit']),2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                          }
+                                                        }
+                                                    }
+                                            ?>
+
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="other_account expense1_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(4,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                // foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 4 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "expense1_".$l2."_".$l3;
+                                                        $ex2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="other_account success expense1_<?php echo $l2."_".$l3; ?>"  style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                        }
+                                                    }
+                                               // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+                                             
+
+                                             <?php 
+                                                $l = 5;
+                                             ?>
+                                             <tr class="balance_account equity1_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;">Equity</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $eq2 = 0;
+                                                      $l2 = "1";
+                                                      foreach ($this->equity as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account equity1_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account equity1_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(5,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                         <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                           //      foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 5 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                         $active[] = "equity1_".$l2."_".$l3;
+                                                         $eq2++;
+                                                         $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="balance_account success equity1_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                        }
+                                                    }
+                                              //  }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+                                             <tr>
+                                               <td style="text-align:right; "><span style="font-size:14px; font-weight:bold;">Total Outflow</span></td>
+                                                <td style="text-align:right;"><?php echo number_format($outflowAmount,2,'.',','); ?></td>
+                                             </tr>
+
+                                             <tr>
+                                               <td style="text-align:right; "><span style="font-size:14px; font-weight:bold;">Net Flow</span></td>
+                                                <td style="text-align:right;"><?php 
+                                                /*echo $inflowAmount.'<br/>';
+                                                echo $outflowAmount.'<br/>';*/
+                                                $cashesflow = round($inflowAmount,2)-round($outflowAmount,2);
+                                                if($cashesflow<0) {
+                                                  echo "(".number_format(abs($cashesflow),2,'.',',').")"; 
+                                                } else {
+                                                  echo number_format($cashesflow,2,'.',','); 
+                                                }
+                                                ?></td>
+                                             </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+
+                      <div class="row" id="content" style="display:none;">
+
+
+                        <div class="col-md-9 col-md-offset-2">
+                         <h4 align="center"><?php echo $company_name; ?> </h4> 
+                             <h4 align="center">Cash Flow Analysis</h4> 
+                             <h4 align="center">Dated From <?php echo $this->from; ?> To <?php echo $this->to; ?></h4> 
+                            
+                            <div class="box-widget">
+                                <div class="widget-head clearfix">
+                                    <span class="h-icon"><i class="icon-power-cord"></i></span>
+                                    <!-- <h4 class="pull-left"><a href="javascript:void(0)" onclick="return account(1);" style="color:#fff;">Cash Flow Analysis</a></h4> -->
+                                </div>
+                                <div class="widget-container">
+                                    <div class="widget-block">
+                                        <div class="widget-content">
+                                           <table class="table responsive" align="center" width="70%" cellpadding="5" cellspacing="5" style="width:70%;">
+                                                 <thead>
+                                                    <tr>
+                                                        <th  style="font-weight:bold; font-size:15px;">
+                                                          Inflow
+                                                        </th>
+                                                        <th>
+                                                        </th>
+                                                        
+                                                    </tr>
+                                                </thead> 
+                                                <tbody>
+                                                <?php
+                                                    $inflowAmount = 0.00;
+                                                    $as1 = 0;
+                                                    $l=1;
+                                                    $active = array();
+                                                    $asset_level1 = 1;
+                                                    $asset_level2 = 2;
+                                                ?>
+                                                   <tr class="balance_account assets_active">
+                                                    <td><span style="font-weight:bold; font-size:14px; cursor: pointer;">Assets</span></td>
+                                                    <td></td>
+                                                   </tr>
+
+
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->asset as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account assets_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account assets_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(1,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                               //  foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 1 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "assets_".$l2."_".$l3;
+                                                        $as1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+
+                                            ?>
+                                                 <tr class="balance_account success assets_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                          }
+                                                        }
+                                                    }
+                                               // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+                                             <?php 
+                                                $li1 = 0;
+                                                $l = 2;
+                                             ?>
+                                             <tr class="balance_account liability_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;  cursor:pointer;">Liability/Credit Card</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->liability as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account liability_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+
+
+                                             <?php
+                                               //  foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 2 && $account['level1']==$l2 && $account['level2']==0) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "liability_".$l2."_".$l3;
+                                                        $li1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="balance_account success liability_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php         }
+                                                        }
+                                                    }
+                                            ?>
+
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account liability_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(2,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+
+<!--                                                      <?php
+                                                             $l4 = "1";
+                                                            foreach ($this->taxes as $tax) {
+                                                                if($l2==1 && $l3==4) {
+                                                                   if($l4<=9) {
+                                                                        $l4 = "0".$l4;
+                                                                    }
+                                                                    $active[] = "liability_".$l2."_".$l3;
+                                                        ?>
+
+                                                     <tr class="balance_account success liability_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><?php echo $l."-".$l2.$l3."-".$l4; ?></td>
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php 
+                                                                if($tax['tax_type']==1) {
+                                                                    foreach ($this->purchase as $key => $purchase) {
+                                                                      if($tax['tax_code']==$key) {
+                                                                        echo $purchase['name'];
+                                                                      }
+                                                                    }
+                                                                  } else if($tax['tax_type']==2) {
+                                                                    foreach ($this->supply as $key => $supply) {
+                                                                      if($tax['tax_code']==$key) {
+                                                                        echo $supply['name'];
+                                                                      }
+                                                                    }
+                                                                  } 
+                                                             ?></span></td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <?php 
+                                                $l4++;
+                                                        }
+                                                    }
+                                             ?> -->
+                                             
+                                            <?php
+                                               //  foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 2 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "liability_".$l2."_".$l3;
+                                                        $li1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="balance_account success liability_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                        }
+                                                    }
+                                               // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+
+                                             <?php 
+                                                $l = 3;
+                                             ?>
+                                             <tr class="other_account income_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;">Income</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $in1 = 0;
+                                                      $l2 = "1";
+                                                      foreach ($this->income as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="other_account income_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+
+                                                 <?php
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 3 && $account['level1']==$l2 && $account['level2']==0) {
+                                                       /*if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }*/
+                                                        $active[] = "income_".$l2."_0";
+                                                        $in1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="other_account success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                    }
+                                                       
+                                                    }
+                                                }
+                                            ?>
+
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="other_account income_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(3,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 //foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 3 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "income_".$l2."_".$l3;
+                                                        $in1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="other_account success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                      }
+                                                       
+                                                    }
+                                                }
+                                             // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+
+                                            <?php 
+                                                $ex1 = 0;
+                                                $l = 4;
+                                             ?>
+                                             <tr class="other_account expense_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;">Expense</span></td>
+                                                    <td></td>
+                                                   </tr>
+<!-- 
+                                            <?php
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 4 && $account['level1']==0 && $account['level2']==0) {
+                                                      /* if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }*/
+                                                        $active[] = "expense_".$l2."_0";
+                                                        $ex1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="other_account success expense_<?php echo $l2."_".$l3; ?>"  style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php   }
+                                                        }
+                                                    }
+                                            ?> -->
+
+
+
+
+
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->expense as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="other_account expense_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+
+                                           <?php
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 4 && $account['level1']==$l2 && $account['level2']==0) {
+                                                      /* if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }*/
+                                                        $active[] = "expense_".$l2."_0";
+                                                        $ex1++;
+                                                        $inflowAmount += abs($this->cashFlow[$account['id']]['debit']);
+                                            ?>
+                                                 <tr class="other_account success expense_<?php echo $l2."_".$l3; ?>"  style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format(abs($this->cashFlow[$account['id']]['debit']),2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                          }
+                                                        }
+                                                    }
+                                            ?>
+
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="other_account expense_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(4,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                // foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 4 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "expense_".$l2."_".$l3;
+                                                        $ex1++;
+                                                        $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="other_account success expense_<?php echo $l2."_".$l3; ?>"  style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                        }
+                                                    }
+                                               // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+                                             
+
+                                             <?php 
+                                                $l = 5;
+                                             ?>
+                                             <tr class="balance_account equity_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;">Equity</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $eq1 = 0;
+                                                      $l2 = "1";
+                                                      foreach ($this->equity as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account equity_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account equity_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(5,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                         <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                           //      foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['debit']!=0) {
+                                                        if($account['account_type'] == 5 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                         $active[] = "equity_".$l2."_".$l3;
+                                                         $eq1++;
+                                                         $inflowAmount += $this->cashFlow[$account['id']]['debit'];
+                                            ?>
+                                                 <tr class="balance_account success equity_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['debit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                        }
+                                                    }
+                                              //  }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+                                             <tr>
+                                               <td style="text-align:right; "><span style="font-size:14px; font-weight:bold;">Total Inflow</span></td>
+                                                <td style="text-align:right;"><?php echo number_format($inflowAmount,2,'.',','); ?></td>
+                                             </tr>
+
+
+
+
+
+
+
+
+                                              <tr>
+                                                        <th  style="font-weight:bold; font-size:15px;">
+                                                          Outflow
+                                                        </th>
+                                                        <th>
+                                                        </th>
+                                                        
+                                                    </tr>
+
+
+
+                                             <?php
+                                                    $outflowAmount = 0.00;
+                                                    $as2 = 0;
+                                                    $l=1;
+                                                    $active = array();
+                                                    $asset_level1 = 1;
+                                                    $asset_level2 = 2;
+                                                ?>
+                                                   <tr class="balance_account assets1_active">
+                                                    <td><span style="font-weight:bold; font-size:14px; cursor: pointer;">Assets</span></td>
+                                                    <td></td>
+                                                   </tr>
+
+
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->asset as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account assets1_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account assets1_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(1,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                               //  foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 1 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "assets1_".$l2."_".$l3;
+                                                        $as2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+
+                                            ?>
+                                                 <tr class="balance_account success assets1_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                          }
+                                                        }
+                                                    }
+                                               // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+                                             <?php 
+                                                $li2 = 0;
+                                                $l = 2;
+                                             ?>
+                                             <tr class="balance_account liability1_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;  cursor:pointer;">Liability/Credit Card</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->liability as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account liability1_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+
+
+                                             <?php
+                                               //  foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 2 && $account['level1']==$l2 && $account['level2']==0) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "liability1_".$l2."_".$l3;
+                                                        $li2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="balance_account success liability1_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php         }
+                                                        }
+                                                    }
+                                            ?>
+
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account liability1_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(2,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+
+<!--                                                      <?php
+                                                             $l4 = "1";
+                                                            foreach ($this->taxes as $tax) {
+                                                                if($l2==1 && $l3==4) {
+                                                                   if($l4<=9) {
+                                                                        $l4 = "0".$l4;
+                                                                    }
+                                                                    $active[] = "liability_".$l2."_".$l3;
+                                                        ?>
+
+                                                     <tr class="balance_account success liability_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><?php echo $l."-".$l2.$l3."-".$l4; ?></td>
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php 
+                                                                if($tax['tax_type']==1) {
+                                                                    foreach ($this->purchase as $key => $purchase) {
+                                                                      if($tax['tax_code']==$key) {
+                                                                        echo $purchase['name'];
+                                                                      }
+                                                                    }
+                                                                  } else if($tax['tax_type']==2) {
+                                                                    foreach ($this->supply as $key => $supply) {
+                                                                      if($tax['tax_code']==$key) {
+                                                                        echo $supply['name'];
+                                                                      }
+                                                                    }
+                                                                  } 
+                                                             ?></span></td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <?php 
+                                                $l4++;
+                                                        }
+                                                    }
+                                             ?> -->
+                                             
+                                            <?php
+                                               //  foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 2 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "liability1_".$l2."_".$l3;
+                                                        $li2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="balance_account success liability1_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                        }
+                                                    }
+                                               // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+
+                                             <?php 
+                                                $l = 3;
+                                             ?>
+                                             <tr class="other_account income1_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;">Income</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $in2 = 0;
+                                                      $l2 = "1";
+                                                      foreach ($this->income as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="other_account income1_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+
+                                                 <?php
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 3 && $account['level1']==$l2 && $account['level2']==0) {
+                                                       /*if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }*/
+                                                        $active[] = "income1_".$l2."_0";
+                                                        $in2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="other_account success income1_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                    }
+                                                       
+                                                    }
+                                                }
+                                            ?>
+
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="other_account income_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(3,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                 //foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 3 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "income1_".$l2."_".$l3;
+                                                        $in2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="other_account success income_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                      }
+                                                       
+                                                    }
+                                                }
+                                             // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+
+                                            <?php 
+                                                $ex2 = 0;
+                                                $l = 4;
+                                             ?>
+                                             <tr class="other_account expense1_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;">Expense</span></td>
+                                                    <td></td>
+                                                   </tr>
+
+                                           <!--  <?php
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 4 && $account['level1']==0 && $account['level2']==0) {
+                                                      /* if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }*/
+                                                        $active[] = "expense1_".$l2."_0";
+                                                        $ex2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="other_account success expense1_<?php echo $l2."_".$l3; ?>"  style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php   }
+                                                        }
+                                                    }
+                                            ?> -->
+
+
+
+
+
+                                                   <?php
+                                                      $l2 = "1";
+                                                      foreach ($this->expense as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="other_account expense1_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+
+                                           <?php
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 4 && $account['level1']==$l2 && $account['level2']==0) {
+                                                      /* if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }*/
+                                                        $active[] = "expense1_".$l2."_0";
+                                                        $ex2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="other_account success expense1_<?php echo $l2."_".$l3; ?>"  style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format(abs($this->cashFlow[$account['id']]['credit']),2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                          }
+                                                        }
+                                                    }
+                                            ?>
+
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="other_account expense1_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(4,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                        <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                                // foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 4 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                        $active[] = "expense1_".$l2."_".$l3;
+                                                        $ex2++;
+                                                        $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="other_account success expense1_<?php echo $l2."_".$l3; ?>"  style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                        }
+                                                    }
+                                               // }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+                                             
+
+                                             <?php 
+                                                $l = 5;
+                                             ?>
+                                             <tr class="balance_account equity1_active">
+                                                    <td><span style="font-weight:bold; font-size:14px;">Equity</span></td>
+                                                    <td></td>
+                                                   </tr>
+                                                   <?php
+                                                      $eq2 = 0;
+                                                      $l2 = "1";
+                                                      foreach ($this->equity as $levelOne => $listOne) {
+                                                        if($l2<=9) {
+                                                            $l2 = "0".$l2;
+                                                        }
+                                                   ?>
+                                                        <tr class="balance_account equity1_<?php echo $l2; ?>" style="display:none; cursor: pointer;">
+                                                            <td><span style="margin-left:10px;font-weight:bold; font-size:13px;"><?php echo $levelOne; ?></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                <?php
+                                                    $l3 = "1";
+                                                    foreach ($listOne as $levelTwo => $listTwo) {
+                                                        if($l3<=9) {
+                                                            $l3 = "0".$l3;
+                                                        }
+                                                ?>
+                                                    <tr class="balance_account equity1_<?php echo $l2.$l3; ?>" style="display:none;">
+                                                        <td><span style="margin-left:20px; font-weight:bold; font-size:12px; cursor: pointer;" onclick="return show(5,<?php echo $l2; ?>,<?php echo $l3; ?>);"><?php echo $levelTwo; ?></span></td>
+                                                         <td></td>
+
+                                                    </tr>
+                                            <?php
+                                                 $l4 = "1";
+                                           //      foreach ($listTwo as $levelThree => $listThree) {
+                                                    foreach ($this->getAccount as $account) {
+                                                      if(isset($this->cashFlow[$account['id']]) && $this->cashFlow[$account['id']]['credit']!=0) {
+                                                        if($account['account_type'] == 5 && $account['level1']==$l2 && $account['level2']==$l3) {
+                                                       if($l4<=9) {
+                                                            $l4 = "0".$l4;
+                                                        }
+                                                         $active[] = "equity1_".$l2."_".$l3;
+                                                         $eq2++;
+                                                         $outflowAmount += $this->cashFlow[$account['id']]['credit'];
+                                            ?>
+                                                 <tr class="balance_account success equity1_<?php echo $l2."_".$l3; ?>" style="display:;">
+                                                        <td><span style="margin-left:30px; font-size:12px; font-style:italic;"><?php echo $account['account_name']; ?></span></td>
+                                                        <td style="text-align:right;"><?php echo number_format($this->cashFlow[$account['id']]['credit'],2,'.',','); ?></td>
+
+                                                    </tr>
+
+                                            <?php 
+                                                $l4++;
+                                                        }
+                                                        }
+                                                    }
+                                              //  }
+                                                    $l3++;
+                                                }
+                                                    $l2++;
+                                                }
+                                             ?>
+
+                                             <tr>
+                                               <td style="text-align:right; "><span style="font-size:14px; font-weight:bold;">Total Outflow</span></td>
+                                                <td style="text-align:right;"><?php echo number_format($outflowAmount,2,'.',','); ?></td>
+                                             </tr>
+
+                                             <tr>
+                                               <td style="text-align:right; "><span style="font-size:14px; font-weight:bold;">Net Flow</span></td>
+                                                <td style="text-align:right;"><?php 
+                                                /*echo $inflowAmount.'<br/>';
+                                                echo $outflowAmount.'<br/>';*/
+                                                $cashesflow = round($inflowAmount,2)-round($outflowAmount,2);
+                                                if($cashesflow<0) {
+                                                  echo "(".number_format(abs($cashesflow),2,'.',',').")"; 
+                                                } else {
+                                                  echo number_format($cashesflow,2,'.',','); 
+                                                }
+                                                ?></td>
+                                             </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+<script type="text/javascript">
+  (function ($) {
+  var rules = document.styleSheets[document.styleSheets.length-1].cssRules;
+  for (var idx = 0, len = rules.length; idx < len; idx++) {
+    $(rules[idx].selectorText).each(function (i, elem) {
+      elem.style.cssText += rules[idx].style.cssText;
+    });
+  }
+  $('style').remove();
+})(jQuery);
+
+var tableToExcel = (function() {
+  var uri = 'data:application/vnd.ms-excel;base64,'
+    , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+    , base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) }
+    , format = function(s, c) { return s.replace(/{(\w+)}/g, function(m, p) { return c[p]; }) }
+  return function(table, name) {
+    if (!table.nodeType) table = document.getElementById(table)
+    var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML}
+    window.location.href = uri + base64(format(template, ctx))
+  }
+})()
+
+$(document).ready(function() {
+    <?php 
+        foreach ($active as $act) {
+           $levels = explode("_", $act);
+    ?>
+        $("<?php echo ".".$levels[0]."_".$levels[1]; ?>").show();
+        $("<?php echo ".".$levels[0]."_".$levels[1].$levels[2]; ?>").show();
+        $("<?php echo ".".$act; ?>").show();
+        $("<?php echo ".".$levels[0]."_".$levels[1]; ?>").addClass("<?php echo $levels[0]."_active"; ?>");
+        $("<?php echo ".".$levels[0]."_".$levels[1].$levels[2]; ?>").addClass("<?php echo $levels[0]."_active"; ?>");
+        $("<?php echo ".".$act; ?>").addClass("<?php echo $levels[0]."_active"; ?>");
+    <?php
+        }
+    ?>
+    <?php 
+        if($as1==0) {
+          echo '$(".assets_active").hide();';
+        }
+        if($li1==0) {
+          echo '$(".liability_active").hide();';
+        }
+        if($in1==0) {
+          echo '$(".income_active").hide();';
+        }
+        if($ex1==0) {
+          echo '$(".expense_active").hide();';
+        }
+        if($eq1==0) {
+          echo '$(".equity_active").hide();';
+        }
+    ?>
+
+    <?php 
+        if($as2==0) {
+          echo '$(".assets1_active").hide();';
+        }
+        if($li2==0) {
+          echo '$(".liability1_active").hide();';
+        }
+        if($in2==0) {
+          echo '$(".income1_active").hide();';
+        }
+        if($ex2==0) {
+          echo '$(".expense1_active").hide();';
+        }
+        if($eq2==0) {
+          echo '$(".equity1_active").hide();';
+        }
+    ?>
+});
+
+</script>

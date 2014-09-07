@@ -1,0 +1,87 @@
+<div class="main-container">
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+
+      <form class="form-horizontal" id="report-period" method="post">
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">From Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="from_date" id="from_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->from) && !empty($this->from)) { echo $this->from; } else { echo date('01-01-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label class="col-lg-5 control-label">To Date <span class="mandatory">*</span></label>
+          <div class="col-lg-2">
+              <input type="text" name="to_date" id="to_date" class="form-control date-pick" placeholder="Select Date" value="<?php if(isset($this->to) && !empty($this->to)) { echo $this->to; } else { echo date('d-m-Y'); } ?>" autocomplete="off"/>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+         <label class="col-lg-5 control-label">&nbsp;</label>
+           <div class="col-lg-3">
+              <div class="form-actions">
+                <button type="submit" id="update" class="btn btn-primary">Update</button>
+              </div>
+           </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+     <div class="box-widget">
+        <div class="widget-head clearfix">
+            <span class="h-icon"><i class="icon-power-cord"></i></span>
+            <h4 class="pull-left"><a href="javascript:void(0)" style="color:#fff;">General Ledger</a></h4>
+        </div>
+        <div class="widget-container">
+        <div class="widget-block">
+        <div class="widget-content">
+        <table class="table responsive">
+            <thead>
+              <tr>
+                 <th>
+                    Account
+                 </th>
+                  <th>
+                    Debit
+                 </th>
+                  <th>
+                    Credit
+                 </th>
+                 <th>
+                    Net Movement
+                 </th>
+              </tr>
+            </thead>
+            <tbody>
+                <?php
+                  foreach ($this->generalLedger as $general) {
+                ?>
+                <tr>
+                  <td><?php echo $general['account']; ?></td>
+                  <td><?php echo $general['debit']; ?></td>
+                  <td><?php echo $general['credit']; ?></td>
+                  <td><?php echo $general['net_movement']; ?></td>
+                </tr>
+
+                <?php
+                  }
+                ?>
+            </tbody>
+        </table>
+        </div>
+        </div>
+        </div>
+        </div>
+    </div>
+
+</div>
+</div>

@@ -1,0 +1,182 @@
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."default/settings/"; ?>">Settings</a></li>
+   <li class="active">Products</li>
+</ul>
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+   <?php
+    $logSession = new Zend_Session_Namespace('sess_login');
+   ?>
+   <?php 
+        if($logSession->type!=5) {
+   ?>
+   <div class="row">
+       <div class="col-md-12 grid-spacing">
+       <?php
+          if(isset($this->product[0]['default_product_title']) && $this->product[0]['default_product_title']==1) {
+       ?>
+       <a href="<?php echo $this->sitePath."settings/add-product"; ?>" class="btn btn-primary" type="button" >Add New Product</a>
+       <?php
+          } else if(isset($this->product[0]['default_product_title']) && $this->product[0]['default_product_title']==2) {
+       ?>
+      <a href="<?php echo $this->sitePath."settings/add-product"; ?>" class="btn btn-primary" type="button" >Add New Service</a>
+       <?php
+          } else if(isset($this->product[0]['default_product_title']) && $this->product[0]['default_product_title']==3) {
+       ?>
+       <a href="<?php echo $this->sitePath."settings/add-product"; ?>" class="btn btn-primary" type="button" >Add New Product / Service</a>
+       <?php
+          } else {
+       ?>
+       <a href="<?php echo $this->sitePath."settings/add-product"; ?>" class="btn btn-primary" type="button" >Add New Product</a>
+       <?php
+          }
+       ?>
+            <!-- Element to pop up -->    
+       </div>
+   </div>
+   <?php 
+        }
+    ?>
+ <div class="row">
+                        <div class="col-md-12">
+                            <div class="box-widget">
+                                <table class="table data-tbl-boxy responsive">
+                                    <thead>
+                                        <tr>
+                                            
+                                            <?php
+                                                if(isset($this->product[0]['default_product_title']) && $this->product[0]['default_product_title']==1) {
+                                             ?>
+                                             <th>
+                                                Product ID
+                                              </th>
+                                              <th>
+                                                Product Name
+                                            </th>
+                                            <th>
+                                                Product Description
+                                            </th>
+                                            <?php
+                                                } else if(isset($this->product[0]['default_product_title']) && $this->product[0]['default_product_title']==2) {
+                                            ?>
+                                              <th>
+                                                Service ID
+                                              </th>
+                                              <th>
+                                                Service Name
+                                              </th>
+                                              <th>
+                                                Service Description
+                                              </th>
+                                            <?php
+                                                } else if(isset($this->product[0]['default_product_title']) && $this->product[0]['default_product_title']==3) {
+                                            ?>
+                                              <th>
+                                                Product / Service ID
+                                              </th>
+                                              <th>
+                                                Product / Service Name
+                                              </th>
+                                              <th>
+                                                Product / Service Description
+                                              </th>
+                                            <?php
+                                                } else {
+                                            ?>
+                                            <th>
+                                                Product ID
+                                              </th>
+                                              <th>
+                                                Product Name
+                                            </th>
+                                            <th>
+                                                Product Description
+                                            </th>
+                                            <?php
+                                                }
+                                            ?>
+                                            <th>
+                                                Income Type
+                                            </th>
+                                            <th style="text-align:center;">
+                                                Unit Price
+                                            </th>
+                                            <th style="text-align:center;">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php 
+                                        $productTitle = 'Product';
+                                        if(isset($this->product[0]['default_product_title']) && $this->product[0]['default_product_title']==1) {
+                                          $productTitle = 'Product';
+                                        } else if(isset($this->product[0]['default_product_title']) && $this->product[0]['default_product_title']==2) {
+                                          $productTitle = 'Service';
+                                        } else if(isset($this->product[0]['default_product_title']) && $this->product[0]['default_product_title']==3) {
+                                          $productTitle = 'Product / Service';
+                                        }
+                                        $i=1;
+                                        foreach($this->result as $results) {
+                                    ?>
+                                        <tr>
+                                        <td><?php echo $results['product_id'] ?></td>
+                                        <td>
+                                        <?php 
+                                            echo ucfirst($results['name']);
+                                        ?>
+                                        </td>
+                                        <td><?php echo $results['description']; ?></td>
+                                        <td>
+                                         <?php 
+                                             if(isset($this->incomeSelected) && !empty($this->incomeSelected)) {
+                                                foreach ($this->incomeSelected as $income) {
+                                                    if($income['id']==$results['fkincomeaccount_id']) {
+                                                        echo $income['account_name'];
+                                                    }
+                                        
+                                                }
+                                             } 
+                                         ?>
+                                        </td>
+                                        <td style="text-align:right;"><span style="margin-right:10px;"><?php echo number_format($results['price'],2,'.',','); ?></span></td>
+                                        <td style="text-align:center;">
+                                        <a href="<?php echo $this->sitePath."settings/edit-product/id/".base64_encode($results['id']); ?>" data-original-title="Edit <?php echo $productTitle; ?>" title="Edit <?php echo $productTitle; ?>"><i class="icon-pencil-3"></i></a>
+                                            <a href="javascript:void(0)" onclick="deleteProduct('<?php echo base64_encode($results['id']); ?>','<?php echo base64_encode($results['name']); ?>')" data-original-title="Delete <?php echo $productTitle; ?>" title="Delete <?php echo $productTitle; ?>"><i class="icon-remove-2"></i></a>
+
+                                        </td>
+                                        </tr>
+                                    <?php 
+                                        }
+                                    ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+<script type="text/javascript">
+function deleteProduct(Idvalue,Name) {
+  var confirmMsg = confirm("Are you sure want to delete this product? You cannot undo this action");
+    if(confirmMsg) {
+            window.location.href='<?php echo $this->sitePath; ?>settings/products/delid/'+Idvalue+'/delname/'+Name;
+    }
+}
+</script>

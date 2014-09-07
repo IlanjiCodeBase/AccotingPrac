@@ -1,0 +1,261 @@
+
+
+<ul class="breadcrumb">
+   <li><a href="<?php echo $this->sitePath."default"; ?>"><i class="icon-home"></i></a></li>
+   <li><a href="<?php echo $this->sitePath."settings/audit-trail/"; ?>">Audit Log</a></li>
+   <li class="active">Income View</li>
+</ul>
+
+  <div class="row">
+           <div class="col-md-4 col-md-offset-4">
+           <?php 
+                if(isset($this->success) && !empty($this->success)) {
+           ?>
+                <div class="alert alert-success">
+                   <strong><?php echo $this->success; ?></strong>
+                </div>
+            <?php
+                } else if(isset($this->error) && !empty($this->error)) {
+            ?>
+                <div class="alert alert-danger">
+                   <strong><?php echo $this->error; ?></strong>
+                </div>
+            <?php 
+                }
+            ?>
+            </div>
+   </div>
+<div class="row">
+<div class="col-md-12">
+                            <div class="square-widget">
+                                <div class="widget-head clearfix">
+                                    <h4 class="pull-left"><i class="icon-user-4"></i> Income Transaction Details</h4>
+                                </div>
+                                <div class="widget-container" style="margin-left:50px;">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                            <strong>Income No  </strong> <br/>
+                                            <span><?php echo $this->income_no; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                            <strong>Date </strong><br>
+                                            <span><?php echo date("d-m-Y",strtotime($this->income[0]['date'])); ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                            <strong>Receipt No  </strong><br>
+                                            <span><?php echo $this->income[0]['receipt_no']; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                            <strong>Customer / Payee  </strong><br>
+                                            <span><?php echo ucfirst($this->income[0]['customer_name']); ?></span>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+
+                                <div class="col-md-3">
+                                        <strong>Credit Term </strong> <br>
+                                        <span>
+                                        <?php 
+                                          if(isset($this->creditTerm) && !empty($this->creditTerm)) {
+                                              foreach ($this->creditTerm as $key => $credit) {
+                                                if($key==$this->income[0]['credit_term']) {
+                                                  echo $credit;
+                                                }
+                                              }
+                                          }
+                                        ?>
+                                        </span>
+                                       
+                                    </div>
+                                  
+                                    <div class="col-md-3">
+                                        <strong>Transaction Currency </strong><br>
+                                        <span>
+                                        <?php 
+                                          if(isset($this->currencies) && !empty($this->currencies)) {
+                                            foreach ($this->currencies as $key => $currency) {
+                                              if($key==$this->income[0]['transaction_currency']) {
+                                                  echo $currency." - ".$key;
+                                                }
+                                            }
+                                          }
+                                        ?>
+                                        </span>
+                                    </div>
+                                    <div class="col-md-3"> 
+                                        <strong>Type of Income </strong><br>
+                                        <span>
+                                        <?php 
+                                          if(isset($this->incomeAccount) && !empty($this->incomeAccount)) {
+                                                foreach ($this->incomeAccount as $income) {
+                                                    if($income['id']==$this->income[0]['fkincome_type']) {
+                                                        echo ucfirst($income['account_name']);
+                                                    }
+                                                }
+                                            }
+                                        ?>
+                                        </span>
+                                        
+
+                                    </div>
+
+                                    <div class="col-md-3">  
+                                        <strong>Description </strong><br>
+                                        <span><?php echo $this->income[0]['transaction_description']; ?></span>
+                                    </div>
+                                    
+
+                                </div>
+                                <br/>
+                                <div class="row">
+
+                                <div class="col-md-3">
+                                        <strong>Amount </strong><br>
+                                        <span><?php echo number_format($this->income[0]['amount'],2,'.',','); ?></span>
+                                    </div>
+                                    
+                                    <div class="col-md-3">
+                                        <strong>Tax Code </strong><br>
+                                        <span>
+                                        <?php 
+                                          if(isset($this->taxCode) && !empty($this->taxCode) && $this->taxCode!=0 && $this->income[0]['fktax_id']!=0) {
+                                            foreach ($this->taxCode as $tax) {
+                                              if($tax['id']==$this->income[0]['fktax_id']) {
+                                                foreach ($this->supply as $key => $supply) {
+                                                    if($tax['tax_code']==$key) {
+                                                      echo $supply['name']." - ".$tax['tax_percentage']." %";
+                                                    }
+                                                }
+                                              }
+                                            }
+                                          } else {
+                                           echo "NA - Not Applicable";
+                                          }
+                                        ?>
+                                        </span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Tax Percentage </strong><br>
+                                        <span><?php echo $this->income[0]['tax_value']." %"; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Receipt if any </strong><br>
+                                         <span>
+                                        <?php
+                                          if(isset($this->income[0]['fkreceipt_id']) && !empty($this->income[0]['fkreceipt_id']) && file_exists("..".$this->filepath.$this->income[0]['fkreceipt_id'])) {
+                                         ?>
+                                       <a href="<?php echo $this->sitePath."..".$this->filepath.$this->income[0]['fkreceipt_id']; ?>" target="_blank">Click to view</a>
+                                           <?php 
+                                          } else {
+                                          ?>
+                                          No attachments available
+                                          <?php 
+                                            }
+                                          ?>
+                                          </span>
+                                </div>
+                                
+                                </div>
+                                <br/>
+                            <div class="row">
+
+                            <div class="col-md-3">
+                                        <strong>Approval By / For </strong><br>
+                                        <span>
+                                        <?php 
+                                            if(isset($this->approveUser) && !empty($this->approveUser)) {
+                                                foreach ($this->approveUser as $approve) {
+                                                  if($approve['account_type']==0) {
+                                                        $account_type = "Developer";
+                                                  } 
+                                                  else if($approve['account_type']==1) {
+                                                        $account_type = "Developer";
+                                                  } 
+                                                  else if($approve['account_type']==2) {
+                                                        $account_type = "Super User";
+                                                  } else if($approve['account_type']==3) {
+                                                        $account_type = "Manager";
+                                                  }
+                                                  if($approve['id']==$this->income[0]['approval_for']) {
+                                                        echo $approve['username']." - ".$account_type;
+                                                  }
+                                                }
+                                            }
+                                        ?>
+                                        </span>
+                                    </div>
+                                
+                                 
+                                    <div class="col-md-3">
+                                        <strong>Status </strong><br>
+                                        <span>
+                                        <?php 
+                                            if($this->income[0]['transaction_status']==1) {
+                                                echo "Approved / Verified";
+                                            } else if($this->income[0]['transaction_status']==2) {
+                                                echo "Saved / Unverified";
+                                            } else if($this->income[0]['transaction_status']==3) {
+                                                echo "Draft";
+                                            }
+                                        ?>
+                                        </span>
+                                    </div>
+                            </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+
+                    <hr/>
+                    <?php
+                     $tax_amount     = ($this->income[0]['amount'] * $this->income[0]['tax_value'] / 100);
+                     $total_amount   = $this->income[0]['amount'] + $tax_amount;
+                     if($this->income[0]['transaction_currency']!='SGD') {
+                        $converted_amount = $total_amount*$this->income[0]['exchange_rate'];
+                      } else {
+                        $converted_amount = $total_amount;
+                      }
+                    // $pending_amount =  $converted_amount - $paid_amount;
+                ?>
+                        <div class="row">
+                            <div class="col-md-4 col-md-offset-9">
+                                   <label class="col-lg-4 control-label" style="padding-top:0px;">Sub Total : </label>
+                                   <span id="sub_total"><?php echo number_format($this->income[0]['amount'],2,'.',','); ?></span><br/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-md-offset-9">
+                                   <label class="col-lg-4 control-label" style="padding-top:0px;">Total GST : </label>
+                                    <span id="total_gst"><?php echo number_format($tax_amount,2,'.',','); ?></span>
+                             </div>
+                        </div>
+
+                            <div class="row">
+                            <div class="col-md-4 col-md-offset-9">
+                                   <label class="col-lg-4 control-label" style="padding-top:0px;">Grand Total : </label>
+                                    <span id="grand_total"><?php echo number_format($total_amount,2,'.',','); ?></span>
+                                </div>
+                             </div>
+                             <div class="row">
+                            <div class="col-md-4 col-md-offset-9">
+                                   <label class="col-lg-4 control-label" style="padding-top:0px;">Exchange Rate :</label>
+                                   <span><?php echo $this->income[0]['exchange_rate']; ?></span>
+                             </div>
+                             </div>
+                            <div class="row">
+                            <div class="col-md-4 col-md-offset-9">
+                                   <label class="col-lg-4 control-label" style="padding-top:0px;">Grand Total SGD :</label>
+                                    <span id="grand_total_sgd">
+                                      <?php echo number_format($converted_amount,2,'.',','); ?> 
+                                    </span>
+                                </div>
+                             </div>
+
+</div>
+
+
+
+                 
